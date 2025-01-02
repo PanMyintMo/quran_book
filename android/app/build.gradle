@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.quran_book"
+    namespace = "com.hidayatul.quran_book"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
