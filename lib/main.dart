@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quran_book/local_db/sharepreference.dart';
-import 'package:quran_book/pages/register_page.dart';
+import 'package:quran_book/pages/sign_up_page.dart';
 import 'package:quran_book/providers/theme_provider.dart';
 
 void main() async {
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
           theme: themeProvider.isDarkModeChecked
               ? ThemeData.dark(useMaterial3: true)
               : ThemeData.light(useMaterial3: true),
-          home:  RegisterPage(),
+          home:  SignUpPage(),
         );
       },
     );
