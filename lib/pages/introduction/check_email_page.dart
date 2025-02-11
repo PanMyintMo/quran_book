@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/pages/introduction/reset_password_page.dart';
 import 'package:quran_book/resources/colors.dart';
@@ -26,13 +27,13 @@ class CheckEmailPage extends StatelessWidget {
             Icon(Icons.email, size: kCheckEmailIconSize, color: Colors.black),
             SizedBox(height: kSP10x),
             EasyTextWidget(
-              text: kCheckYourEmailLabelText,
+              text: kCheckYourEmailLabelText.tr(),
               fontSize: kFontSize22x,
               fontWeight: FontWeight.bold,
             ),
             SizedBox(height: kSP10x),
             EasyTextWidget(
-              text: kCheckYourEmailSentText,
+              text: kCheckYourEmailSentText.tr(),
               textColor: Colors.grey,
               textAlign: TextAlign.center,
             ),
@@ -43,7 +44,7 @@ class CheckEmailPage extends StatelessWidget {
               onPressed: () {
                 context.navigateToNextPage(ResetPasswordPage());
               },
-              buttonText: kCheckYourEmailResendEmailText,
+              buttonText: kCheckYourEmailResendEmailText.tr(),
               buttonTextColor: kWhiteColor,
             ),
             SizedBox(height: kSP20x),
@@ -53,13 +54,13 @@ class CheckEmailPage extends StatelessWidget {
               onPressed: () {
                 context.navigateToNextPage(ResetPasswordPage());
               },
-              buttonText: kCheckYourEmailOpenEmailText,
+              buttonText: kCheckYourEmailOpenEmailText.tr(),
               buttonTextColor: kWhiteColor,
             ),
             SizedBox(height: kSP20x),
             PrimaryButtonWidget(
               onPressed: () {},
-              buttonText: kCheckYourEmailDidNotGetText,
+              buttonText: kCheckYourEmailDidNotGetText.tr(),
             ),
           ],
         ),

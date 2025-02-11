@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/pages/introduction/login_page.dart';
 import 'package:quran_book/resources/colors.dart';
@@ -26,19 +27,20 @@ class BookListFromCategoryPage extends StatelessWidget {
                 color: kWhiteColor,
               ),
               decoration: InputDecoration(
-                  fillColor: kAppPrimaryColor,
-                  filled: true,
-                  hintText: kSearchHintText,
-                  hintStyle: TextStyle(
-                    color: kWhiteColor,
-                  ),
-                  prefixIcon: const Icon(
-                    Icons.search,
-                    color: kWhiteColor,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(kSP10x),
-                  )),
+                fillColor: kAppPrimaryColor,
+                filled: true,
+                hintText: kSearchHintText.tr(),
+                hintStyle: TextStyle(
+                  color: kWhiteColor,
+                ),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  color: kWhiteColor,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(kSP10x),
+                ),
+              ),
             ),
             const SizedBox(
               height: kSP20x,

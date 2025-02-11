@@ -70,6 +70,20 @@ const kCreateNewPasswordTitleHintText = 'create_new_password_hint';
 const kCreateNewPasswordRepeatTitleText = 'create_new_password_repeat_title';
 const kCreateNewPasswordRepeatTitleHintText = 'create_new_password_repeat_hint';
 
+const kRegisterCreateYourAccountText = 'register_create_account';
+const kRegisterSubText = 'register_subtext';
+const kRegisterNameTitleText = 'register_name_title';
+const kRegisterNameHintText = 'register_name_hint';
+const kRegisterEmailTitleText = 'register_email_title';
+const kRegisterEmailHintText = 'register_email_hint';
+const kRegisterPasswordTitleText = 'register_password_title';
+const kRegisterPasswordHintText = 'register_password_hint';
+const kRegisterRepeatPasswordTitleText = 'register_repeat_password_title';
+const kRegisterRepeatPasswordHintText = 'register_repeat_password_hint';
+const kRegisterContinueWithText = 'register_continue_with';
+const kRegisterAlreadyAccountText = 'register_already_account';
+const kRegisterSignUpText = 'register_sign_up';
+
 const kNext = 'next';
 const kLogin = 'login';
 const kRegister = 'register';

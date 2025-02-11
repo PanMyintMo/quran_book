@@ -1,5 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/pages/main_page/book_overview_page.dart';
+import 'package:quran_book/pages/main_page/language_page.dart';
 import 'package:quran_book/pages/main_page/setting_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
@@ -44,7 +46,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
                   height: kSP20x,
                 ),
                 EasyTextWidget(
-                  text: 'Bookmarks',
+                  text: kBookmarkText.tr(),
                   fontWeight: FontWeight.w600,
                   fontSize: kFontSize16x,
                 ),
@@ -151,8 +153,8 @@ class _HomePageDrawerView extends StatelessWidget {
                 const SizedBox(
                   height: kSP10x,
                 ),
-                const EasyTextWidget(
-                  text: kDrawerWelcomeText,
+                EasyTextWidget(
+                  text: kDrawerWelcomeText.tr(),
                   fontSize: kFontSize18x,
                   fontWeight: FontWeight.bold,
                 ),
@@ -167,7 +169,9 @@ class _HomePageDrawerView extends StatelessWidget {
             context,
             icon: Icons.language,
             label: kDrawerLanguageText,
-            onTap: () {},
+            onTap: () {
+              context.navigateToNextPage(LanguagePage());
+            },
           ),
           _buildDrawerItem(
             context,

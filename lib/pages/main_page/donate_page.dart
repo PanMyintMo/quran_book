@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quran_book/resources/colors.dart';
@@ -14,8 +15,8 @@ class DonatePage extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: const EasyTextWidget(
-            text: kDonationText,
+          title: EasyTextWidget(
+            text: kDonationText.tr(),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -34,7 +35,10 @@ class DonatePage extends StatelessWidget {
                 onTap: () {
                   Clipboard.setData(ClipboardData(text: '09254138115'));
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: EasyTextWidget(text: kCopiedText)),
+                    SnackBar(
+                        content: EasyTextWidget(
+                      text: kCopiedText.tr(),
+                    )),
                   );
                 },
                 contentPadding: const EdgeInsets.all(0),
@@ -60,7 +64,7 @@ class DonatePage extends StatelessWidget {
                       height: kSP20x,
                     ),
                     EasyTextWidget(
-                      text: kClickToCopyText,
+                      text: kClickToCopyText.tr(),
                       fontSize: kFontSize12x,
                     ),
                   ],

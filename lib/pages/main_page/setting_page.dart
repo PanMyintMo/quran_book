@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
+import 'package:quran_book/widgets/easy_text_widget.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -11,7 +13,10 @@ class SettingPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Setting"),
+        title: EasyTextWidget(
+          text: kDrawerSettingText.tr(),
+          fontWeight: FontWeight.w600,
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -28,8 +33,8 @@ class SettingPage extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildThemeOption(kLightModeText, false),
-                  _buildThemeOption(kDarkModeText, true),
+                  _buildThemeOption(kLightModeText.tr(), false),
+                  _buildThemeOption(kDarkModeText.tr(), true),
                 ],
               ),
             ),
@@ -40,19 +45,22 @@ class SettingPage extends StatelessWidget {
           Expanded(
             child: ListView(
               children: [
-                _buildSettingItem(Icons.language, kDrawerLanguageText),
-                _buildSettingItem(Icons.notifications, kDrawerNotificationText),
+                _buildSettingItem(
+                  Icons.language,
+                  kDrawerLanguageText.tr(),
+                ),
+                _buildSettingItem(Icons.notifications, kDrawerNotificationText.tr()),
                 const SizedBox(
                   height: kSP20x,
                 ),
-                _buildSettingItem(Icons.star, kDrawerWriteAnAppStoreReviewText),
-                _buildSettingItem(Icons.share, kDrawerShareTheAppText),
+                _buildSettingItem(Icons.star, kDrawerWriteAnAppStoreReviewText.tr()),
+                _buildSettingItem(Icons.share, kDrawerShareTheAppText.tr()),
                 const SizedBox(
                   height: kSP20x,
                 ),
-                _buildSettingItem(Icons.info, kDrawerAboutUsText),
-                _buildSettingItem(Icons.contact_mail, kDrawerContactUsText),
-                _buildSettingItem(Icons.help, kDrawerHelpAndSupportText),
+                _buildSettingItem(Icons.info, kDrawerAboutUsText.tr()),
+                _buildSettingItem(Icons.contact_mail, kDrawerContactUsText.tr()),
+                _buildSettingItem(Icons.help, kDrawerHelpAndSupportText.tr()),
               ],
             ),
           ),

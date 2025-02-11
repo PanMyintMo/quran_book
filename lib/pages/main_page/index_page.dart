@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/pages/main_page/book_mark_page.dart';
 import 'package:quran_book/pages/main_page/home_page.dart';
@@ -26,45 +27,38 @@ class _IndexPageState extends State<IndexPage> {
           ProfilePage(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        unselectedItemColor: Colors.grey,
-        currentIndex: _index,
-        selectedItemColor: kAppPrimaryColor,
-        onTap: (index) {
-          if (mounted) {
-            setState(() {
-              _index = index;
-            });
-          }
+      bottomNavigationBar: Builder(
+        builder: (context) {
+          return BottomNavigationBar(
+            unselectedItemColor: Colors.grey,
+            currentIndex: _index,
+            selectedItemColor: kAppPrimaryColor,
+            onTap: (index) {
+              if (mounted) {
+                setState(() {
+                  _index = index;
+                });
+              }
+            },
+            items: [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_filled),
+                activeIcon: Icon(Icons.home),
+                label: kHomePageText.tr(),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.bookmark_border),
+                activeIcon: Icon(Icons.bookmark),
+                label: kBookmarkText.tr(),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_2_outlined),
+                activeIcon: Icon(Icons.person),
+                label: kProfileText.tr(),
+              ),
+            ],
+          );
         },
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.home_filled,
-            ),
-            activeIcon: Icon(
-              Icons.home,
-            ),
-            label: kHomePageText,
-          ),
-          BottomNavigationBarItem(
-              icon: Icon(
-                Icons.bookmark_border,
-              ),
-              activeIcon: Icon(
-                Icons.bookmark,
-              ),
-              label: kBookmarkText),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.person_2_outlined,
-            ),
-            activeIcon: Icon(
-              Icons.person,
-            ),
-            label: kProfileText,
-          ),
-        ],
       ),
     );
   }

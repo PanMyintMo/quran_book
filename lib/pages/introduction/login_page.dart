@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/pages/introduction/forget_password_page.dart';
 import 'package:quran_book/pages/introduction/register_page.dart';
@@ -25,13 +26,13 @@ class LoginPage extends StatelessWidget {
               Image.asset(AssetImageUtils.kAppIcon, height: 80),
               SizedBox(height: kSP20x),
               EasyTextWidget(
-                text: kLoginWelcomeText,
+                text: kLoginWelcomeText.tr(),
                 fontSize: kFontSize22x,
                 fontWeight: FontWeight.bold,
               ),
               SizedBox(height: kSP10x),
               EasyTextWidget(
-                text: kLoginSubText,
+                text: kLoginSubText.tr(),
                 textColor: Colors.grey,
                 textAlign: TextAlign.center,
               ),
@@ -39,14 +40,14 @@ class LoginPage extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: EasyTextWidget(
-                  text: kLoginEmailText,
+                  text: kLoginEmailText.tr(),
                   fontWeight: FontWeight.bold,
                 ),
               ),
               SizedBox(height: kSP10x),
               TextField(
                 decoration: InputDecoration(
-                  hintText: kLoginEmailHintText,
+                  hintText: kLoginEmailHintText.tr(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(kSP10x),
                   ),
@@ -55,13 +56,16 @@ class LoginPage extends StatelessWidget {
               SizedBox(height: kSP20x),
               Align(
                 alignment: Alignment.centerLeft,
-                child: EasyTextWidget(text: kLoginPasswordText, fontWeight: FontWeight.bold),
+                child: EasyTextWidget(
+                  text: kLoginPasswordText.tr(),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               SizedBox(height: kSP10x),
               TextField(
                 obscureText: true,
                 decoration: InputDecoration(
-                  hintText: kLoginPasswordHintText,
+                  hintText: kLoginPasswordHintText.tr(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(kSP10x),
                   ),
@@ -76,7 +80,7 @@ class LoginPage extends StatelessWidget {
                     context.navigateToNextPage(ForgotPasswordPage());
                   },
                   child: EasyTextWidget(
-                    text: kLoginForgetPasswordLabelText,
+                    text: kLoginForgetPasswordLabelText.tr(),
                     textColor: Colors.grey,
                   ),
                 ),
@@ -86,7 +90,7 @@ class LoginPage extends StatelessWidget {
                 width: double.infinity,
                 height: kLoginPageButtonHeight,
                 onPressed: () {},
-                buttonText: kLogin,
+                buttonText: kLogin.tr(),
                 buttonTextColor: Colors.white,
               ),
               SizedBox(height: kSP10x),
@@ -96,7 +100,7 @@ class LoginPage extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: kSP10x),
                     child: EasyTextWidget(
-                      text: kLoginOrLoginWithText,
+                      text: kLoginOrLoginWithText.tr(),
                     ),
                   ),
                   Expanded(child: Divider()),
@@ -107,12 +111,12 @@ class LoginPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildSocialLoginButton(
-                    kGoogle,
+                    kGoogle.tr(),
                     AssetImageUtils.kGoogleIcon,
                   ),
                   SizedBox(width: kSP20x),
                   _buildSocialLoginButton(
-                    kApple,
+                    kApple.tr(),
                     AssetImageUtils.kAppleIcon,
                   ),
                 ],
@@ -121,9 +125,9 @@ class LoginPage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  EasyTextWidget(text: kLoginDoNoHaveAnAccountText),
+                  EasyTextWidget(text: kLoginDoNoHaveAnAccountText.tr()),
                   PrimaryButtonWidget(
-                    buttonText: kRegister,
+                    buttonText: kRegister.tr(),
                     buttonFontWeight: FontWeight.bold,
                     onPressed: () {
                       context.navigateToNextPageWithReplacement(RegisterPage());

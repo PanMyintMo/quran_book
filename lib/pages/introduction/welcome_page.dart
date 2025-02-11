@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/pages/introduction/on_boarding_page.dart';
 import 'package:quran_book/resources/colors.dart';
@@ -32,7 +33,7 @@ class WelcomePage extends StatelessWidget {
               child: EasyTextWidget(
                 textAlign: TextAlign.center,
                 fontFamily: kAgbalumoFont,
-                text: kWelcomeToText,
+                text: kWelcomeToText.tr(),
                 textColor: kWhiteColor,
                 fontSize: kFontSize40x,
               ),
@@ -52,7 +53,7 @@ class WelcomePage extends StatelessWidget {
                 onPressed: () {
                   context.navigateToNextPage(OnBoardingPage());
                 },
-                buttonText: kNext,
+                buttonText: kNext.tr(),
               ),
             ),
           ),

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
@@ -13,8 +14,8 @@ class ProfilePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const EasyTextWidget(
-          text: kProfileText,
+        title: EasyTextWidget(
+          text: kProfileText.tr(),
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -59,7 +60,7 @@ class ProfilePage extends StatelessWidget {
                 height: kProfilePageButtonHeight,
                 width: double.infinity,
                 onPressed: () {},
-                buttonText: kDeleteAccountText,
+                buttonText: kDeleteAccountText.tr(),
                 backgroundColor: Colors.amber,
                 buttonFontWeight: FontWeight.w600,
               ),
@@ -70,7 +71,7 @@ class ProfilePage extends StatelessWidget {
                 height: kProfilePageButtonHeight,
                 width: double.infinity,
                 onPressed: () {},
-                buttonText: kLogoutText,
+                buttonText: kLogoutText.tr(),
                 backgroundColor: Colors.red,
                 buttonFontWeight: FontWeight.w600,
               ),

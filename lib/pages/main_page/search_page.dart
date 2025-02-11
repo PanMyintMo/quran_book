@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
@@ -28,7 +29,7 @@ class SearchPage extends StatelessWidget {
                 decoration: InputDecoration(
                     fillColor: kAppPrimaryColor,
                     filled: true,
-                    hintText: kSearchHintText,
+                    hintText: kSearchHintText.tr(),
                     hintStyle: TextStyle(
                       color: kWhiteColor,
                     ),

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -5,11 +6,11 @@ import 'package:quran_book/pages/main_page/book_read_details_page.dart';
 import 'package:quran_book/pages/main_page/donate_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
-import 'package:quran_book/resources/strings.dart';
 import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/widgets/cache_network_image_widget.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 import 'package:quran_book/widgets/primary_button_widget.dart';
+import 'package:quran_book/resources/strings.dart';
 
 class BookOverviewPage extends StatefulWidget {
   const BookOverviewPage({
@@ -129,7 +130,7 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                   const SizedBox(height: kSP20x),
                   _ReadAndPlayButtonView(
                     icon: Icons.laptop_chromebook,
-                    buttonText: kReadText,
+                    buttonText: kReadText.tr(),
                     isGhost: true,
                     onTap: () {
                       context.navigateToNextPage(BookReadDetailsPage(
@@ -140,7 +141,7 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                   const SizedBox(height: kSP10x),
                   _ReadAndPlayButtonView(
                     icon: Icons.play_arrow,
-                    buttonText: kListenText,
+                    buttonText: kListenText.tr(),
                     isGhost: false,
                     onTap: () {
                       requestPermissions().then((_) {
@@ -220,7 +221,7 @@ class _DonateDialogView extends StatelessWidget {
               context.navigateBack();
               context.navigateToNextPage(DonatePage());
             },
-            buttonText: kYes,
+            buttonText: kYes.tr(),
           ),
           const SizedBox(
             height: kSP10x,
@@ -233,7 +234,7 @@ class _DonateDialogView extends StatelessWidget {
             onPressed: () {
               context.navigateBack();
             },
-            buttonText: kNo,
+            buttonText: kNo.tr(),
           ),
           const SizedBox(
             height: kSP30x,
@@ -418,7 +419,7 @@ class _OverViewAndTimeView extends StatelessWidget {
                 width: kSP5x,
               ),
               EasyTextWidget(
-                text: kOverviewText,
+                text: kOverviewText.tr(),
                 fontSize: kFontSize12x,
                 fontWeight: FontWeight.w600,
               )

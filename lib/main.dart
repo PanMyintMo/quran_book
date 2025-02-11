@@ -1,7 +1,9 @@
+import 'dart:ui' as ui;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:quran_book/bloc/local_bloc.dart';
+import 'package:quran_book/bloc/main_page/local_bloc.dart';
 import 'package:quran_book/pages/introduction/splash_page.dart';
 import 'package:quran_book/resources/strings.dart';
 
@@ -13,7 +15,7 @@ void main() async {
     EasyLocalization(
       supportedLocales: [
         Locale('en', ''),
-        Locale('mm', ''),
+        Locale('my', ''),
         Locale('ar', 'SA'),
       ],
       path: 'assets/translations',
@@ -42,6 +44,12 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           fontFamily: kInter,
         ),
+        builder: (context, child) {
+          return Directionality(
+            textDirection: ui.TextDirection.ltr,
+            child: child!,
+          );
+        },
         home: SplashPage(),
       );
     });

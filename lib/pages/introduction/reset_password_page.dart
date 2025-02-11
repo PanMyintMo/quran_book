@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/pages/introduction/login_page.dart';
 import 'package:quran_book/resources/colors.dart';
@@ -30,20 +31,26 @@ class ResetPasswordPage extends StatelessWidget {
             ),
             SizedBox(height: kSP20x),
             EasyTextWidget(
-              text: kCreateNewPasswordText,
+              text: kCreateNewPasswordText.tr(),
               fontSize: kFontSize22x,
               fontWeight: FontWeight.bold,
             ),
             SizedBox(height: kSP10x),
             EasyTextWidget(
-              text: kCreateNewPasswordSubText,
+              text: kCreateNewPasswordSubText.tr(),
               textColor: Colors.grey,
               textAlign: TextAlign.center,
             ),
             SizedBox(height: kSP20x),
-            _buildPasswordField(kCreateNewPasswordTitleText, kCreateNewPasswordTitleHintText),
+            _buildPasswordField(
+              kCreateNewPasswordTitleText.tr(),
+              kCreateNewPasswordTitleHintText.tr(),
+            ),
             SizedBox(height: kSP20x),
-            _buildPasswordField(kCreateNewPasswordRepeatTitleText, kCreateNewPasswordRepeatTitleHintText),
+            _buildPasswordField(
+              kCreateNewPasswordRepeatTitleText.tr(),
+              kCreateNewPasswordRepeatTitleHintText.tr(),
+            ),
             SizedBox(height: kSP20x),
             PrimaryButtonWidget(
               width: double.infinity,
@@ -52,7 +59,7 @@ class ResetPasswordPage extends StatelessWidget {
               onPressed: () {
                 context.navigateToNextPageWithRemoveUntil(LoginPage());
               },
-              buttonText: kSubmit,
+              buttonText: kSubmit.tr(),
               buttonTextColor: kWhiteColor,
             ),
           ],

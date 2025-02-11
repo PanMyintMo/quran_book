@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/pages/main_page/book_list_from_category_page.dart';
 import 'package:quran_book/pages/main_page/book_overview_page.dart';
 import 'package:quran_book/pages/main_page/book_see_all_page.dart';
 import 'package:quran_book/pages/main_page/category_see_all_page.dart';
+import 'package:quran_book/pages/main_page/language_page.dart';
 import 'package:quran_book/pages/main_page/search_page.dart';
 import 'package:quran_book/pages/main_page/setting_page.dart';
 import 'package:quran_book/resources/colors.dart';
@@ -228,8 +230,8 @@ class _HomePageDrawerView extends StatelessWidget {
                 const SizedBox(
                   height: kSP10x,
                 ),
-                const EasyTextWidget(
-                  text: kDrawerWelcomeText,
+                EasyTextWidget(
+                  text: kDrawerWelcomeText.tr(),
                   fontSize: kFontSize18x,
                   fontWeight: FontWeight.bold,
                 ),
@@ -243,31 +245,33 @@ class _HomePageDrawerView extends StatelessWidget {
           _buildDrawerItem(
             context,
             icon: Icons.language,
-            label: kDrawerLanguageText,
-            onTap: () {},
+            label: kDrawerLanguageText.tr(),
+            onTap: () {
+              context.navigateToNextPage(LanguagePage());
+            },
           ),
           _buildDrawerItem(
             context,
             icon: Icons.notifications,
-            label: kDrawerNotificationText,
+            label: kDrawerNotificationText.tr(),
             onTap: () {},
           ),
           _buildDrawerItem(
             context,
             icon: Icons.rate_review,
-            label: kDrawerWriteAnAppStoreReviewText,
+            label: kDrawerWriteAnAppStoreReviewText.tr(),
             onTap: () {},
           ),
           _buildDrawerItem(
             context,
             icon: Icons.share,
-            label: kDrawerShareTheAppText,
+            label: kDrawerShareTheAppText.tr(),
             onTap: () {},
           ),
           _buildDrawerItem(
             context,
             icon: Icons.settings,
-            label: kDrawerSettingText,
+            label: kDrawerSettingText.tr(),
             onTap: () {
               context.navigateToNextPage(SettingPage());
             },
@@ -275,7 +279,7 @@ class _HomePageDrawerView extends StatelessWidget {
           _buildDrawerItem(
             context,
             icon: Icons.brightness_6,
-            label: kDrawerThemeText,
+            label: kDrawerThemeText.tr(),
             onTap: () {
               context.navigateToNextPage(SettingPage());
             },
@@ -283,19 +287,19 @@ class _HomePageDrawerView extends StatelessWidget {
           _buildDrawerItem(
             context,
             icon: Icons.phone,
-            label: kDrawerContactUsText,
+            label: kDrawerContactUsText.tr(),
             onTap: () {},
           ),
           _buildDrawerItem(
             context,
             icon: Icons.help_outline,
-            label: kDrawerHelpAndSupportText,
+            label: kDrawerHelpAndSupportText.tr(),
             onTap: () {},
           ),
           _buildDrawerItem(
             context,
             icon: Icons.info_outline,
-            label: kDrawerAboutUsText,
+            label: kDrawerAboutUsText.tr(),
             onTap: () {},
           ),
         ],

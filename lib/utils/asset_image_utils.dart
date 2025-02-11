@@ -2,6 +2,7 @@ class AssetImageUtils {
   static const _kAssetsPath = 'assets';
   static const _kAssetsIconPath = '$_kAssetsPath/icons';
   static const _kAssetsImagesPath = '$_kAssetsPath/images';
+  static const _kAssetsFlagsPath = '$_kAssetsPath/flags';
 
   static const kAppIcon = '$_kAssetsIconPath/app_icon.png';
 
@@ -16,4 +17,10 @@ class AssetImageUtils {
   static const kGoogleIcon = '$_kAssetsIconPath/google_icon.png';
 
   static const kAppleIcon = '$_kAssetsIconPath/apple_icon.png';
+
+  static const kEnFlag = '$_kAssetsFlagsPath/en_flag.png';
+
+  static const kMMFlag = '$_kAssetsFlagsPath/mm_flag.png';
+
+  static const kSAFlag = '$_kAssetsFlagsPath/sa_flag.png';
 }

@@ -61,5 +61,19 @@
   "no": "No",
   "submit": "Submit",
   "google": "Google",
-  "apple": "Apple"
+  "apple": "Apple",
+  "register_create_account": "Create Your Account",
+  "register_subtext": "Enter your username and password to continue",
+  "register_name_title": "Name",
+  "register_name_hint": "Enter your name",
+  "register_email_title": "Email Address",
+  "register_email_hint": "Enter your email address",
+  "register_password_title": "Password",
+  "register_password_hint": "Enter your password",
+  "register_repeat_password_title": "Repeat Password",
+  "register_repeat_password_hint": "Enter your password",
+  "register_continue_with": "Or continue with",
+  "register_already_account": "Already have an account?",
+  "register_sign_up": "Sign up"
 }
+

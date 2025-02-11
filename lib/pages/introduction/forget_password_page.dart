@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/pages/introduction/check_email_page.dart';
 import 'package:quran_book/resources/colors.dart';
@@ -24,20 +25,20 @@ class ForgotPasswordPage extends StatelessWidget {
           children: [
             SizedBox(height: kSP40x),
             EasyTextWidget(
-              text: kForgetPasswordTitleText,
+              text: kForgetPasswordTitleText.tr(),
               fontSize: kFontSize22x,
               fontWeight: FontWeight.bold,
             ),
             SizedBox(height: kSP10x),
             EasyTextWidget(
-              text: kForgetPasswordSubText,
+              text: kForgetPasswordSubText.tr(),
               textColor: Colors.grey,
               textAlign: TextAlign.center,
             ),
             SizedBox(height: kSP20x),
             _buildTextField(
-              kForgetPasswordEmailTitleText,
-              kForgetPasswordEmailHintText,
+              kForgetPasswordEmailTitleText.tr(),
+              kForgetPasswordEmailHintText.tr(),
             ),
             SizedBox(height: kSP20x),
             PrimaryButtonWidget(
@@ -47,7 +48,7 @@ class ForgotPasswordPage extends StatelessWidget {
               onPressed: () {
                 context.navigateToNextPage(CheckEmailPage());
               },
-              buttonText: kSubmit,
+              buttonText: kSubmit.tr(),
               buttonTextColor: kWhiteColor,
             ),
           ],

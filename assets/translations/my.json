@@ -56,5 +56,20 @@
   "no": "မဟုတ်ပါ",
   "submit": "တင်သွင်းရန်",
   "google": "Google",
-  "apple": "Apple"
+  "apple": "Apple",
+  "register_create_account": "သင်၏အကောင့်ကို ဖန်တီးပါ",
+  "register_subtext": "သင့်အသုံးပြုသူအမည်နှင့်စကားဝှက်ကို ထည့်ပါ",
+  "register_name_title": "အမည်",
+  "register_name_hint": "သင့်အမည်ကို ထည့်ပါ",
+  "register_email_title": "အီးမေးလ်လိပ်စာ",
+  "register_email_hint": "သင့်အီးမေးလ်ကို ထည့်ပါ",
+  "register_password_title": "စကားဝှက်",
+  "register_password_hint": "သင့်စကားဝှက်ကို ထည့်ပါ",
+  "register_repeat_password_title": "စကားဝှက် ပြန်ထည့်ရန်",
+  "register_repeat_password_hint": "သင့်စကားဝှက်ကို ထပ်မံထည့်ပါ",
+  "register_continue_with": "သို့မဟုတ် နောက်ထပ်အကောင့်ဖြင့် ဆက်လက်ဝင်ပါ",
+  "register_already_account": "အကောင့်ရှိပြီးသားလား?",
+  "register_sign_up": "အကောင့်ဖွင့်ရန်"
 }
+
+

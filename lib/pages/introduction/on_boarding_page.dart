@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/pages/introduction/login_page.dart';
 import 'package:quran_book/pages/main_page/index_page.dart';
@@ -40,7 +41,7 @@ class OnBoardingPage extends StatelessWidget {
                 height: kSP20x,
               ),
               EasyTextWidget(
-                text: kOnBoardingDescriptionText,
+                text: kOnBoardingDescriptionText.tr(),
                 fontWeight: FontWeight.w600,
                 textColor: kWhiteColor,
                 fontSize: kFontSize12x,
@@ -52,7 +53,7 @@ class OnBoardingPage extends StatelessWidget {
                 radius: kSP10x,
                 width: double.infinity,
                 height: kOnBoardingButtonHeight,
-                buttonText: kOnBoardingReadDirectText,
+                buttonText: kOnBoardingReadDirectText.tr(),
                 buttonTextColor: kWhiteColor,
                 buttonFontWeight: FontWeight.w600,
                 onPressed: () {
@@ -66,7 +67,7 @@ class OnBoardingPage extends StatelessWidget {
                 radius: kSP10x,
                 width: double.infinity,
                 height: kOnBoardingButtonHeight,
-                buttonText: kLogin,
+                buttonText: kLogin.tr(),
                 backgroundColor: kWhiteColor,
                 buttonFontWeight: FontWeight.w600,
                 onPressed: () {

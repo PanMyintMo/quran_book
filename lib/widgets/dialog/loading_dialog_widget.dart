@@ -1,5 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/resources/strings.dart';
+import 'package:quran_book/widgets/easy_text_widget.dart';
 
 class LoadingDialogWidget extends StatelessWidget {
   final String message;
@@ -22,7 +24,7 @@ class LoadingDialogWidget extends StatelessWidget {
           children: [
             const CircularProgressIndicator(),
             const SizedBox(width: 16.0),
-            Text(message),
+            EasyTextWidget(text: message.tr()),
           ],
         ),
       ),

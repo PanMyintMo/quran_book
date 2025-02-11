@@ -1,7 +1,13 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/pages/introduction/login_page.dart';
+import 'package:quran_book/resources/colors.dart';
+import 'package:quran_book/resources/dimens.dart';
+import 'package:quran_book/resources/strings.dart';
 import 'package:quran_book/utils/asset_image_utils.dart';
 import 'package:quran_book/utils/context_extensions.dart';
+import 'package:quran_book/widgets/easy_text_widget.dart';
+import 'package:quran_book/widgets/primary_button_widget.dart';
 
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
@@ -10,77 +16,84 @@ class RegisterPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: const EdgeInsets.symmetric(horizontal: kSP20x),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 60),
-              Image.asset(AssetImageUtils.kAppIcon, height: 80),
-              SizedBox(height: 16),
-              Text(
-                "Create Your Account",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              SizedBox(height: kSP60x),
+              Image.asset(
+                AssetImageUtils.kAppIcon,
+                height: kResetPasswordAppIconHeight,
               ),
-              SizedBox(height: 8),
-              Text(
-                "Enter your username and password to continue",
-                style: TextStyle(color: Colors.grey),
+              SizedBox(height: kSP20x),
+              EasyTextWidget(
+                text: kRegisterCreateYourAccountText.tr(),
+                fontSize: kFontSize22x,
+                fontWeight: FontWeight.bold,
+              ),
+              SizedBox(height: kSP10x),
+              EasyTextWidget(
+                text: kRegisterSubText.tr(),
+                textColor: Colors.grey,
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 24),
-              _buildTextField("Name", "Enter your name"),
-              SizedBox(height: 16),
-              _buildTextField("Email Address", "Enter your email address"),
-              SizedBox(height: 16),
-              _buildPasswordField("Password", "Enter your password"),
-              SizedBox(height: 16),
-              _buildPasswordField("Repeat Password", "Enter your password"),
-              SizedBox(height: 24),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.indigo,
-                  minimumSize: Size(double.infinity, 50),
-                ),
+              SizedBox(height: kSP20x),
+              _buildTextField(kRegisterNameTitleText.tr(), kRegisterNameHintText.tr()),
+              SizedBox(height: kSP20x),
+              _buildTextField(kRegisterEmailTitleText.tr(), kRegisterEmailHintText.tr()),
+              SizedBox(height: kSP20x),
+              _buildPasswordField(kRegisterPasswordTitleText.tr(), kRegisterPasswordHintText.tr()),
+              SizedBox(height: kSP20x),
+              _buildPasswordField(kRegisterRepeatPasswordTitleText.tr(), kRegisterRepeatPasswordHintText.tr()),
+              SizedBox(height: kSP20x),
+              PrimaryButtonWidget(
+                width: double.infinity,
+                height: kLoginPageButtonHeight,
+                backgroundColor: kAppPrimaryColor,
                 onPressed: () {},
-                child: Text("Login", style: TextStyle(color: Colors.white)),
+                buttonTextColor: kWhiteColor,
+                buttonText: kLogin.tr(),
               ),
-              SizedBox(height: 16),
+              SizedBox(height: kSP20x),
               Row(
                 children: [
                   Expanded(child: Divider()),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text("Or continue with"),
+                    padding: const EdgeInsets.symmetric(horizontal: kSP10x),
+                    child: EasyTextWidget(text: kRegisterContinueWithText),
                   ),
                   Expanded(child: Divider()),
                 ],
               ),
-              SizedBox(height: 16),
+              SizedBox(height: kSP20x),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildSocialLoginButton(
-                    "Google",
+                    kGoogle.tr(),
                     AssetImageUtils.kGoogleIcon,
                   ),
-                  SizedBox(width: 16),
+                  SizedBox(width: kSP20x),
                   _buildSocialLoginButton(
-                    "Apple",
+                    kApple.tr(),
                     AssetImageUtils.kAppleIcon,
                   ),
                 ],
               ),
-              SizedBox(height: 24),
+              SizedBox(height: kSP20x),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Already have an account?"),
+                  EasyTextWidget(text: kRegisterAlreadyAccountText.tr()),
                   TextButton(
                     onPressed: () {
                       context.navigateToNextPageWithReplacement(LoginPage());
                     },
-                    child: Text("Sign up", style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: EasyTextWidget(
+                      text: kRegisterSignUpText.tr(),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -96,12 +109,12 @@ class RegisterPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-        SizedBox(height: 8),
+        SizedBox(height: kSP10x),
         TextField(
           decoration: InputDecoration(
             hintText: hintText,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(kSP10x),
             ),
           ),
         ),
@@ -114,13 +127,13 @@ class RegisterPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-        SizedBox(height: 8),
+        SizedBox(height: kSP10x),
         TextField(
           obscureText: true,
           decoration: InputDecoration(
             hintText: hintText,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(kSP10x),
             ),
             suffixIcon: Icon(Icons.visibility_off),
           ),
@@ -132,17 +145,24 @@ class RegisterPage extends StatelessWidget {
   Widget _buildSocialLoginButton(String label, String assetPath) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        side: BorderSide(color: Colors.black),
-        minimumSize: Size(150, 50),
+        backgroundColor: kWhiteColor,
+        side: BorderSide(
+          color: kBlackColor,
+        ),
+        minimumSize: Size(kGoogleAppleButtonWidth, kGoogleAppleButtonHeight),
       ),
       onPressed: () {},
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset(assetPath, height: 24),
-          SizedBox(width: 8),
-          Text(label, style: TextStyle(color: Colors.black)),
+          Image.asset(assetPath, height: kGoogleAppleImageHeight),
+          SizedBox(
+            width: kSP10x,
+          ),
+          EasyTextWidget(
+            text: label,
+            textColor: kBlackColor,
+          ),
         ],
       ),
     );
