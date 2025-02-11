@@ -1,5 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:quran_book/bloc/main_page/local_and_theme_bloc.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
@@ -22,23 +24,27 @@ class SettingPage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(kSP10x),
-            child: Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(kSP10x),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildThemeOption(kLightModeText.tr(), false),
-                  _buildThemeOption(kDarkModeText.tr(), true),
-                ],
-              ),
-            ),
-          ),
+          Selector<LocalAndThemeBloc, bool>(
+              selector: (_, bloc) => bloc.isDarkMode,
+              builder: (context, isDarkMode, _) {
+                return Padding(
+                  padding: const EdgeInsets.all(kSP10x),
+                  child: Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(kSP10x),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildThemeOption(kLightModeText.tr(), !isDarkMode, context),
+                        _buildThemeOption(kDarkModeText.tr(), isDarkMode, context),
+                      ],
+                    ),
+                  ),
+                );
+              }),
           const SizedBox(
             height: kSP20x,
           ),
@@ -73,13 +79,16 @@ class SettingPage extends StatelessWidget {
     );
   }
 
-  Widget _buildThemeOption(String text, bool isSelected) {
+  Widget _buildThemeOption(String text, bool isSelected, BuildContext context) {
     return Column(
       children: [
         Radio(
           value: text,
           groupValue: isSelected ? text : null,
-          onChanged: (value) {},
+          onChanged: (value) {
+            final bloc = context.read<LocalAndThemeBloc>();
+            bloc.toggleTheme();
+          },
         ),
         Text(text, style: TextStyle(fontSize: kFontSize16x)),
       ],

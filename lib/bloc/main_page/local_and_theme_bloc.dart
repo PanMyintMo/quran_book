@@ -2,15 +2,18 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class LocalBloc extends ChangeNotifier {
+class LocalAndThemeBloc extends ChangeNotifier {
   Locale _locale = Locale('en', '');
+  bool _isDarkMode = false; // Default to light mode
 
   Locale get locale => _locale;
+  bool get isDarkMode => _isDarkMode;
 
-  LocalBloc() {
-    _loadSavedLocale();
+  LocalAndThemeBloc() {
+    _loadSavedPreferences();
   }
 
+  /// Set Locale and Save in SharedPreferences
   Future<void> setLocale(Locale locale, BuildContext context) async {
     _locale = locale;
     context.setLocale(locale);
@@ -21,6 +24,7 @@ class LocalBloc extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Set Locale using Language Name
   void setLocaleWithLanguage(String language, BuildContext context) {
     Locale locale;
     if (language == 'English') {
@@ -34,6 +38,7 @@ class LocalBloc extends ChangeNotifier {
     setLocale(locale, context);
   }
 
+  /// Get Language Display Name
   String get getLanguageByLocale {
     if (_locale == Locale('en', '')) {
       return 'English';
@@ -44,14 +49,32 @@ class LocalBloc extends ChangeNotifier {
     return "بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ";
   }
 
-  Future<void> _loadSavedLocale() async {
+  /// Load saved Locale and Theme from SharedPreferences
+  Future<void> _loadSavedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? languageCode = prefs.getString('language_code');
+    bool? savedTheme = prefs.getBool('isDarkMode');
 
-    print(languageCode);
     if (languageCode != null) {
       _locale = Locale(languageCode, '');
     }
+
+    if (savedTheme != null) {
+      _isDarkMode = savedTheme;
+    }
+
     notifyListeners();
   }
+
+  /// Toggle Dark Mode and Save in SharedPreferences
+  Future<void> toggleTheme() async {
+    _isDarkMode = !_isDarkMode;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDarkMode', _isDarkMode);
+
+    notifyListeners();
+  }
+
+  /// Get ThemeMode based on `_isDarkMode`
+  ThemeMode get currentThemeMode => _isDarkMode ? ThemeMode.dark : ThemeMode.light;
 }

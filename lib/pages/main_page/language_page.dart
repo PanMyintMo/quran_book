@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:quran_book/bloc/main_page/local_bloc.dart';
+import 'package:quran_book/bloc/main_page/local_and_theme_bloc.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
@@ -20,7 +20,7 @@ class _LanguagePageState extends State<LanguagePage> {
 
   @override
   void initState() {
-    final bloc = context.read<LocalBloc>();
+    final bloc = context.read<LocalAndThemeBloc>();
     selectedLanguage = bloc.getLanguageByLocale;
     super.initState();
   }
@@ -66,7 +66,7 @@ class _LanguagePageState extends State<LanguagePage> {
           if (mounted) {
             setState(() {
               selectedLanguage = language;
-              final bloc = context.read<LocalBloc>();
+              final bloc = context.read<LocalAndThemeBloc>();
               bloc.setLocaleWithLanguage(selectedLanguage, context);
             });
           }
