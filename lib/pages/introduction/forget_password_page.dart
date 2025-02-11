@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:quran_book/pages/introduction/check_email_page.dart';
+import 'package:quran_book/resources/colors.dart';
+import 'package:quran_book/resources/dimens.dart';
+import 'package:quran_book/resources/strings.dart';
+import 'package:quran_book/utils/context_extensions.dart';
+import 'package:quran_book/widgets/easy_text_widget.dart';
+import 'package:quran_book/widgets/primary_button_widget.dart';
 
 class ForgotPasswordPage extends StatelessWidget {
   const ForgotPasswordPage({super.key});
@@ -8,44 +14,41 @@ class ForgotPasswordPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: kWhiteColor,
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: const EdgeInsets.symmetric(horizontal: kSP20x),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 40),
-            Text(
-              "Forgot Password",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            SizedBox(height: kSP40x),
+            EasyTextWidget(
+              text: kForgetPasswordTitleText,
+              fontSize: kFontSize22x,
+              fontWeight: FontWeight.bold,
             ),
-            SizedBox(height: 8),
-            Text(
-              "No worries! Enter your email address below, and we'll send you a link to reset your password.",
-              style: TextStyle(color: Colors.grey),
+            SizedBox(height: kSP10x),
+            EasyTextWidget(
+              text: kForgetPasswordSubText,
+              textColor: Colors.grey,
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 24),
-            _buildTextField("Email", "Enter your email address"),
-            SizedBox(height: 24),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo,
-                minimumSize: Size(double.infinity, 50),
-              ),
+            SizedBox(height: kSP20x),
+            _buildTextField(
+              kForgetPasswordEmailTitleText,
+              kForgetPasswordEmailHintText,
+            ),
+            SizedBox(height: kSP20x),
+            PrimaryButtonWidget(
+              width: double.infinity,
+              backgroundColor: kAppPrimaryColor,
+              height: kForgetPasswordButtonHeight,
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => CheckEmailPage()),
-                );
+                context.navigateToNextPage(CheckEmailPage());
               },
-              child: Text("Submit", style: TextStyle(color: Colors.white)),
+              buttonText: kSubmit,
+              buttonTextColor: kWhiteColor,
             ),
           ],
         ),
@@ -57,13 +60,13 @@ class ForgotPasswordPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-        SizedBox(height: 8),
+        EasyTextWidget(text: label, fontWeight: FontWeight.bold),
+        SizedBox(height: kSP10x),
         TextField(
           decoration: InputDecoration(
             hintText: hintText,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(kSP10x),
             ),
           ),
         ),

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:quran_book/pages/introduction/login_page.dart';
+import 'package:quran_book/resources/colors.dart';
+import 'package:quran_book/resources/dimens.dart';
+import 'package:quran_book/resources/strings.dart';
 import 'package:quran_book/utils/asset_image_utils.dart';
 import 'package:quran_book/utils/context_extensions.dart';
+import 'package:quran_book/widgets/easy_text_widget.dart';
+import 'package:quran_book/widgets/primary_button_widget.dart';
 
 class ResetPasswordPage extends StatelessWidget {
   const ResetPasswordPage({super.key});
@@ -10,45 +15,45 @@ class ResetPasswordPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: kWhiteColor,
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: const EdgeInsets.symmetric(horizontal: kSP20x),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 40),
-            Image.asset(AssetImageUtils.kAppIcon, height: 80),
-            SizedBox(height: 16),
-            Text(
-              "Create a new password",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            SizedBox(height: kSP40x),
+            Image.asset(
+              AssetImageUtils.kAppIcon,
+              height: kResetPasswordAppIconHeight,
             ),
-            SizedBox(height: 8),
-            Text(
-              "Enter your new password below to complete the reset process.",
-              style: TextStyle(color: Colors.grey),
+            SizedBox(height: kSP20x),
+            EasyTextWidget(
+              text: kCreateNewPasswordText,
+              fontSize: kFontSize22x,
+              fontWeight: FontWeight.bold,
+            ),
+            SizedBox(height: kSP10x),
+            EasyTextWidget(
+              text: kCreateNewPasswordSubText,
+              textColor: Colors.grey,
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 24),
-            _buildPasswordField("New Password", "Enter your password"),
-            SizedBox(height: 16),
-            _buildPasswordField("Repeat New Password", "Enter your password"),
-            SizedBox(height: 24),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo,
-                minimumSize: Size(double.infinity, 50),
-              ),
+            SizedBox(height: kSP20x),
+            _buildPasswordField(kCreateNewPasswordTitleText, kCreateNewPasswordTitleHintText),
+            SizedBox(height: kSP20x),
+            _buildPasswordField(kCreateNewPasswordRepeatTitleText, kCreateNewPasswordRepeatTitleHintText),
+            SizedBox(height: kSP20x),
+            PrimaryButtonWidget(
+              width: double.infinity,
+              backgroundColor: kAppPrimaryColor,
+              height: kResetPasswordSubmitHeight,
               onPressed: () {
                 context.navigateToNextPageWithRemoveUntil(LoginPage());
               },
-              child: Text("Submit", style: TextStyle(color: Colors.white)),
+              buttonText: kSubmit,
+              buttonTextColor: kWhiteColor,
             ),
           ],
         ),
@@ -60,8 +65,8 @@ class ResetPasswordPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-        SizedBox(height: 8),
+        EasyTextWidget(text: label, fontWeight: FontWeight.bold),
+        SizedBox(height: kSP10x),
         TextField(
           obscureText: true,
           decoration: InputDecoration(

@@ -213,27 +213,27 @@ class _DonateDialogView extends StatelessWidget {
           ),
           PrimaryButtonWidget(
             radius: kSP5x,
-            width: 176,
-            height: 32,
+            width: kBookOverviewDonateButtonWidth,
+            height: kBookOverviewDonateButtonHeight,
             backgroundColor: kWhiteColor,
             onPressed: () {
               context.navigateBack();
               context.navigateToNextPage(DonatePage());
             },
-            buttonText: 'Yes',
+            buttonText: kYes,
           ),
           const SizedBox(
             height: kSP10x,
           ),
           PrimaryButtonWidget(
             radius: kSP5x,
-            width: 176,
-            height: 32,
+            width: kBookOverviewDonateButtonWidth,
+            height: kBookOverviewDonateButtonHeight,
             backgroundColor: kAppYellowButtonColor,
             onPressed: () {
               context.navigateBack();
             },
-            buttonText: 'No',
+            buttonText: kNo,
           ),
           const SizedBox(
             height: kSP30x,
@@ -357,7 +357,7 @@ class _ReadAndPlayButtonView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 50,
+      height: kBookOverviewDonateReadPlayButtonHeight,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(kSP10x),
         color: isGhost ? kWhiteColor : kAppPrimaryColor,

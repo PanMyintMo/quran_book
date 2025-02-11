@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
+import 'package:quran_book/resources/strings.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 import 'package:quran_book/widgets/primary_button_widget.dart';
 
@@ -13,7 +14,7 @@ class ProfilePage extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         title: const EasyTextWidget(
-          text: 'Profile',
+          text: kProfileText,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -55,10 +56,10 @@ class ProfilePage extends StatelessWidget {
                 height: kSP40x,
               ),
               PrimaryButtonWidget(
-                height: 50,
+                height: kProfilePageButtonHeight,
                 width: double.infinity,
                 onPressed: () {},
-                buttonText: 'Delete Account',
+                buttonText: kDeleteAccountText,
                 backgroundColor: Colors.amber,
                 buttonFontWeight: FontWeight.w600,
               ),
@@ -66,10 +67,10 @@ class ProfilePage extends StatelessWidget {
                 height: kSP10x,
               ),
               PrimaryButtonWidget(
-                height: 50,
+                height: kProfilePageButtonHeight,
                 width: double.infinity,
                 onPressed: () {},
-                buttonText: 'Logout',
+                buttonText: kLogoutText,
                 backgroundColor: Colors.red,
                 buttonFontWeight: FontWeight.w600,
               ),

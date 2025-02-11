@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:quran_book/pages/introduction/forget_password_page.dart';
 import 'package:quran_book/pages/introduction/register_page.dart';
 import 'package:quran_book/resources/colors.dart';
+import 'package:quran_book/resources/dimens.dart';
+import 'package:quran_book/resources/strings.dart';
 import 'package:quran_book/utils/asset_image_utils.dart';
 import 'package:quran_book/utils/context_extensions.dart';
+import 'package:quran_book/widgets/easy_text_widget.dart';
+import 'package:quran_book/widgets/primary_button_widget.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -11,107 +16,118 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: const EdgeInsets.symmetric(horizontal: kSP20x),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 60),
+              SizedBox(height: kSP60x),
               Image.asset(AssetImageUtils.kAppIcon, height: 80),
-              SizedBox(height: 16),
-              Text(
-                "Welcome to our page",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              SizedBox(height: kSP20x),
+              EasyTextWidget(
+                text: kLoginWelcomeText,
+                fontSize: kFontSize22x,
+                fontWeight: FontWeight.bold,
               ),
-              SizedBox(height: 8),
-              Text(
-                "Enter your username and password to continue.",
-                style: TextStyle(color: Colors.grey),
+              SizedBox(height: kSP10x),
+              EasyTextWidget(
+                text: kLoginSubText,
+                textColor: Colors.grey,
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 24),
+              SizedBox(height: kSP20x),
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text("Email Address", style: TextStyle(fontWeight: FontWeight.bold)),
+                child: EasyTextWidget(
+                  text: kLoginEmailText,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              SizedBox(height: 8),
+              SizedBox(height: kSP10x),
               TextField(
                 decoration: InputDecoration(
-                  hintText: "Enter your email address",
+                  hintText: kLoginEmailHintText,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(kSP10x),
                   ),
                 ),
               ),
-              SizedBox(height: 16),
+              SizedBox(height: kSP20x),
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text("Password", style: TextStyle(fontWeight: FontWeight.bold)),
+                child: EasyTextWidget(text: kLoginPasswordText, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 8),
+              SizedBox(height: kSP10x),
               TextField(
                 obscureText: true,
                 decoration: InputDecoration(
-                  hintText: "Enter your password",
+                  hintText: kLoginPasswordHintText,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(kSP10x),
                   ),
                   suffixIcon: Icon(Icons.visibility_off),
                 ),
               ),
-              SizedBox(height: 8),
+              SizedBox(height: kSP10x),
               Align(
                 alignment: Alignment.centerRight,
-                child: Text(
-                  "Forgot your password? Reset now",
-                  style: TextStyle(color: Colors.grey),
+                child: GestureDetector(
+                  onTap: () {
+                    context.navigateToNextPage(ForgotPasswordPage());
+                  },
+                  child: EasyTextWidget(
+                    text: kLoginForgetPasswordLabelText,
+                    textColor: Colors.grey,
+                  ),
                 ),
               ),
-              SizedBox(height: 24),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: kAppPrimaryColor,
-                  minimumSize: Size(double.infinity, 50),
-                ),
+              SizedBox(height: kSP20x),
+              PrimaryButtonWidget(
+                width: double.infinity,
+                height: kLoginPageButtonHeight,
                 onPressed: () {},
-                child: Text("Login", style: TextStyle(color: Colors.white)),
+                buttonText: kLogin,
+                buttonTextColor: Colors.white,
               ),
-              SizedBox(height: 16),
+              SizedBox(height: kSP10x),
               Row(
                 children: [
                   Expanded(child: Divider()),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text("Or Login with"),
+                    padding: const EdgeInsets.symmetric(horizontal: kSP10x),
+                    child: EasyTextWidget(
+                      text: kLoginOrLoginWithText,
+                    ),
                   ),
                   Expanded(child: Divider()),
                 ],
               ),
-              SizedBox(height: 16),
+              SizedBox(height: kSP10x),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildSocialLoginButton(
-                    "Google",
+                    kGoogle,
                     AssetImageUtils.kGoogleIcon,
                   ),
-                  SizedBox(width: 16),
+                  SizedBox(width: kSP20x),
                   _buildSocialLoginButton(
-                    "Apple",
+                    kApple,
                     AssetImageUtils.kAppleIcon,
                   ),
                 ],
               ),
-              SizedBox(height: 24),
+              SizedBox(height: kSP20x),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Don't have an account?"),
-                  TextButton(
+                  EasyTextWidget(text: kLoginDoNoHaveAnAccountText),
+                  PrimaryButtonWidget(
+                    buttonText: kRegister,
+                    buttonFontWeight: FontWeight.bold,
                     onPressed: () {
                       context.navigateToNextPageWithReplacement(RegisterPage());
                     },
-                    child: Text("Register", style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
@@ -125,17 +141,20 @@ class LoginPage extends StatelessWidget {
   Widget _buildSocialLoginButton(String label, String assetPath) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        side: BorderSide(color: Colors.black),
-        minimumSize: Size(150, 50),
+        backgroundColor: kWhiteColor,
+        side: BorderSide(color: kBlackColor),
+        minimumSize: Size(kGoogleAppleButtonWidth, kGoogleAppleButtonHeight),
       ),
       onPressed: () {},
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset(assetPath, height: 24),
-          SizedBox(width: 8),
-          Text(label, style: TextStyle(color: Colors.black)),
+          Image.asset(assetPath, height: kGoogleAppleImageHeight),
+          SizedBox(width: kSP10x),
+          EasyTextWidget(
+            text: label,
+            textColor: kBlackColor,
+          ),
         ],
       ),
     );

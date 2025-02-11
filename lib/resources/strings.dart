@@ -1,36 +1,83 @@
-const kDefaultLoadingText = 'Loading...';
+const kDefaultLoadingText = 'loading';
 
-const kWelcomeToText = 'Welcome\nto\nOur\nQuran';
+const kWelcomeToText = 'welcome_to';
 
-const kOnBoardingDescriptionText =
-    'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. ';
-const kOnBoardingReadDirectText = 'Read Direct';
+const kOnBoardingDescriptionText = 'onboarding_description';
+const kOnBoardingReadDirectText = 'onboarding_read_direct';
 
-const kDrawerWelcomeText = 'Welcome to Our Quran';
+const kDrawerWelcomeText = 'drawer_welcome';
+const kDrawerLanguageText = 'drawer_language';
+const kDrawerNotificationText = 'drawer_notification';
+const kDrawerWriteAnAppStoreReviewText = 'drawer_write_review';
+const kDrawerShareTheAppText = 'drawer_share_app';
+const kDrawerSettingText = 'drawer_setting';
+const kDrawerThemeText = 'drawer_theme';
+const kDrawerContactUsText = 'drawer_contact_us';
+const kDrawerHelpAndSupportText = 'drawer_help_support';
+const kDrawerAboutUsText = 'drawer_about_us';
 
-const kDrawerLanguageText = 'Language';
-const kDrawerNotificationText = 'Notification';
-const kDrawerWriteAnAppStoreReviewText = 'Write an app store review';
-const kDrawerShareTheAppText = 'Share the app';
-const kDrawerSettingText = 'Setting';
-const kDrawerThemeText = 'Theme';
-const kDrawerContactUsText = 'Contact us';
-const kDrawerHelpAndSupportText = 'Help & Support';
-const kDrawerAboutUsText = 'About us';
+const kSearchHintText = 'search_hint';
 
-const kSearchHintText = 'Search';
+const kRegisterNowText = 'register_now';
 
-const kRegisterNowText = 'Regiser now';
+const kRegisterAlertTextForPlayText = 'register_alert_play';
+const kRegisterAlertTextForSaveText = 'register_alert_save';
 
-const kRegisterAlertTextForPlayText = 'If you want to play, please login and  Register';
-const kRegisterAlertTextForSaveText = 'If you want to save, please login and  Register';
+const kOverviewText = 'overview';
+const kReadText = 'read';
+const kListenText = 'listen';
 
-const kOverviewText = 'Overview';
-const kReadText = 'Read';
-const kListenText = 'Listen';
+const kCopiedText = 'copied';
+const kClickToCopyText = 'click_to_copy';
 
-const kNext = 'Next';
-const kLogin = 'Login';
+const kDonationText = 'donation';
+
+const kHomePageText = 'home_page';
+const kBookmarkText = 'bookmark';
+const kProfileText = 'profile';
+
+const kCheckYourEmailLabelText = 'check_email_label';
+const kCheckYourEmailSentText = 'check_email_sent';
+const kCheckYourEmailResendEmailText = 'check_email_resend';
+const kCheckYourEmailOpenEmailText = 'check_email_open';
+const kCheckYourEmailDidNotGetText = 'check_email_did_not_get';
+
+const kForgetPasswordTitleText = 'forget_password_title';
+const kForgetPasswordSubText = 'forget_password_subtext';
+const kForgetPasswordEmailTitleText = 'forget_password_email_title';
+const kForgetPasswordEmailHintText = 'forget_password_email_hint';
+
+const kDeleteAccountText = 'delete_account';
+const kLogoutText = 'logout';
+
+const kDarkModeText = 'dark_mode';
+const kLightModeText = 'light_mode';
+
+const kLoginWelcomeText = 'login_welcome';
+const kLoginSubText = 'login_subtext';
+const kLoginEmailText = 'login_email';
+const kLoginEmailHintText = 'login_email_hint';
+const kLoginPasswordText = 'login_password';
+const kLoginPasswordHintText = 'login_password_hint';
+const kLoginForgetPasswordLabelText = 'login_forget_password';
+const kLoginOrLoginWithText = 'login_or_with';
+const kLoginDoNoHaveAnAccountText = 'login_no_account';
+
+const kCreateNewPasswordText = 'create_new_password';
+const kCreateNewPasswordSubText = 'create_new_password_subtext';
+const kCreateNewPasswordTitleText = 'create_new_password_title';
+const kCreateNewPasswordTitleHintText = 'create_new_password_hint';
+const kCreateNewPasswordRepeatTitleText = 'create_new_password_repeat_title';
+const kCreateNewPasswordRepeatTitleHintText = 'create_new_password_repeat_hint';
+
+const kNext = 'next';
+const kLogin = 'login';
+const kRegister = 'register';
+const kYes = 'yes';
+const kNo = 'no';
+const kSubmit = 'submit';
+const kGoogle = 'google';
+const kApple = 'apple';
 
 ///Fon Family
 const kAgbalumoFont = 'Agbalumo';

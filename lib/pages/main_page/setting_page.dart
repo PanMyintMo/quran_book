@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
+import 'package:quran_book/resources/strings.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -27,8 +28,8 @@ class SettingPage extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildThemeOption("Light", false),
-                  _buildThemeOption("Dark", true),
+                  _buildThemeOption(kLightModeText, false),
+                  _buildThemeOption(kDarkModeText, true),
                 ],
               ),
             ),
@@ -39,30 +40,25 @@ class SettingPage extends StatelessWidget {
           Expanded(
             child: ListView(
               children: [
-                _buildSettingItem(Icons.language, "Languages"),
-                _buildSettingItem(Icons.notifications, "Notifications"),
+                _buildSettingItem(Icons.language, kDrawerLanguageText),
+                _buildSettingItem(Icons.notifications, kDrawerNotificationText),
                 const SizedBox(
                   height: kSP20x,
                 ),
-                _buildSettingItem(Icons.star, "Write an app store review..."),
-                _buildSettingItem(Icons.share, "Share the app.."),
+                _buildSettingItem(Icons.star, kDrawerWriteAnAppStoreReviewText),
+                _buildSettingItem(Icons.share, kDrawerShareTheAppText),
                 const SizedBox(
                   height: kSP20x,
                 ),
-                _buildSettingItem(Icons.info, "About us"),
-                _buildSettingItem(Icons.contact_mail, "Contact us"),
-                _buildSettingItem(Icons.help, "Help & Support"),
+                _buildSettingItem(Icons.info, kDrawerAboutUsText),
+                _buildSettingItem(Icons.contact_mail, kDrawerContactUsText),
+                _buildSettingItem(Icons.help, kDrawerHelpAndSupportText),
               ],
             ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: kSP20x),
-            child: Column(
-              children: [
-                Text("app name", style: TextStyle(color: Colors.black54)),
-                Text("Version 1.1", style: TextStyle(color: Colors.black54)),
-              ],
-            ),
+            child: Text("Version 1.1", style: TextStyle(color: Colors.black54)),
           ),
         ],
       ),

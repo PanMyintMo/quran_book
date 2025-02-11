@@ -3,6 +3,7 @@ import 'package:quran_book/pages/main_page/book_mark_page.dart';
 import 'package:quran_book/pages/main_page/home_page.dart';
 import 'package:quran_book/pages/main_page/profile_page.dart';
 import 'package:quran_book/resources/colors.dart';
+import 'package:quran_book/resources/strings.dart';
 
 class IndexPage extends StatefulWidget {
   const IndexPage({super.key});
@@ -44,17 +45,16 @@ class _IndexPageState extends State<IndexPage> {
             activeIcon: Icon(
               Icons.home,
             ),
-            label: 'Home',
+            label: kHomePageText,
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.bookmark_border,
-            ),
-            activeIcon: Icon(
-              Icons.bookmark,
-            ),
-            label: 'Bookmark',
-          ),
+              icon: Icon(
+                Icons.bookmark_border,
+              ),
+              activeIcon: Icon(
+                Icons.bookmark,
+              ),
+              label: kBookmarkText),
           BottomNavigationBarItem(
             icon: Icon(
               Icons.person_2_outlined,
@@ -62,7 +62,7 @@ class _IndexPageState extends State<IndexPage> {
             activeIcon: Icon(
               Icons.person,
             ),
-            label: 'Profile',
+            label: kProfileText,
           ),
         ],
       ),

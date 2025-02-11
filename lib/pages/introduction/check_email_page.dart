@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:quran_book/pages/introduction/reset_password_page.dart';
+import 'package:quran_book/resources/colors.dart';
+import 'package:quran_book/resources/dimens.dart';
+import 'package:quran_book/resources/strings.dart';
 import 'package:quran_book/utils/context_extensions.dart';
+import 'package:quran_book/widgets/easy_text_widget.dart';
+import 'package:quran_book/widgets/primary_button_widget.dart';
 
 class CheckEmailPage extends StatelessWidget {
   const CheckEmailPage({super.key});
@@ -9,55 +14,52 @@ class CheckEmailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         elevation: 0,
         backgroundColor: Colors.white,
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: const EdgeInsets.symmetric(horizontal: kSP20x),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 40),
-            Icon(Icons.email, size: 80, color: Colors.black),
-            SizedBox(height: 16),
-            Text(
-              "Check your email",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            SizedBox(height: kSP40x),
+            Icon(Icons.email, size: kCheckEmailIconSize, color: Colors.black),
+            SizedBox(height: kSP10x),
+            EasyTextWidget(
+              text: kCheckYourEmailLabelText,
+              fontSize: kFontSize22x,
+              fontWeight: FontWeight.bold,
             ),
-            SizedBox(height: 8),
-            Text(
-              "We've sent you a password reset link. Please check your email.",
-              style: TextStyle(color: Colors.grey),
+            SizedBox(height: kSP10x),
+            EasyTextWidget(
+              text: kCheckYourEmailSentText,
+              textColor: Colors.grey,
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 24),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo,
-                minimumSize: Size(double.infinity, 50),
-              ),
+            SizedBox(height: kSP20x),
+            PrimaryButtonWidget(
+              backgroundColor: kAppPrimaryColor,
+              height: kCheckEmailResetButtonHeight,
               onPressed: () {
                 context.navigateToNextPage(ResetPasswordPage());
               },
-              child: Text("Reset Password", style: TextStyle(color: Colors.white)),
+              buttonText: kCheckYourEmailResendEmailText,
+              buttonTextColor: kWhiteColor,
             ),
-            SizedBox(height: 24),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo,
-                minimumSize: Size(double.infinity, 50),
-              ),
-              onPressed: () {},
-              child: Text("Open email", style: TextStyle(color: Colors.white)),
+            SizedBox(height: kSP20x),
+            PrimaryButtonWidget(
+              backgroundColor: kAppPrimaryColor,
+              height: kCheckEmailResetButtonHeight,
+              onPressed: () {
+                context.navigateToNextPage(ResetPasswordPage());
+              },
+              buttonText: kCheckYourEmailOpenEmailText,
+              buttonTextColor: kWhiteColor,
             ),
-            SizedBox(height: 16),
-            TextButton(
+            SizedBox(height: kSP20x),
+            PrimaryButtonWidget(
               onPressed: () {},
-              child: Text("Didn't receive the email? Resend"),
+              buttonText: kCheckYourEmailDidNotGetText,
             ),
           ],
         ),

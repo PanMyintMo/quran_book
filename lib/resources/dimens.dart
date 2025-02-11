@@ -4,6 +4,7 @@ const kSP10x = 10.0;
 const kSP20x = 20.0;
 const kSP30x = 30.0;
 const kSP40x = 40.0;
+const kSP60x = 60.0;
 
 ///App Specific
 ///Splash Page
@@ -41,11 +42,41 @@ const kBookDetailsOverViewMiniPlayHeight = 80.0;
 const kBookDetailsOverViewMiniPlayImageWidth = 45.0;
 const kBookDetailsOverViewMiniPlayImageHeight = 60.0;
 
+///Book Overview Page
+const kBookOverviewDonateButtonWidth = 176.0;
+const kBookOverviewDonateButtonHeight = 32.0;
+const kBookOverviewDonateReadPlayButtonHeight = 50.0;
+
+///Donate Page
+const kDonatePageImageSize = 100.0;
+
+///Profile Page
+const kProfilePageButtonHeight = 50.0;
+
+///Check Email Page
+const kCheckEmailIconSize = 80.0;
+const kCheckEmailResetButtonHeight = 50.0;
+
+///ForgetPassword Page
+const kForgetPasswordButtonHeight = 50.0;
+
+///Login Page
+const kLoginPageButtonHeight = 50.0;
+
+///ResetPassword Page
+const kResetPasswordAppIconHeight = 80.0;
+const kResetPasswordSubmitHeight = 50.0;
+
+const kGoogleAppleButtonWidth = 150.0;
+const kGoogleAppleButtonHeight = 50.0;
+const kGoogleAppleImageHeight = 24.0;
+
 ///FontSize
 const kFontSize12x = 12.0;
 const kFontSize14x = 14.0;
 const kFontSize16x = 16.0;
 const kFontSize18x = 18.0;
 const kFontSize21x = 21.0;
+const kFontSize22x = 22.0;
 const kFontSize32x = 32.0;
 const kFontSize40x = 40.0;

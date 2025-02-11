@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
+import 'package:quran_book/resources/strings.dart';
 import 'package:quran_book/widgets/cache_network_image_widget.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 
@@ -14,7 +15,7 @@ class DonatePage extends StatelessWidget {
         appBar: AppBar(
           centerTitle: true,
           title: const EasyTextWidget(
-            text: 'Donation',
+            text: kDonationText,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -33,13 +34,13 @@ class DonatePage extends StatelessWidget {
                 onTap: () {
                   Clipboard.setData(ClipboardData(text: '09254138115'));
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Copied!")),
+                    SnackBar(content: EasyTextWidget(text: kCopiedText)),
                   );
                 },
                 contentPadding: const EdgeInsets.all(0),
                 leading: CacheNetworkImageWidget(
-                  width: 100,
-                  height: 100,
+                  width: kDonatePageImageSize,
+                  height: kDonatePageImageSize,
                   imageUrl: 'https://mpics.mgronline.com/pics/Images/564000005890201.JPEG',
                 ),
                 title: EasyTextWidget(
@@ -59,7 +60,7 @@ class DonatePage extends StatelessWidget {
                       height: kSP20x,
                     ),
                     EasyTextWidget(
-                      text: 'Click to copy',
+                      text: kClickToCopyText,
                       fontSize: kFontSize12x,
                     ),
                   ],
