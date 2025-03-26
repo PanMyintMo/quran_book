@@ -23,4 +23,18 @@ class AssetImageUtils {
   static const kMMFlag = '$_kAssetsFlagsPath/mm_flag.png';
 
   static const kSAFlag = '$_kAssetsFlagsPath/sa_flag.png';
+
+  static const kAdminCategoryIcon = '$_kAssetsIconPath/admin_category_icon.png';
+
+  static const kAdminPostIcon = '$_kAssetsIconPath/admin_post_icon.png';
+
+  static const kAdminReadingIcon = '$_kAssetsIconPath/admin_reading_icon.png';
+
+  static const kAdminNewPostIcon = '$_kAssetsIconPath/admin_new_post_icon.png';
+
+  static const kAdminUserIcon = '$_kAssetsIconPath/admin_user_icon.png';
+
+  static const kAdminBannerIcon = '$_kAssetsIconPath/admin_banner_icon.png';
+
+  static const kAdminDonationIcon = '$_kAssetsIconPath/admin_donation_icon.png';
 }

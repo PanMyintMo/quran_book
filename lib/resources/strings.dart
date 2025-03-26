@@ -93,6 +93,27 @@ const kSubmit = 'submit';
 const kGoogle = 'google';
 const kApple = 'apple';
 
+const kDashboardAdminText = 'dashboard_admin';
+
+const kCategoryText = 'category';
+const kCategorySelectImageText = 'category_select_image';
+const kCategoryEnterNameText = 'category_enter_name';
+const kCategoryEnterSubtitleText = 'category_enter_subtitle';
+
+const kPostText = 'post';
+
+const kBookEnterNameText = 'book_enter_name';
+const kBookEnterOverviewText = 'book_enter_overview';
+const kBookEnterAuthorText = 'book_enter_author';
+const kBookEnterHighlightText = 'book_enter_highlight';
+const kBookSelectCoverText = 'book_select_cover';
+const kBookSelectPdfText = 'book_select_pdf';
+const kBookEnterPdfTitleText = 'book_enter_pdf_title';
+const kBookSelectAudioText = 'book_select_audio';
+const kBookSelectCategoryText = 'book_select_category';
+
+const kReadingText = 'reading';
+
 ///Fon Family
 const kAgbalumoFont = 'Agbalumo';
 const kInter = 'Inter';

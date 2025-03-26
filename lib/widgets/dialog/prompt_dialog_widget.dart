@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quran_book/utils/context_extensions.dart';
 
 class PromptDialogWidget extends StatelessWidget {
   final String title;
@@ -46,7 +47,7 @@ class PromptDialogWidget extends StatelessWidget {
       actions.add(
         TextButton(
           onPressed: () {
-            Navigator.of(context).pop();
+            context.navigateBack();
             onNegativePressed!();
           },
           child: Text(negativeText!),
@@ -58,7 +59,7 @@ class PromptDialogWidget extends StatelessWidget {
       actions.add(
         ElevatedButton(
           onPressed: () {
-            Navigator.of(context).pop();
+            context.navigateBack();
             onPositivePressed!();
           },
           child: Text(positiveText!),

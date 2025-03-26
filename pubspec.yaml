@@ -51,6 +51,9 @@ dependencies:
   audio_session: ^0.1.25
   permission_handler: ^11.3.1
   timeago: ^3.7.0
+  image_picker: ^1.1.2
+  file_picker: ^9.2.1
+  url_launcher: ^6.3.1
 
 flutter_icons:
   android: true

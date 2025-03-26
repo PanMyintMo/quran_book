@@ -74,6 +74,23 @@
   "register_repeat_password_hint": "Enter your password",
   "register_continue_with": "Or continue with",
   "register_already_account": "Already have an account?",
-  "register_sign_up": "Sign up"
+  "register_sign_up": "Sign up",
+  "dashboard_admin": "Dashboard Admin View",
+  "category": "Category",
+  "category_select_image": "Please select an image for category",
+  "category_enter_name": "Enter name for category",
+  "category_enter_subtitle": "Enter subtitle for category",
+  "post": "Post",
+  "book_enter_name": "Enter name for book",
+  "book_enter_overview": "Enter overview for book",
+  "book_enter_author": "Enter author for book",
+  "book_enter_highlight": "Enter highlight text for this book",
+  "book_select_cover": "Please select cover photo for book",
+  "book_select_pdf": "Please select PDF file for book",
+  "book_enter_pdf_title": "Enter PDF title for book",
+  "book_select_audio": "Please select audio file for book",
+  "book_select_category": "Please select category for book",
+  "reading": "Reading"
+
 }
 
