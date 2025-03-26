@@ -1,5 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:quran_book/data/model/firebase_model.dart';
+import 'package:quran_book/data/vos/book_vo.dart';
 import 'package:quran_book/pages/main_page/book_overview_page.dart';
 import 'package:quran_book/pages/main_page/language_page.dart';
 import 'package:quran_book/pages/main_page/setting_page.dart';
@@ -10,6 +12,7 @@ import 'package:quran_book/utils/asset_image_utils.dart';
 import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/utils/random_color_utils.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:timeago/timeago.dart' as time_ago;
 
 class BookMarkPage extends StatefulWidget {
@@ -21,6 +24,26 @@ class BookMarkPage extends StatefulWidget {
 
 class _BookMarkPageState extends State<BookMarkPage> {
   final GlobalKey<ScaffoldState> _key = GlobalKey();
+  final FirebaseModel _firebaseModel = FirebaseModel();
+  final _auth = FirebaseAuth.instance;
+  List<BookVO> _bookmarkedBooks = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBookmarkedBooks();
+  }
+
+  Future<void> _loadBookmarkedBooks() async {
+    final books = await _firebaseModel.getAllBooks();
+    final userId = _auth.currentUser?.uid;
+    if (userId != null) {
+      final bookmarks = books.where((book) => book.userIDOfBookMark.contains(userId)).toList();
+      setState(() {
+        _bookmarkedBooks = bookmarks;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,26 +65,23 @@ class _BookMarkPageState extends State<BookMarkPage> {
                     },
                   );
                 }),
-                const SizedBox(
-                  height: kSP20x,
-                ),
+                const SizedBox(height: kSP20x),
                 EasyTextWidget(
                   text: kBookmarkText.tr(),
                   fontWeight: FontWeight.w600,
                   fontSize: kFontSize16x,
                 ),
-                const SizedBox(
-                  height: kSP20x,
-                ),
-                ...List.generate(
-                  5,
-                  (index) => GestureDetector(
-                    onTap: () {
-                      context.navigateToNextPage(BookOverviewPage(isPlay: false));
-                    },
-                    child: _BookMarkItemView(),
-                  ),
-                ),
+                const SizedBox(height: kSP20x),
+                ..._bookmarkedBooks.map((book) => GestureDetector(
+                      onTap: () {
+                        context.navigateToNextPage(BookOverviewPage(isPlay: false, book: book));
+                      },
+                      child: _BookMarkItemView(
+                        title: book.name,
+                        subtitle: book.overview,
+                        createdAt: book.createAt,
+                      ),
+                    )),
               ],
             ),
           ),
@@ -72,7 +92,15 @@ class _BookMarkPageState extends State<BookMarkPage> {
 }
 
 class _BookMarkItemView extends StatelessWidget {
-  const _BookMarkItemView();
+  final String title;
+  final String subtitle;
+  final DateTime createdAt;
+
+  const _BookMarkItemView({
+    required this.title,
+    required this.subtitle,
+    required this.createdAt,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -80,12 +108,8 @@ class _BookMarkItemView extends StatelessWidget {
       padding: const EdgeInsets.all(kSP10x),
       margin: const EdgeInsets.only(bottom: kSP20x),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: kBlackColor,
-        ),
-        borderRadius: BorderRadius.circular(
-          kSP10x,
-        ),
+        border: Border.all(color: kBlackColor),
+        borderRadius: BorderRadius.circular(kSP10x),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,28 +121,24 @@ class _BookMarkItemView extends StatelessWidget {
               color: RandomColorUtils.getRandomColor(),
             ),
           ),
-          const SizedBox(
-            width: kSP20x,
-          ),
+          const SizedBox(width: kSP20x),
           Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               EasyTextWidget(
-                text: 'စိတ်တောင်တန်း',
+                text: title,
                 fontWeight: FontWeight.w600,
                 fontSize: kFontSize16x,
               ),
               EasyTextWidget(
-                text: 'မွန်းကျပ်လေးလံနေတဲ့ ဘဝတစ်ခုကိ့',
+                text: subtitle,
                 fontWeight: FontWeight.w600,
                 fontSize: kFontSize12x,
               ),
-              const SizedBox(
-                height: kSP20x,
-              ),
+              const SizedBox(height: kSP20x),
               EasyTextWidget(
-                text: time_ago.format(DateTime.now()),
+                text: time_ago.format(createdAt),
                 fontWeight: FontWeight.w600,
                 fontSize: kFontSize12x,
               ),
@@ -140,9 +160,7 @@ class _HomePageDrawerView extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.white,
-            ),
+            decoration: const BoxDecoration(color: Colors.white),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -150,21 +168,16 @@ class _HomePageDrawerView extends StatelessWidget {
                   AssetImageUtils.kAppIcon,
                   height: kHomePageDrawerAppIconHeight,
                 ),
-                const SizedBox(
-                  height: kSP10x,
-                ),
+                const SizedBox(height: kSP10x),
                 EasyTextWidget(
                   text: kDrawerWelcomeText.tr(),
                   fontSize: kFontSize18x,
                   fontWeight: FontWeight.bold,
                 ),
-                const EasyTextWidget(
-                  text: 'v 1.0.0',
-                ),
+                const EasyTextWidget(text: 'v 1.0.0'),
               ],
             ),
           ),
-          // Drawer Items
           _buildDrawerItem(
             context,
             icon: Icons.language,
@@ -233,9 +246,7 @@ class _HomePageDrawerView extends StatelessWidget {
   ListTile _buildDrawerItem(BuildContext context, {required IconData icon, required String label, required VoidCallback onTap}) {
     return ListTile(
       leading: Icon(icon),
-      title: EasyTextWidget(
-        text: label,
-      ),
+      title: EasyTextWidget(text: label),
       onTap: () {
         Scaffold.of(context).closeDrawer();
         onTap();
@@ -245,9 +256,7 @@ class _HomePageDrawerView extends StatelessWidget {
 }
 
 class _HomePageAppbarView extends StatelessWidget {
-  const _HomePageAppbarView({
-    required this.onTapLeadingIcon,
-  });
+  const _HomePageAppbarView({required this.onTapLeadingIcon});
 
   final Function onTapLeadingIcon;
 
@@ -257,9 +266,7 @@ class _HomePageAppbarView extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
-          icon: Icon(
-            Icons.menu,
-          ),
+          icon: const Icon(Icons.menu),
           onPressed: () {
             onTapLeadingIcon();
           },
@@ -269,9 +276,7 @@ class _HomePageAppbarView extends StatelessWidget {
           width: kHomePageAppIconWidth,
           height: kHomePageAppIconHeight,
         ),
-        const SizedBox(
-          width: kSP40x,
-        ),
+        const SizedBox(width: kSP40x),
       ],
     );
   }

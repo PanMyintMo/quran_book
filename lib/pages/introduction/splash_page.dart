@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:quran_book/data/model/firebase_model.dart';
+import 'package:quran_book/pages/admin/admin_home_page.dart';
 import 'package:quran_book/pages/introduction/welcome_page.dart';
+import 'package:quran_book/pages/main_page/index_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/utils/asset_image_utils.dart';
@@ -13,14 +16,35 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+  final FirebaseModel _firebaseModel = FirebaseModel();
+
   @override
   void initState() {
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        context.navigateToNextPage(WelcomePage());
-      }
-    });
     super.initState();
+    Future.delayed(const Duration(seconds: 2), _checkLoginStatus);
+  }
+
+  Future<void> _checkLoginStatus() async {
+    if (!_firebaseModel.isLoggedIn()) {
+      if (mounted) context.navigateToNextPage(const WelcomePage());
+      return;
+    }
+
+    final userId = _firebaseModel.currentUser?.uid;
+    if (userId != null) {
+      final users = await _firebaseModel.getAllUsers();
+      final currentUser = users.firstWhere((user) => user.id == userId);
+
+      if (mounted) {
+        if (currentUser.isAdmin) {
+          context.navigateToNextPage(const AdminHomePage());
+        } else {
+          context.navigateToNextPage(const IndexPage());
+        }
+      }
+    } else {
+      if (mounted) context.navigateToNextPage(const WelcomePage());
+    }
   }
 
   @override

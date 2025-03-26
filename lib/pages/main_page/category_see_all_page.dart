@@ -1,127 +1,71 @@
 import 'package:flutter/material.dart';
-import 'package:quran_book/pages/main_page/book_list_from_category_page.dart';
-import 'package:quran_book/resources/colors.dart';
+import 'package:quran_book/data/model/firebase_model.dart';
+import 'package:quran_book/data/vos/book_vo.dart';
+import 'package:quran_book/pages/main_page/book_overview_page.dart';
 import 'package:quran_book/resources/dimens.dart';
-import 'package:quran_book/utils/asset_image_utils.dart';
 import 'package:quran_book/utils/context_extensions.dart';
+import 'package:quran_book/widgets/cache_network_image_widget.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 
-class CategorySeeAllPage extends StatelessWidget {
-  const CategorySeeAllPage({super.key});
+class BookSeeAllPage extends StatefulWidget {
+  const BookSeeAllPage({
+    super.key,
+    required this.title,
+  });
+
+  final String title;
+
+  @override
+  State<BookSeeAllPage> createState() => _BookSeeAllPageState();
+}
+
+class _BookSeeAllPageState extends State<BookSeeAllPage> {
+  final FirebaseModel _firebaseModel = FirebaseModel();
+  List<BookVO> _bookList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBooks();
+  }
+
+  Future<void> _loadBooks() async {
+    final books = await _firebaseModel.getAllBooks();
+    setState(() {
+      _bookList = books;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: SafeArea(
-        child: ListView.separated(
-          padding: const EdgeInsets.all(kSP20x),
-          itemCount: 10,
-          itemBuilder: (_, index) {
-            return _CategorySeeAllItemView(
-              title: 'စိတ်တောင်တန်း',
-              index: index + 1,
-              suffixText: 'نِ الرَّحِيمِ',
-              totalCourse: 7,
-              onTap: () {
-                context.navigateToNextPage(BookListFromCategoryPage());
-              },
-            );
-          },
-          separatorBuilder: (_, index) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(
-                height: kSP10x,
-              ),
-              const Divider(),
-            ],
-          ),
+      appBar: AppBar(
+        title: EasyTextWidget(
+          text: widget.title,
+          fontWeight: FontWeight.w600,
         ),
       ),
-    );
-  }
-}
-
-class _CategorySeeAllItemView extends StatelessWidget {
-  const _CategorySeeAllItemView({
-    required this.index,
-    required this.title,
-    required this.suffixText,
-    required this.totalCourse,
-    required this.onTap,
-  });
-
-  final int index;
-  final String title;
-  final String suffixText;
-  final int totalCourse;
-  final Function onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        onTap();
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: kSeeAllCategorySize,
-                height: kSeeAllCategorySize,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(
-                      AssetImageUtils.kSearchStartIcon,
-                    ),
-                  ),
-                ),
-                child: EasyTextWidget(
-                  text: index.toString(),
-                  textColor: kWhiteColor,
-                  fontSize: kFontSize12x,
-                ),
-              ),
-              const SizedBox(
-                width: kSP10x,
-              ),
-              EasyTextWidget(
-                text: title,
-                fontWeight: FontWeight.w600,
-                maxLines: 1,
-              ),
-              const Spacer(),
-              EasyTextWidget(
-                text: suffixText,
-                textColor: kAppPrimaryColor,
-                fontSize: kFontSize16x,
-                fontWeight: FontWeight.w700,
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: kSP5x,
-          ),
-          Row(
-            children: [
-              const SizedBox(
-                width: kSP30x,
-              ),
-              Flexible(
-                child: EasyTextWidget(
-                  text: 'Course - $totalCourse',
-                ),
-              ),
-            ],
-          )
-        ],
+      body: GridView.builder(
+        padding: const EdgeInsets.all(kSP20x),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: kSP20x,
+          mainAxisSpacing: kSP20x,
+        ),
+        itemCount: _bookList.length,
+        itemBuilder: (_, index) {
+          final book = _bookList[index];
+          return GestureDetector(
+            onTap: () {
+              context.navigateToNextPage(BookOverviewPage(isPlay: false, book: book));
+            },
+            child: CacheNetworkImageWidget(
+              radius: kSP10x,
+              imageUrl: book.image,
+              fit: BoxFit.cover,
+            ),
+          );
+        },
       ),
     );
   }

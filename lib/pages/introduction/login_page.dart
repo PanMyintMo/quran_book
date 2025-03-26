@@ -1,7 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:quran_book/data/model/firebase_model.dart';
+import 'package:quran_book/pages/admin/admin_home_page.dart';
 import 'package:quran_book/pages/introduction/forget_password_page.dart';
 import 'package:quran_book/pages/introduction/register_page.dart';
+import 'package:quran_book/pages/introduction/welcome_page.dart';
+import 'package:quran_book/pages/main_page/index_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
@@ -10,8 +14,46 @@ import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 import 'package:quran_book/widgets/primary_button_widget.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final FirebaseModel _firebaseModel = FirebaseModel();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  Future<void> _handleLogin() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    try {
+      await _firebaseModel.login(email, password);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Login successful")),
+        );
+        final user = await _firebaseModel.getCurrentUserVO();
+        if (user != null) {
+          if (user.isAdmin) {
+            context.navigateToNextPageWithRemoveUntil(const AdminHomePage());
+          } else {
+            context.navigateToNextPageWithRemoveUntil(const IndexPage());
+          }
+        } else {
+          context.navigateToNextPageWithRemoveUntil(const WelcomePage());
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Login failed: ${e.toString()}")),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +88,7 @@ class LoginPage extends StatelessWidget {
               ),
               SizedBox(height: kSP10x),
               TextField(
+                controller: _emailController,
                 decoration: InputDecoration(
                   hintText: kLoginEmailHintText.tr(),
                   border: OutlineInputBorder(
@@ -63,13 +106,14 @@ class LoginPage extends StatelessWidget {
               ),
               SizedBox(height: kSP10x),
               TextField(
+                controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: kLoginPasswordHintText.tr(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(kSP10x),
                   ),
-                  suffixIcon: Icon(Icons.visibility_off),
+                  suffixIcon: const Icon(Icons.visibility_off),
                 ),
               ),
               SizedBox(height: kSP10x),
@@ -77,7 +121,7 @@ class LoginPage extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: GestureDetector(
                   onTap: () {
-                    context.navigateToNextPage(ForgotPasswordPage());
+                    context.navigateToNextPage(const ForgotPasswordPage());
                   },
                   child: EasyTextWidget(
                     text: kLoginForgetPasswordLabelText.tr(),
@@ -89,21 +133,21 @@ class LoginPage extends StatelessWidget {
               PrimaryButtonWidget(
                 width: double.infinity,
                 height: kLoginPageButtonHeight,
-                onPressed: () {},
+                onPressed: _handleLogin,
                 buttonText: kLogin.tr(),
                 buttonTextColor: Colors.white,
               ),
               SizedBox(height: kSP10x),
               Row(
                 children: [
-                  Expanded(child: Divider()),
+                  const Expanded(child: Divider()),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: kSP10x),
                     child: EasyTextWidget(
                       text: kLoginOrLoginWithText.tr(),
                     ),
                   ),
-                  Expanded(child: Divider()),
+                  const Expanded(child: Divider()),
                 ],
               ),
               SizedBox(height: kSP10x),
@@ -130,7 +174,7 @@ class LoginPage extends StatelessWidget {
                     buttonText: kRegister.tr(),
                     buttonFontWeight: FontWeight.bold,
                     onPressed: () {
-                      context.navigateToNextPageWithReplacement(RegisterPage());
+                      context.navigateToNextPageWithReplacement(const RegisterPage());
                     },
                   ),
                 ],
@@ -146,8 +190,8 @@ class LoginPage extends StatelessWidget {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: kWhiteColor,
-        side: BorderSide(color: kBlackColor),
-        minimumSize: Size(kGoogleAppleButtonWidth, kGoogleAppleButtonHeight),
+        side: const BorderSide(color: kBlackColor),
+        minimumSize: const Size(kGoogleAppleButtonWidth, kGoogleAppleButtonHeight),
       ),
       onPressed: () {},
       child: Row(

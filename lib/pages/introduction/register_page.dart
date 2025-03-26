@@ -1,5 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:quran_book/data/model/firebase_model.dart';
+import 'package:quran_book/data/vos/user_vo.dart';
 import 'package:quran_book/pages/introduction/login_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
@@ -9,8 +11,70 @@ import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 import 'package:quran_book/widgets/primary_button_widget.dart';
 
-class RegisterPage extends StatelessWidget {
+class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
+
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  final FirebaseModel _firebaseModel = FirebaseModel();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _repeatPasswordController = TextEditingController();
+
+  Future<void> _handleRegister() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final repeatPassword = _repeatPasswordController.text.trim();
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty || repeatPassword.isEmpty) {
+      _showMessage("Please fill all fields");
+      return;
+    }
+
+    if (password != repeatPassword) {
+      _showMessage("Passwords do not match");
+      return;
+    }
+
+    try {
+      final userCredential = await _firebaseModel.register(email, password);
+      final user = userCredential.user;
+      if (user != null) {
+        final userId = user.uid;
+        await _firebaseModel.createUser(
+          UserVO(
+            id: userId,
+            name: name,
+            email: email,
+            password: password,
+            isAdmin: false,
+            isDeleteAccount: false,
+            createAt: DateTime.now(),
+            updateAt: DateTime.now(),
+          ),
+        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Registration successful")),
+          );
+          context.navigateToNextPageWithRemoveUntil(const LoginPage());
+        }
+      }
+    } catch (e) {
+      _showMessage("Registration failed: ${e.toString()}");
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,31 +103,31 @@ class RegisterPage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: kSP20x),
-              _buildTextField(kRegisterNameTitleText.tr(), kRegisterNameHintText.tr()),
+              _buildTextField(kRegisterNameTitleText.tr(), kRegisterNameHintText.tr(), _nameController),
               SizedBox(height: kSP20x),
-              _buildTextField(kRegisterEmailTitleText.tr(), kRegisterEmailHintText.tr()),
+              _buildTextField(kRegisterEmailTitleText.tr(), kRegisterEmailHintText.tr(), _emailController),
               SizedBox(height: kSP20x),
-              _buildPasswordField(kRegisterPasswordTitleText.tr(), kRegisterPasswordHintText.tr()),
+              _buildPasswordField(kRegisterPasswordTitleText.tr(), kRegisterPasswordHintText.tr(), _passwordController),
               SizedBox(height: kSP20x),
-              _buildPasswordField(kRegisterRepeatPasswordTitleText.tr(), kRegisterRepeatPasswordHintText.tr()),
+              _buildPasswordField(kRegisterRepeatPasswordTitleText.tr(), kRegisterRepeatPasswordHintText.tr(), _repeatPasswordController),
               SizedBox(height: kSP20x),
               PrimaryButtonWidget(
                 width: double.infinity,
                 height: kLoginPageButtonHeight,
                 backgroundColor: kAppPrimaryColor,
-                onPressed: () {},
+                onPressed: _handleRegister,
                 buttonTextColor: kWhiteColor,
                 buttonText: kLogin.tr(),
               ),
               SizedBox(height: kSP20x),
               Row(
                 children: [
-                  Expanded(child: Divider()),
+                  const Expanded(child: Divider()),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: kSP10x),
                     child: EasyTextWidget(text: kRegisterContinueWithText),
                   ),
-                  Expanded(child: Divider()),
+                  const Expanded(child: Divider()),
                 ],
               ),
               SizedBox(height: kSP20x),
@@ -88,7 +152,7 @@ class RegisterPage extends StatelessWidget {
                   EasyTextWidget(text: kRegisterAlreadyAccountText.tr()),
                   TextButton(
                     onPressed: () {
-                      context.navigateToNextPageWithReplacement(LoginPage());
+                      context.navigateToNextPageWithReplacement(const LoginPage());
                     },
                     child: EasyTextWidget(
                       text: kRegisterSignUpText.tr(),
@@ -104,13 +168,14 @@ class RegisterPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField(String label, String hintText) {
+  Widget _buildTextField(String label, String hintText, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
         SizedBox(height: kSP10x),
         TextField(
+          controller: controller,
           decoration: InputDecoration(
             hintText: hintText,
             border: OutlineInputBorder(
@@ -122,20 +187,21 @@ class RegisterPage extends StatelessWidget {
     );
   }
 
-  Widget _buildPasswordField(String label, String hintText) {
+  Widget _buildPasswordField(String label, String hintText, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
         SizedBox(height: kSP10x),
         TextField(
+          controller: controller,
           obscureText: true,
           decoration: InputDecoration(
             hintText: hintText,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(kSP10x),
             ),
-            suffixIcon: Icon(Icons.visibility_off),
+            suffixIcon: const Icon(Icons.visibility_off),
           ),
         ),
       ],
@@ -146,19 +212,15 @@ class RegisterPage extends StatelessWidget {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: kWhiteColor,
-        side: BorderSide(
-          color: kBlackColor,
-        ),
-        minimumSize: Size(kGoogleAppleButtonWidth, kGoogleAppleButtonHeight),
+        side: const BorderSide(color: kBlackColor),
+        minimumSize: const Size(kGoogleAppleButtonWidth, kGoogleAppleButtonHeight),
       ),
       onPressed: () {},
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Image.asset(assetPath, height: kGoogleAppleImageHeight),
-          SizedBox(
-            width: kSP10x,
-          ),
+          SizedBox(width: kSP10x),
           EasyTextWidget(
             text: label,
             textColor: kBlackColor,

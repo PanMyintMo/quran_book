@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:quran_book/data/model/firebase_model.dart';
+import 'package:quran_book/data/vos/donation_vo.dart';
+import 'package:uuid/uuid.dart';
 import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/utils/picker_delegate_utils.dart';
 import 'package:quran_book/widgets/cache_network_image_widget.dart';
@@ -21,6 +24,7 @@ class _AdminAddDonationPageState extends State<AdminAddDonationPage> {
   final _nameController = TextEditingController();
   final _accountController = TextEditingController();
   File? _selectedImage;
+  final FirebaseModel _firebaseModel = FirebaseModel();
 
   @override
   void initState() {
@@ -55,9 +59,7 @@ class _AdminAddDonationPageState extends State<AdminAddDonationPage> {
             leading: const Icon(Icons.photo_library),
             title: const Text("Gallery"),
             onTap: () async {
-              context.navigateBack(await PickerDelegateUtils.takePhoto(
-                isCamera: false,
-              ));
+              context.navigateBack(await PickerDelegateUtils.takePhoto(isCamera: false));
             },
           ),
         ],
@@ -70,15 +72,33 @@ class _AdminAddDonationPageState extends State<AdminAddDonationPage> {
     }
   }
 
-  void _submitDonation() {
+  Future<void> _submitDonation() async {
     final name = _nameController.text;
     final account = _accountController.text;
 
     if ((_selectedImage != null || widget.imageUrl != null) && name.isNotEmpty && account.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Donation setup saved successfully")),
+      String imageUrl = widget.imageUrl ?? '';
+      if (_selectedImage != null) {
+        imageUrl = await _firebaseModel.uploadFile(_selectedImage!, 'donations');
+      }
+
+      final donation = DonationVO(
+        id: const Uuid().v4(),
+        name: name,
+        accNumber: account,
+        image: imageUrl,
+        createAt: DateTime.now(),
+        updateAt: DateTime.now(),
       );
-      Navigator.pop(context);
+
+      await _firebaseModel.createDonation(donation);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Donation setup saved successfully")),
+        );
+        Navigator.pop(context);
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please fill all fields")),

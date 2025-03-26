@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "496161030293",
+    "project_id": "quran-book-30ddf",
+    "storage_bucket": "quran-book-30ddf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:496161030293:android:ac31567f27830f9c1e1b9c",
+        "android_client_info": {
+          "package_name": "com.example.quran_book"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgePfZ0Q3Uc1Q3DDz4NIgKe5hWBQvntOc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
