@@ -2,9 +2,15 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:quran_book/data/model/firebase_model.dart';
+import 'package:quran_book/data/vos/audio_vo.dart';
+import 'package:quran_book/data/vos/book_vo.dart';
+import 'package:quran_book/data/vos/category_vo.dart';
+import 'package:quran_book/data/vos/pdf_vo.dart';
 import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/utils/picker_delegate_utils.dart';
 import 'package:quran_book/widgets/cache_network_image_widget.dart';
+import 'package:uuid/uuid.dart';
 
 class AdminAddPostPage extends StatefulWidget {
   final String? name;
@@ -13,9 +19,20 @@ class AdminAddPostPage extends StatefulWidget {
   final String? imageUrl;
   final String? pdfName;
   final String? audioName;
-  final String? category;
+  final CategoryVO? category;
+  final List<String>? userIDOfBookMark;
 
-  const AdminAddPostPage({super.key, this.name, this.overview, this.author, this.imageUrl, this.pdfName, this.audioName, this.category});
+  const AdminAddPostPage({
+    super.key,
+    this.name,
+    this.overview,
+    this.author,
+    this.imageUrl,
+    this.pdfName,
+    this.audioName,
+    this.category,
+    this.userIDOfBookMark,
+  });
 
   @override
   State<AdminAddPostPage> createState() => _AdminAddPostPageState();
@@ -30,7 +47,10 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
   final _authorController = TextEditingController();
   final _pdfController = TextEditingController();
   final _audioController = TextEditingController();
-  String? _selectedCategory;
+  final FirebaseModel _firebaseModel = FirebaseModel();
+
+  CategoryVO? _selectedCategory;
+  List<CategoryVO> _categoryList = [];
 
   @override
   void initState() {
@@ -41,6 +61,14 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
     _pdfController.text = widget.pdfName ?? '';
     _audioController.text = widget.audioName ?? '';
     _selectedCategory = widget.category;
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    final categories = await _firebaseModel.getAllCategories();
+    setState(() {
+      _categoryList = categories;
+    });
   }
 
   @override
@@ -72,9 +100,7 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
             leading: const Icon(Icons.photo_library),
             title: const Text("Gallery"),
             onTap: () async {
-              context.navigateBack(await PickerDelegateUtils.takePhoto(
-                isCamera: false,
-              ));
+              context.navigateBack(await PickerDelegateUtils.takePhoto(isCamera: false));
             },
           ),
         ],
@@ -107,24 +133,60 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
     }
   }
 
-  void _submitPost() {
+  Future<void> _submitPost() async {
     final name = _nameController.text;
     final overview = _overviewController.text;
     final author = _authorController.text;
-    final pdf = _pdfController.text;
-    final audio = _audioController.text;
 
     if ((_selectedImage != null || widget.imageUrl != null) &&
         name.isNotEmpty &&
         overview.isNotEmpty &&
         author.isNotEmpty &&
-        pdf.isNotEmpty &&
-        audio.isNotEmpty &&
+        _pdfController.text.isNotEmpty &&
+        _audioController.text.isNotEmpty &&
         _selectedCategory != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Post added successfully")),
+      final id = const Uuid().v4();
+      final imageUrl = _selectedImage != null ? await _firebaseModel.uploadFile(_selectedImage!, 'images') : widget.imageUrl!;
+      final pdfUrl = _selectedPdf != null ? await _firebaseModel.uploadFile(_selectedPdf!, 'pdf') : '';
+      final audioUrl = _selectedAudio != null ? await _firebaseModel.uploadFile(_selectedAudio!, 'audio') : '';
+
+      final book = BookVO(
+        id: id,
+        name: name,
+        overview: overview,
+        author: author,
+        image: imageUrl,
+        category: _selectedCategory!,
+        pdf: PdfVO(
+          id: id,
+          name: _pdfController.text,
+          image: imageUrl,
+          url: pdfUrl,
+          createAt: DateTime.now(),
+          updateAt: DateTime.now(),
+        ),
+        audio: AudioVO(
+          id: id,
+          name: _audioController.text,
+          url: audioUrl,
+          createAt: DateTime.now(),
+          updateAt: DateTime.now(),
+        ),
+        pages: {},
+        readBy: [],
+        createAt: DateTime.now(),
+        updateAt: DateTime.now(),
+        userIDOfBookMark: widget.userIDOfBookMark ?? [],
       );
-      Navigator.pop(context);
+
+      await _firebaseModel.createBook(book);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Post added successfully")),
+        );
+        Navigator.pop(context);
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please fill all fields")),
@@ -201,13 +263,13 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
               ),
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
+            DropdownButtonFormField<CategoryVO>(
               value: _selectedCategory,
               hint: const Text('Select Category'),
-              items: ['Tafsir', 'Translation', 'Fiqh']
+              items: _categoryList
                   .map((cat) => DropdownMenuItem(
                         value: cat,
-                        child: Text(cat),
+                        child: Text(cat.name),
                       ))
                   .toList(),
               onChanged: (value) {

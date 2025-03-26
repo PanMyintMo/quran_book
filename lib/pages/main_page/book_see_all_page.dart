@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:quran_book/data/model/firebase_model.dart';
+import 'package:quran_book/data/vos/book_vo.dart';
+import 'package:quran_book/pages/main_page/book_overview_page.dart';
 import 'package:quran_book/resources/dimens.dart';
+import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/widgets/cache_network_image_widget.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 
-class BookSeeAllPage extends StatelessWidget {
+class BookSeeAllPage extends StatefulWidget {
   const BookSeeAllPage({
     super.key,
     required this.title,
@@ -12,11 +16,32 @@ class BookSeeAllPage extends StatelessWidget {
   final String title;
 
   @override
+  State<BookSeeAllPage> createState() => _BookSeeAllPageState();
+}
+
+class _BookSeeAllPageState extends State<BookSeeAllPage> {
+  final FirebaseModel _firebaseModel = FirebaseModel();
+  List<BookVO> _bookList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBooks();
+  }
+
+  Future<void> _loadBooks() async {
+    final books = await _firebaseModel.getAllBooks();
+    setState(() {
+      _bookList = books;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: EasyTextWidget(
-          text: title,
+          text: widget.title,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -27,13 +52,18 @@ class BookSeeAllPage extends StatelessWidget {
           crossAxisSpacing: kSP20x,
           mainAxisSpacing: kSP20x,
         ),
-        itemCount: 8,
+        itemCount: _bookList.length,
         itemBuilder: (_, index) {
-          return CacheNetworkImageWidget(
-            radius: kSP10x,
-            imageUrl:
-                'https://images.rawpixel.com/image_png_800/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTExL3JtNjAzLWVsZW1lbnQtMTg2LnBuZw.png',
-            fit: BoxFit.cover,
+          final book = _bookList[index];
+          return GestureDetector(
+            onTap: () {
+              context.navigateToNextPage(BookOverviewPage(isPlay: false, book: book));
+            },
+            child: CacheNetworkImageWidget(
+              radius: kSP10x,
+              imageUrl: book.image,
+              fit: BoxFit.cover,
+            ),
           );
         },
       ),

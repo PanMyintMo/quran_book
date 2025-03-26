@@ -86,8 +86,8 @@ class SettingPage extends StatelessWidget {
           value: text,
           groupValue: isSelected ? text : null,
           onChanged: (value) {
-            final bloc = context.read<LocalAndThemeBloc>();
-            bloc.toggleTheme();
+            // final bloc = context.read<LocalAndThemeBloc>();
+            // bloc.toggleTheme();
           },
         ),
         Text(text, style: TextStyle(fontSize: kFontSize16x)),

@@ -2,23 +2,27 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:quran_book/data/model/firebase_model.dart';
+import 'package:quran_book/data/vos/book_vo.dart';
 import 'package:quran_book/pages/main_page/book_read_details_page.dart';
 import 'package:quran_book/pages/main_page/donate_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
+import 'package:quran_book/resources/strings.dart';
 import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/widgets/cache_network_image_widget.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 import 'package:quran_book/widgets/primary_button_widget.dart';
-import 'package:quran_book/resources/strings.dart';
 
 class BookOverviewPage extends StatefulWidget {
   const BookOverviewPage({
     super.key,
     required this.isPlay,
+    required this.book,
   });
 
   final bool isPlay;
+  final BookVO book;
 
   @override
   State<BookOverviewPage> createState() => _BookOverviewPageState();
@@ -26,16 +30,16 @@ class BookOverviewPage extends StatefulWidget {
 
 class _BookOverviewPageState extends State<BookOverviewPage> {
   final AudioPlayer _audioPlayer = AudioPlayer();
+  final FirebaseModel _firebaseModel = FirebaseModel();
   bool isPlaying = false;
   bool showMiniPlayer = false;
-  final String musicUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; // Replace with actual URL
 
   @override
   void initState() {
     super.initState();
     isPlaying = widget.isPlay;
     showMiniPlayer = widget.isPlay;
-    _audioPlayer.setUrl(musicUrl);
+    _audioPlayer.setUrl(widget.book.audio?.url ?? "");
   }
 
   @override
@@ -75,11 +79,20 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
 
   @override
   Widget build(BuildContext context) {
+    final book = widget.book;
     return Scaffold(
       appBar: AppBar(
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () async {
+              final currentUserID = (await _firebaseModel.getCurrentUserVO())?.id;
+              await _firebaseModel.toggleBookmark(book.id, currentUserID.toString());
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Bookmarked successfully!")),
+                );
+              }
+            },
             icon: const Icon(Icons.bookmark),
           ),
           IconButton(
@@ -88,7 +101,10 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
           ),
           IconButton(
             onPressed: () {
-              showDialog(context: context, builder: (_) => _DonateDialogView(title: 'Are you sure about the donation?'));
+              showDialog(
+                context: context,
+                builder: (_) => _DonateDialogView(title: 'Are you sure about the donation?'),
+              );
             },
             icon: const Icon(Icons.card_giftcard),
           ),
@@ -98,9 +114,7 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
         children: [
           SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(
-                kSP20x,
-              ),
+              padding: const EdgeInsets.all(kSP20x),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -108,25 +122,24 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                     child: CacheNetworkImageWidget(
                       width: kBookDetailsOverViewImageWidth,
                       height: kBookDetailsOverViewImageHeight,
-                      imageUrl:
-                          'https://images.rawpixel.com/image_png_800/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTExL3JtNjAzLWVsZW1lbnQtMTg2LnBuZw.png',
+                      imageUrl: book.image,
                     ),
                   ),
                   const SizedBox(height: kSP10x),
                   EasyTextWidget(
-                    text: 'What they says',
+                    text: book.name,
                     fontWeight: FontWeight.w600,
                     fontSize: kFontSize16x,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: kSP5x),
                   EasyTextWidget(
-                    text: 'by Thomas',
+                    text: 'by ${book.author}',
                     fontSize: kFontSize12x,
                     textColor: Colors.black54,
                   ),
                   const SizedBox(height: kSP10x),
-                  _OverViewAndTimeView(),
+                  const _OverViewAndTimeView(),
                   const SizedBox(height: kSP20x),
                   _ReadAndPlayButtonView(
                     icon: Icons.laptop_chromebook,
@@ -134,7 +147,7 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                     isGhost: true,
                     onTap: () {
                       context.navigateToNextPage(BookReadDetailsPage(
-                        title: 'What they says',
+                        title: book.name,
                       ));
                     },
                   ),
@@ -154,7 +167,7 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                   Align(
                     alignment: Alignment.topLeft,
                     child: EasyTextWidget(
-                      text: 'စာအုပ်မိတ်ဆက်',
+                      text: book.name,
                       fontWeight: FontWeight.w700,
                       fontSize: kFontSize16x,
                     ),
@@ -163,8 +176,7 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                   EasyTextWidget(
                     textAlign: TextAlign.center,
                     textColor: Colors.black54,
-                    text:
-                        'မြန်မာစာစတင်ဖြစ်ပေါ်လာခြင်းသည် မြန်မာသည် ပျူနှင့်မွန်စာရေးနည်းကို စံတင်ပြီး (၁၂)ရာစုတွင် မြန်မာဘာသာ ပေါ်ထွန်းလာခဲ့ခြင်းဖြစ်သည်။ မြန်မာနိုင်ငံ စတင်တည်ထောင်စဉ်ကာလ အနော်ရထာမင်း၏ လက်ထက်တွင် သက္ကတဘာသာစာဖြင့် ရေးသောအုတ်ခွက်စာများ၊ ပါဠိစာများဖြင့်ရေးသော အုတ်ခွက်စာများကို အထောက်အထားပြုကာ မြန်မာ့တို့သည် မူလက ပါဠိနှင့် သက္ကတဘာသာတို့ကို ရင်းနှီးခဲ့ကြောင်း သိရသည်။ ',
+                    text: book.overview,
                     maxLines: 7,
                   ),
                   const SizedBox(height: kSP40x),
@@ -173,10 +185,14 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
             ),
           ),
           AnimatedCrossFade(
-            firstChild: _MiniPlayerUI(audioPlayer: _audioPlayer, onClose: _hideMiniPlayer),
+            firstChild: _MiniPlayerUI(
+              audioPlayer: _audioPlayer,
+              onClose: _hideMiniPlayer,
+              bookImage: book.image,
+            ),
             secondChild: const SizedBox.shrink(),
             crossFadeState: showMiniPlayer ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-            duration: Duration(seconds: 1),
+            duration: const Duration(seconds: 1),
           )
         ],
       ),
@@ -248,8 +264,13 @@ class _DonateDialogView extends StatelessWidget {
 class _MiniPlayerUI extends StatelessWidget {
   final AudioPlayer audioPlayer;
   final VoidCallback onClose;
+  final String bookImage;
 
-  const _MiniPlayerUI({required this.audioPlayer, required this.onClose});
+  const _MiniPlayerUI({
+    required this.audioPlayer,
+    required this.onClose,
+    required this.bookImage,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -271,8 +292,7 @@ class _MiniPlayerUI extends StatelessWidget {
             CacheNetworkImageWidget(
               width: kBookDetailsOverViewMiniPlayImageWidth,
               height: kBookDetailsOverViewMiniPlayImageHeight,
-              imageUrl:
-                  'https://images.rawpixel.com/image_png_800/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTExL3JtNjAzLWVsZW1lbnQtMTg2LnBuZw.png',
+              imageUrl: bookImage,
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

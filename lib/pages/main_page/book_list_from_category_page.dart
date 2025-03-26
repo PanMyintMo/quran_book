@@ -1,5 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:quran_book/data/model/firebase_model.dart';
+import 'package:quran_book/data/vos/book_vo.dart';
 import 'package:quran_book/pages/introduction/login_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
@@ -8,8 +10,29 @@ import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 import 'package:quran_book/widgets/primary_button_widget.dart';
 
-class BookListFromCategoryPage extends StatelessWidget {
+class BookListFromCategoryPage extends StatefulWidget {
   const BookListFromCategoryPage({super.key});
+
+  @override
+  State<BookListFromCategoryPage> createState() => _BookListFromCategoryPageState();
+}
+
+class _BookListFromCategoryPageState extends State<BookListFromCategoryPage> {
+  final FirebaseModel _firebaseModel = FirebaseModel();
+  List<BookVO> _books = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBooks();
+  }
+
+  Future<void> _loadBooks() async {
+    final books = await _firebaseModel.getAllBooks();
+    setState(() {
+      _books = books;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,16 +70,16 @@ class BookListFromCategoryPage extends StatelessWidget {
             ),
             Expanded(
               child: ListView.separated(
-                itemCount: 7,
+                itemCount: _books.length,
                 itemBuilder: (_, index) => _BookListFromCategoryItemView(
                   index: index + 1,
-                  title: 'إ ِنَّكَ لَمِنَ ٱلْمُرْسَلِينَ ِنَّكَ لَمِنَ ٱلْمُرْسَلِينَ',
-                  translateBy: 'Dr. Mustafa Khattab',
+                  title: _books[index].name,
+                  translateBy: _books[index].author,
                   isSave: false,
                   onTapPlay: () {
                     showDialog(
                       context: context,
-                      builder: (_) => _NeedToRegisterDialogView(
+                      builder: (_) => const _NeedToRegisterDialogView(
                         title: kRegisterAlertTextForPlayText,
                       ),
                     );
@@ -64,13 +87,12 @@ class BookListFromCategoryPage extends StatelessWidget {
                   onTapSave: () {
                     showDialog(
                       context: context,
-                      builder: (_) => _NeedToRegisterDialogView(
+                      builder: (_) => const _NeedToRegisterDialogView(
                         title: kRegisterAlertTextForSaveText,
                       ),
                     );
                   },
-                  description:
-                      'မြန်မာစာစတင်ဖြစ်ပေါ်လာခြင်းသည် မြန်မာသည် ပျူနှင့်မွန်စာရေးနည်းကို စံတင်ပြီး (၁၂)ရာစုတွင် မြန်မာဘာသာ ပေါ်ထွန်းလာခဲ့ခြင်းဖြစ်သည်။ မြန်မာနိုင်ငံ စတင်တည်ထောင်စဉ်ကာလ အနော်ရထာမင်း၏ လက်ထက်တွင် သက္ကတဘာသာစာဖြင့် ရေးသောအုတ်ခွက်စာများ၊ ပါဠိစာများဖြင့်ရေးသော အုတ်ခွက်စာများကို အထောက်အထားပြုကာ မြန်မာ့တို့သည် မူလက ပါဠိနှင့် သက္ကတဘာသာတို့ကို ရင်းနှီးခဲ့ကြောင်း သိရသည်။ ',
+                  description: _books[index].overview,
                 ),
                 separatorBuilder: (_, index) => const SizedBox(
                   height: kSP40x,
@@ -131,7 +153,7 @@ class _NeedToRegisterDialogView extends StatelessWidget {
             backgroundColor: kAppYellowButtonColor,
             onPressed: () {
               context.navigateBack();
-              context.navigateToNextPage(LoginPage());
+              context.navigateToNextPage(const LoginPage());
             },
             buttonText: kRegisterNowText,
           ),
@@ -182,7 +204,7 @@ class _BookListFromCategoryItemView extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: kSP40x),
           child: EasyTextWidget(
             textAlign: TextAlign.center,
-            text: title.toString(),
+            text: title,
             textColor: kAppPrimaryColor,
             fontSize: kFontSize21x,
             fontWeight: FontWeight.w600,
@@ -195,7 +217,7 @@ class _BookListFromCategoryItemView extends StatelessWidget {
         Row(
           children: [
             EasyTextWidget(
-              text: 'Translarion by $translateBy',
+              text: 'Translation by $translateBy',
               fontSize: kFontSize12x,
             ),
             const Spacer(),

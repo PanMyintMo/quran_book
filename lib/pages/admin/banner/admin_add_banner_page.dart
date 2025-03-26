@@ -1,10 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:quran_book/data/model/firebase_model.dart';
+import 'package:quran_book/data/vos/banner_vo.dart';
 import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/utils/picker_delegate_utils.dart';
 import 'package:quran_book/widgets/cache_network_image_widget.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
+import 'package:uuid/uuid.dart';
 
 class AdminAddBannerPage extends StatefulWidget {
   final String? imageUrl;
@@ -17,6 +20,7 @@ class AdminAddBannerPage extends StatefulWidget {
 
 class _AdminAddBannerPageState extends State<AdminAddBannerPage> {
   File? _selectedImage;
+  final FirebaseModel _firebaseModel = FirebaseModel();
 
   Future<void> _pickImage() async {
     final File? image = await showModalBottomSheet<File?>(
@@ -52,12 +56,36 @@ class _AdminAddBannerPageState extends State<AdminAddBannerPage> {
     }
   }
 
-  void _submitBanner() {
-    if (_selectedImage != null || widget.imageUrl != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Banner saved successfully")),
+  Future<void> _submitBanner() async {
+    if (_selectedImage != null) {
+      final imageUrl = await _firebaseModel.uploadFile(_selectedImage!, 'banners');
+      final banner = BannerVO(
+        id: const Uuid().v4(),
+        image: imageUrl,
+        createAt: DateTime.now(),
+        updateAt: DateTime.now(),
       );
-      Navigator.pop(context);
+      await _firebaseModel.createBanner(banner);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Banner saved successfully")),
+        );
+        Navigator.pop(context);
+      }
+    } else if (widget.imageUrl != null) {
+      final banner = BannerVO(
+        id: const Uuid().v4(), // In a real case, pass the existing ID when editing
+        image: widget.imageUrl!,
+        createAt: DateTime.now(),
+        updateAt: DateTime.now(),
+      );
+      await _firebaseModel.createBanner(banner);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Banner updated successfully")),
+        );
+        Navigator.pop(context);
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please select an image")),

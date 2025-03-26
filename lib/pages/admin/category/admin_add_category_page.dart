@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:quran_book/data/model/firebase_model.dart';
+import 'package:quran_book/data/vos/category_vo.dart';
+import 'package:uuid/uuid.dart';
 import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/utils/picker_delegate_utils.dart';
 import 'package:quran_book/widgets/cache_network_image_widget.dart';
@@ -21,6 +24,7 @@ class _AdminAddCategoryPageState extends State<AdminAddCategoryPage> {
   File? _selectedImage;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _subtitleController = TextEditingController();
+  final FirebaseModel _firebaseModel = FirebaseModel();
 
   @override
   void initState() {
@@ -70,14 +74,30 @@ class _AdminAddCategoryPageState extends State<AdminAddCategoryPage> {
     }
   }
 
-  void _submitCategory() {
+  Future<void> _submitCategory() async {
     final name = _nameController.text;
     final subtitle = _subtitleController.text;
     if ((_selectedImage != null || widget.imageUrl != null) && name.isNotEmpty && subtitle.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Category added successfully")),
+      String imageUrl = widget.imageUrl ?? '';
+      if (_selectedImage != null) {
+        imageUrl = await _firebaseModel.uploadFile(_selectedImage!, 'categories');
+      }
+      final category = CategoryVO(
+        id: const Uuid().v4(),
+        image: imageUrl,
+        name: name,
+        subtitle: subtitle,
+        totalBookCount: 0,
+        createAt: DateTime.now(),
+        updateAt: DateTime.now(),
       );
-      Navigator.pop(context);
+      await _firebaseModel.createCategory(category);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Category added successfully")),
+        );
+        Navigator.pop(context);
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please fill all fields")),

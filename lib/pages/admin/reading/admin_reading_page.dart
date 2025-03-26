@@ -1,8 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:quran_book/data/model/firebase_model.dart';
+import 'package:quran_book/data/vos/user_vo.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 
-class AdminReadingPage extends StatelessWidget {
+class AdminReadingPage extends StatefulWidget {
   const AdminReadingPage({super.key});
+
+  @override
+  State<AdminReadingPage> createState() => _AdminReadingPageState();
+}
+
+class _AdminReadingPageState extends State<AdminReadingPage> {
+  final FirebaseModel _firebaseModel = FirebaseModel();
+  int _totalReads = 0;
+  final List<UserVO> _readers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAnalytics();
+  }
+
+  Future<void> _loadAnalytics() async {
+    final books = await _firebaseModel.getAllBooks();
+    final allUsers = await _firebaseModel.getAllUsers();
+
+    final readerIds = <String>{};
+
+    for (final book in books) {
+      readerIds.addAll(book.readBy.map((user) => user.id));
+    }
+
+    final readers = allUsers.where((user) => readerIds.contains(user.id)).toList();
+
+    setState(() {
+      _totalReads = readerIds.length;
+      _readers.clear();
+      _readers.addAll(readers);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +63,7 @@ class AdminReadingPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     EasyTextWidget(
-                      text: '3 times',
+                      text: '$_totalReads times',
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       textColor: Colors.blue,
@@ -44,17 +80,20 @@ class AdminReadingPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Expanded(
-              child: ListView.separated(
-                itemCount: 10,
-                separatorBuilder: (_, __) => const Divider(),
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: const Icon(Icons.person),
-                    title: EasyTextWidget(text: "Test User"),
-                    subtitle: EasyTextWidget(text: "thantsin7755@gmail.com"),
-                  );
-                },
-              ),
+              child: _readers.isEmpty
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.separated(
+                      itemCount: _readers.length,
+                      separatorBuilder: (_, __) => const Divider(),
+                      itemBuilder: (context, index) {
+                        final user = _readers[index];
+                        return ListTile(
+                          leading: const Icon(Icons.person),
+                          title: EasyTextWidget(text: user.name),
+                          subtitle: EasyTextWidget(text: user.email),
+                        );
+                      },
+                    ),
             )
           ],
         ),
