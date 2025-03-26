@@ -61,5 +61,23 @@
   "no": "لا",
   "submit": "إرسال",
   "google": "جوجل",
-  "apple": "آبل"
+  "apple": "آبل",
+  "dashboard_admin": "عرض لوحة تحكم المسؤول",
+  "category": "الفئة",
+  "category_select_image": "يرجى تحديد صورة للفئة",
+  "category_enter_name": "أدخل اسم الفئة",
+  "category_enter_subtitle": "أدخل العنوان الفرعي للفئة",
+  "post": "نشر",
+  "book_enter_name": "أدخل اسم الكتاب",
+  "book_enter_overview": "أدخل لمحة عامة عن الكتاب",
+  "book_enter_author": "أدخل مؤلف الكتاب",
+  "book_enter_highlight": "أدخل نص التمييز لهذا الكتاب",
+  "book_select_cover": "يرجى تحديد صورة غلاف الكتاب",
+  "book_select_pdf": "يرجى تحديد ملف PDF للكتاب",
+  "book_enter_pdf_title": "أدخل عنوان PDF للكتاب",
+  "book_select_audio": "يرجى تحديد ملف صوتي للكتاب",
+  "book_select_category": "يرجى تحديد فئة للكتاب",
+  "reading": "القراءة"
+
 }
+

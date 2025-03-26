@@ -1,0 +1,2 @@
+/Users/thihathantsin/Desktop/quran_book/android/app/.cxx/Debug/sl4742d1/x86/CMakeFiles/edit_cache.dir
+/Users/thihathantsin/Desktop/quran_book/android/app/.cxx/Debug/sl4742d1/x86/CMakeFiles/rebuild_cache.dir

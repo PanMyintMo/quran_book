@@ -69,7 +69,24 @@
   "register_repeat_password_hint": "သင့်စကားဝှက်ကို ထပ်မံထည့်ပါ",
   "register_continue_with": "သို့မဟုတ် နောက်ထပ်အကောင့်ဖြင့် ဆက်လက်ဝင်ပါ",
   "register_already_account": "အကောင့်ရှိပြီးသားလား?",
-  "register_sign_up": "အကောင့်ဖွင့်ရန်"
+  "register_sign_up": "အကောင့်ဖွင့်ရန်",
+  "dashboard_admin": "ဒက်ရှ်ဘုတ် အဒ်မင် မြင်ကွင်း",
+  "category": "အမျိုးအစား",
+  "category_select_image": "အမျိုးအစားအတွက် ဓာတ်ပုံရွေးပါ",
+  "category_enter_name": "အမျိုးအစားအမည်ထည့်ပါ",
+  "category_enter_subtitle": "အမျိုးအစားအတွက် ခေါင်းစဉ်အမြှုပ်ထည့်ပါ",
+  "post": "ပို့စ်",
+  "book_enter_name": "စာအုပ်အမည်ထည့်ပါ",
+  "book_enter_overview": "စာအုပ်အကြောင်းအနည်းငယ်ရေးပါ",
+  "book_enter_author": "စာအုပ်ရေးသားသူထည့်ပါ",
+  "book_enter_highlight": "ဤစာအုပ်အတွက် အထူးသဖြင့် ထည့်သွင်းရန်",
+  "book_select_cover": "စာအုပ်အတွက် အဖုံးဓာတ်ပုံရွေးပါ",
+  "book_select_pdf": "စာအုပ် PDF ဖိုင်ရွေးပါ",
+  "book_enter_pdf_title": "စာအုပ် PDF ခေါင်းစဉ်ထည့်ပါ",
+  "book_select_audio": "စာအုပ်အတွက် အသံဖိုင်ရွေးပါ",
+  "book_select_category": "စာအုပ်အတွက် အမျိုးအစားရွေးပါ",
+  "reading": "ဖတ်ရှုခြင်း"
+
 }
 
 
