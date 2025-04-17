@@ -20,6 +20,7 @@ class BookListFromCategoryPage extends StatefulWidget {
 class _BookListFromCategoryPageState extends State<BookListFromCategoryPage> {
   final FirebaseModel _firebaseModel = FirebaseModel();
   List<BookVO> _books = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -28,10 +29,21 @@ class _BookListFromCategoryPageState extends State<BookListFromCategoryPage> {
   }
 
   Future<void> _loadBooks() async {
-    final books = await _firebaseModel.getAllBooks();
-    setState(() {
-      _books = books;
-    });
+    try {
+      setState(() => _isLoading = true);
+      final books = await _firebaseModel.getAllBooks();
+      if (mounted) {
+        setState(() {
+          _books = books;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        context.showErrorSnackBar("Failed to load books: $e");
+      }
+    }
   }
 
   @override
@@ -41,63 +53,58 @@ class _BookListFromCategoryPageState extends State<BookListFromCategoryPage> {
       body: Padding(
         padding: const EdgeInsets.all(kSP20x),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
-              onChanged: (text) {},
-              style: TextStyle(
-                color: kWhiteColor,
-              ),
+              onChanged: (text) {
+                // optional: implement search logic
+              },
+              style: const TextStyle(color: kWhiteColor),
               decoration: InputDecoration(
                 fillColor: kAppPrimaryColor,
                 filled: true,
                 hintText: kSearchHintText.tr(),
-                hintStyle: TextStyle(
-                  color: kWhiteColor,
-                ),
-                prefixIcon: const Icon(
-                  Icons.search,
-                  color: kWhiteColor,
-                ),
+                hintStyle: const TextStyle(color: kWhiteColor),
+                prefixIcon: const Icon(Icons.search, color: kWhiteColor),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(kSP10x),
                 ),
               ),
             ),
-            const SizedBox(
-              height: kSP20x,
-            ),
+            const SizedBox(height: kSP20x),
             Expanded(
-              child: ListView.separated(
-                itemCount: _books.length,
-                itemBuilder: (_, index) => _BookListFromCategoryItemView(
-                  index: index + 1,
-                  title: _books[index].name,
-                  translateBy: _books[index].author,
-                  isSave: false,
-                  onTapPlay: () {
-                    showDialog(
-                      context: context,
-                      builder: (_) => const _NeedToRegisterDialogView(
-                        title: kRegisterAlertTextForPlayText,
-                      ),
-                    );
-                  },
-                  onTapSave: () {
-                    showDialog(
-                      context: context,
-                      builder: (_) => const _NeedToRegisterDialogView(
-                        title: kRegisterAlertTextForSaveText,
-                      ),
-                    );
-                  },
-                  description: _books[index].overview,
-                ),
-                separatorBuilder: (_, index) => const SizedBox(
-                  height: kSP40x,
-                ),
-              ),
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.separated(
+                      itemCount: _books.length,
+                      itemBuilder: (_, index) {
+                        final book = _books[index];
+                        return _BookListFromCategoryItemView(
+                          index: index + 1,
+                          title: book.name,
+                          translateBy: book.author,
+                          description: book.overview,
+                          isSave: false,
+                          onTapSave: () {
+                            showDialog(
+                              context: context,
+                              builder: (_) => const _NeedToRegisterDialogView(
+                                title: kRegisterAlertTextForSaveText,
+                              ),
+                            );
+                          },
+                          onTapPlay: () {
+                            showDialog(
+                              context: context,
+                              builder: (_) => const _NeedToRegisterDialogView(
+                                title: kRegisterAlertTextForPlayText,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      separatorBuilder: (_, __) => const SizedBox(height: kSP40x),
+                    ),
             ),
           ],
         ),
@@ -123,29 +130,20 @@ class _NeedToRegisterDialogView extends StatelessWidget {
           Align(
             alignment: Alignment.topRight,
             child: GestureDetector(
-              onTap: () {
-                context.navigateBack();
-              },
-              child: const Icon(
-                Icons.close,
-                color: kWhiteColor,
-              ),
+              onTap: () => context.navigateBack(),
+              child: const Icon(Icons.close, color: kWhiteColor),
             ),
           ),
-          const SizedBox(
-            height: kSP30x,
-          ),
+          const SizedBox(height: kSP30x),
           EasyTextWidget(
-            textAlign: TextAlign.center,
             text: title,
             fontSize: kFontSize16x,
             fontWeight: FontWeight.w600,
             textColor: kWhiteColor,
+            textAlign: TextAlign.center,
             maxLines: 2,
           ),
-          const SizedBox(
-            height: kSP20x,
-          ),
+          const SizedBox(height: kSP20x),
           PrimaryButtonWidget(
             radius: kSP5x,
             width: kSeeAllCategoryRegisterNowButtonWidth,
@@ -157,9 +155,7 @@ class _NeedToRegisterDialogView extends StatelessWidget {
             },
             buttonText: kRegisterNowText,
           ),
-          const SizedBox(
-            height: kSP30x,
-          ),
+          const SizedBox(height: kSP30x),
         ],
       ),
     );
@@ -171,8 +167,8 @@ class _BookListFromCategoryItemView extends StatelessWidget {
     required this.index,
     required this.title,
     required this.translateBy,
-    required this.onTapSave,
     required this.isSave,
+    required this.onTapSave,
     required this.onTapPlay,
     required this.description,
   });
@@ -181,14 +177,13 @@ class _BookListFromCategoryItemView extends StatelessWidget {
   final String title;
   final String translateBy;
   final bool isSave;
-  final Function onTapSave;
-  final Function onTapPlay;
+  final VoidCallback onTapSave;
+  final VoidCallback onTapPlay;
   final String description;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         EasyTextWidget(
@@ -196,24 +191,20 @@ class _BookListFromCategoryItemView extends StatelessWidget {
           fontSize: kFontSize18x,
           fontWeight: FontWeight.w600,
         ),
-        const SizedBox(
-          height: kSP10x,
-        ),
+        const SizedBox(height: kSP10x),
         Container(
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: kSP40x),
           child: EasyTextWidget(
-            textAlign: TextAlign.center,
             text: title,
+            textAlign: TextAlign.center,
             textColor: kAppPrimaryColor,
             fontSize: kFontSize21x,
             fontWeight: FontWeight.w600,
             maxLines: 2,
           ),
         ),
-        const SizedBox(
-          height: kSP20x,
-        ),
+        const SizedBox(height: kSP20x),
         Row(
           children: [
             EasyTextWidget(
@@ -222,38 +213,25 @@ class _BookListFromCategoryItemView extends StatelessWidget {
             ),
             const Spacer(),
             GestureDetector(
-              onTap: () {
-                onTapSave();
-              },
-              child: isSave
-                  ? const Icon(
-                      Icons.bookmark,
-                      color: kAppYellowButtonColor,
-                    )
-                  : const Icon(
-                      Icons.bookmark_border,
-                      color: kAppPrimaryColor,
-                    ),
+              onTap: onTapSave,
+              child: Icon(
+                isSave ? Icons.bookmark : Icons.bookmark_border,
+                color: isSave ? kAppYellowButtonColor : kAppPrimaryColor,
+              ),
             ),
-            const SizedBox(
-              width: kSP10x,
-            ),
+            const SizedBox(width: kSP10x),
             GestureDetector(
-              onTap: () {
-                onTapPlay();
-              },
+              onTap: onTapPlay,
               child: const Icon(Icons.play_arrow),
-            )
+            ),
           ],
         ),
-        const SizedBox(
-          height: kSP40x,
-        ),
+        const SizedBox(height: kSP40x),
         EasyTextWidget(
           text: description,
           maxLines: 6,
           textColor: Colors.black54,
-        )
+        ),
       ],
     );
   }

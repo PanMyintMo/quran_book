@@ -22,6 +22,7 @@ class BookSeeAllPage extends StatefulWidget {
 class _BookSeeAllPageState extends State<BookSeeAllPage> {
   final FirebaseModel _firebaseModel = FirebaseModel();
   List<BookVO> _bookList = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -30,10 +31,20 @@ class _BookSeeAllPageState extends State<BookSeeAllPage> {
   }
 
   Future<void> _loadBooks() async {
-    final books = await _firebaseModel.getAllBooks();
-    setState(() {
-      _bookList = books;
-    });
+    try {
+      final books = await _firebaseModel.getAllBooks();
+      if (mounted) {
+        setState(() {
+          _bookList = books;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        context.showErrorSnackBar('Failed to load books: \$e');
+      }
+    }
   }
 
   @override
@@ -45,28 +56,32 @@ class _BookSeeAllPageState extends State<BookSeeAllPage> {
           fontWeight: FontWeight.w600,
         ),
       ),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(kSP20x),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: kSP20x,
-          mainAxisSpacing: kSP20x,
-        ),
-        itemCount: _bookList.length,
-        itemBuilder: (_, index) {
-          final book = _bookList[index];
-          return GestureDetector(
-            onTap: () {
-              context.navigateToNextPage(BookOverviewPage(isPlay: false, book: book));
-            },
-            child: CacheNetworkImageWidget(
-              radius: kSP10x,
-              imageUrl: book.image,
-              fit: BoxFit.cover,
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : GridView.builder(
+              padding: const EdgeInsets.all(kSP20x),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: kSP20x,
+                mainAxisSpacing: kSP20x,
+              ),
+              itemCount: _bookList.length,
+              itemBuilder: (_, index) {
+                final book = _bookList[index];
+                return GestureDetector(
+                  onTap: () {
+                    context.navigateToNextPage(
+                      BookOverviewPage(isPlay: false, book: book),
+                    );
+                  },
+                  child: CacheNetworkImageWidget(
+                    radius: kSP10x,
+                    imageUrl: book.image,
+                    fit: BoxFit.cover,
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 }

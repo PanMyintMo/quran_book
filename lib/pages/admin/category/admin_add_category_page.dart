@@ -59,14 +59,13 @@ class _AdminAddCategoryPageState extends State<AdminAddCategoryPage> {
             leading: const Icon(Icons.photo_library),
             title: const Text("Gallery"),
             onTap: () async {
-              context.navigateBack(await PickerDelegateUtils.takePhoto(
-                isCamera: false,
-              ));
+              context.navigateBack(await PickerDelegateUtils.takePhoto(isCamera: false));
             },
           ),
         ],
       ),
     );
+
     if (image != null) {
       setState(() {
         _selectedImage = File(image.path);
@@ -75,33 +74,45 @@ class _AdminAddCategoryPageState extends State<AdminAddCategoryPage> {
   }
 
   Future<void> _submitCategory() async {
-    final name = _nameController.text;
-    final subtitle = _subtitleController.text;
+    final name = _nameController.text.trim();
+    final subtitle = _subtitleController.text.trim();
+
     if ((_selectedImage != null || widget.imageUrl != null) && name.isNotEmpty && subtitle.isNotEmpty) {
-      String imageUrl = widget.imageUrl ?? '';
-      if (_selectedImage != null) {
-        imageUrl = await _firebaseModel.uploadFile(_selectedImage!, 'categories');
-      }
-      final category = CategoryVO(
-        id: const Uuid().v4(),
-        image: imageUrl,
-        name: name,
-        subtitle: subtitle,
-        totalBookCount: 0,
-        createAt: DateTime.now(),
-        updateAt: DateTime.now(),
-      );
-      await _firebaseModel.createCategory(category);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Category added successfully")),
+      try {
+        context.showLoadingDialog();
+
+        String imageUrl = widget.imageUrl ?? '';
+        if (_selectedImage != null) {
+          imageUrl = await _firebaseModel.uploadFile(_selectedImage!, 'categories');
+        }
+
+        final category = CategoryVO(
+          id: const Uuid().v4(),
+          image: imageUrl,
+          name: name,
+          subtitle: subtitle,
+          totalBookCount: 0,
+          createAt: DateTime.now(),
+          updateAt: DateTime.now(),
         );
-        Navigator.pop(context);
+
+        await _firebaseModel.createCategory(category);
+
+        if (mounted) {
+          context.hideLoadingDialog();
+          context.showSuccessSnackBar("Category added successfully");
+          Navigator.pop(context);
+        }
+      } catch (e) {
+        if (mounted) {
+          context.hideLoadingDialog();
+          context.showErrorSnackBar("Failed to add category: $e");
+        }
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all fields")),
-      );
+      if (mounted) {
+        context.showErrorSnackBar("Please fill all fields");
+      }
     }
   }
 

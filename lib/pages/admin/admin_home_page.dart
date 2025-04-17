@@ -16,21 +16,20 @@ class AdminHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: EasyTextWidget(text: 'Dashboard amdin view'),
+        title: const EasyTextWidget(text: 'Dashboard Admin View'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: SingleChildScrollView(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 20,
             children: [
-              EasyTextWidget(
+              const EasyTextWidget(
                 text: 'Activity',
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
+              const SizedBox(height: 16),
               GridView.count(
                 shrinkWrap: true,
                 crossAxisSpacing: 10,
@@ -40,75 +39,51 @@ class AdminHomePage extends StatelessWidget {
                 childAspectRatio: 5 / 3,
                 children: [
                   _CardItemView(
-                    count: EasyTextWidget(
-                      text: '30',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
+                    count: '30',
                     label: 'Categories',
                     iconPath: AssetImageUtils.kAdminCategoryIcon,
                     onTap: () {
-                      context.navigateToNextPage(AdminCategoryHomePage());
+                      context.navigateToNextPage(const AdminCategoryHomePage());
                     },
                   ),
                   _CardItemView(
-                    count: EasyTextWidget(
-                      text: '30',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
+                    count: '30',
                     label: 'Posts',
                     iconPath: AssetImageUtils.kAdminPostIcon,
                     onTap: () {
-                      context.navigateToNextPage(AdminPostPage());
+                      context.navigateToNextPage(const AdminPostPage());
                     },
                   ),
                   _CardItemView(
-                    count: EasyTextWidget(
-                      text: '30',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
+                    count: '30',
                     label: 'Reading',
                     iconPath: AssetImageUtils.kAdminReadingIcon,
                     onTap: () {
-                      context.navigateBack(AdminReadingPage());
+                      context.navigateToNextPage(const AdminReadingPage());
                     },
                   ),
                   _CardItemView(
-                    count: EasyTextWidget(
-                      text: '30',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
+                    count: '30',
                     label: 'Users',
                     iconPath: AssetImageUtils.kAdminUserIcon,
                     onTap: () {
-                      context.navigateToNextPage(AdminUserManagementPage());
+                      context.navigateToNextPage(const AdminUserManagementPage());
                     },
                   ),
                   _CardItemView(
-                    count: EasyTextWidget(
-                      text: '30',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
+                    count: '30',
                     label: 'Banners',
                     iconPath: AssetImageUtils.kAdminBannerIcon,
                     onTap: () {
-                      context.navigateToNextPage(AdminBannerManagementPage());
+                      context.navigateToNextPage(const AdminBannerManagementPage());
                     },
                   ),
                   _CardItemView(
-                    count: EasyTextWidget(
-                      text: '30',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
+                    count: '30',
                     label: 'Donation',
                     iconPath: AssetImageUtils.kAdminDonationIcon,
                     onTap: () {
-                      context.navigateToNextPage(AdminDonationSetupPage());
+                      context.navigateToNextPage(const AdminDonationSetupPage());
                     },
                   ),
                 ],
@@ -130,41 +105,45 @@ class _CardItemView extends StatelessWidget {
   });
 
   final String iconPath;
-  final Widget count;
+  final String count;
   final String label;
-  final Function onTap;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        onTap();
-      },
+      onTap: onTap,
       child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5),
-        ),
-        child: Center(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: 10,
             children: [
               Image.asset(
                 iconPath,
-                width: 30,
-                height: 30,
+                width: 40,
+                height: 40,
               ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 5,
-                children: [
-                  count,
-                  EasyTextWidget(
-                    text: label,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16,
-                  ),
-                ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    EasyTextWidget(
+                      text: count,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                    const SizedBox(height: 4),
+                    EasyTextWidget(
+                      text: label,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
