@@ -1,0 +1,2 @@
+/Users/thihathantsin/Desktop/quran_book/android/app/.cxx/RelWithDebInfo/435e6x57/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/thihathantsin/Desktop/quran_book/android/app/.cxx/RelWithDebInfo/435e6x57/armeabi-v7a/CMakeFiles/rebuild_cache.dir

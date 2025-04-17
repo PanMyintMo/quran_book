@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/user_vo.dart';
+import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 
 class AdminReadingPage extends StatefulWidget {
@@ -14,6 +15,7 @@ class _AdminReadingPageState extends State<AdminReadingPage> {
   final FirebaseModel _firebaseModel = FirebaseModel();
   int _totalReads = 0;
   final List<UserVO> _readers = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -22,22 +24,34 @@ class _AdminReadingPageState extends State<AdminReadingPage> {
   }
 
   Future<void> _loadAnalytics() async {
-    final books = await _firebaseModel.getAllBooks();
-    final allUsers = await _firebaseModel.getAllUsers();
+    try {
+      setState(() => _isLoading = true);
 
-    final readerIds = <String>{};
+      final books = await _firebaseModel.getAllBooks();
+      final allUsers = await _firebaseModel.getAllUsers();
 
-    for (final book in books) {
-      readerIds.addAll(book.readBy.map((user) => user.id));
+      final readerIds = <String>{};
+      for (final book in books) {
+        readerIds.addAll(book.readBy.map((user) => user.id));
+      }
+
+      final readers = allUsers.where((user) => readerIds.contains(user.id)).toList();
+
+      if (mounted) {
+        setState(() {
+          _totalReads = readerIds.length;
+          _readers
+            ..clear()
+            ..addAll(readers);
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        context.showErrorSnackBar("Failed to load analytics: $e");
+      }
     }
-
-    final readers = allUsers.where((user) => readerIds.contains(user.id)).toList();
-
-    setState(() {
-      _totalReads = readerIds.length;
-      _readers.clear();
-      _readers.addAll(readers);
-    });
   }
 
   @override
@@ -80,20 +94,22 @@ class _AdminReadingPageState extends State<AdminReadingPage> {
             ),
             const SizedBox(height: 12),
             Expanded(
-              child: _readers.isEmpty
+              child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : ListView.separated(
-                      itemCount: _readers.length,
-                      separatorBuilder: (_, __) => const Divider(),
-                      itemBuilder: (context, index) {
-                        final user = _readers[index];
-                        return ListTile(
-                          leading: const Icon(Icons.person),
-                          title: EasyTextWidget(text: user.name),
-                          subtitle: EasyTextWidget(text: user.email),
-                        );
-                      },
-                    ),
+                  : _readers.isEmpty
+                      ? const Center(child: Text("No readers found yet."))
+                      : ListView.separated(
+                          itemCount: _readers.length,
+                          separatorBuilder: (_, __) => const Divider(),
+                          itemBuilder: (context, index) {
+                            final user = _readers[index];
+                            return ListTile(
+                              leading: const Icon(Icons.person),
+                              title: EasyTextWidget(text: user.name),
+                              subtitle: EasyTextWidget(text: user.email),
+                            );
+                          },
+                        ),
             )
           ],
         ),

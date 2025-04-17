@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:quran_book/widgets/dialog/loading_dialog_widget.dart';
+import 'package:quran_book/widgets/easy_text_widget.dart';
 
 extension ContextExtensions on BuildContext {
   PageRoute<T> _slideRoute<T>(Widget nextPage) {
@@ -30,5 +32,40 @@ extension ContextExtensions on BuildContext {
     if (Navigator.of(this).canPop()) {
       Navigator.of(this).pop(argument);
     }
+  }
+
+  void showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: EasyTextWidget(text: message, textColor: Colors.white),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  void showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: EasyTextWidget(text: message, textColor: Colors.white),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  void showLoadingDialog({String? message}) {
+    showDialog(
+        context: this,
+        barrierDismissible: false,
+        builder: (_) => LoadingDialogWidget(
+              message: message ?? '',
+            ));
+  }
+
+  void hideLoadingDialog() {
+    navigateBack();
   }
 }

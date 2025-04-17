@@ -15,11 +15,7 @@ import 'package:quran_book/widgets/easy_text_widget.dart';
 import 'package:quran_book/widgets/primary_button_widget.dart';
 
 class BookOverviewPage extends StatefulWidget {
-  const BookOverviewPage({
-    super.key,
-    required this.isPlay,
-    required this.book,
-  });
+  const BookOverviewPage({super.key, required this.isPlay, required this.book});
 
   final bool isPlay;
   final BookVO book;
@@ -39,7 +35,12 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
     super.initState();
     isPlaying = widget.isPlay;
     showMiniPlayer = widget.isPlay;
-    _audioPlayer.setUrl(widget.book.audio?.url ?? "");
+    if (widget.book.audio?.url.isNotEmpty ?? false) {
+      _audioPlayer.setUrl(widget.book.audio!.url).catchError((e) {
+        if (mounted) context.showErrorSnackBar("Failed to load audio: $e");
+        return e;
+      });
+    }
   }
 
   @override
@@ -49,32 +50,30 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
   }
 
   void _togglePlayPause() async {
-    if (isPlaying) {
-      await _audioPlayer.pause();
-    } else {
-      await _audioPlayer.play();
+    try {
+      if (isPlaying) {
+        await _audioPlayer.pause();
+      } else {
+        await _audioPlayer.play();
+      }
+      if (mounted) setState(() => isPlaying = !isPlaying);
+    } catch (e) {
+      if (mounted) context.showErrorSnackBar("Playback error: $e");
     }
-    setState(() {
-      isPlaying = !isPlaying;
-    });
   }
 
   Future<void> requestPermissions() async {
     await Permission.notification.request();
   }
 
-  void _showMiniPlayer() {
-    setState(() {
-      showMiniPlayer = true;
-    });
-  }
+  void _showMiniPlayer() => setState(() => showMiniPlayer = true);
 
   void _hideMiniPlayer() {
     setState(() {
       showMiniPlayer = false;
       isPlaying = false;
-      _audioPlayer.stop();
     });
+    _audioPlayer.stop();
   }
 
   @override
@@ -85,12 +84,16 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
         actions: [
           IconButton(
             onPressed: () async {
-              final currentUserID = (await _firebaseModel.getCurrentUserVO())?.id;
-              await _firebaseModel.toggleBookmark(book.id, currentUserID.toString());
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Bookmarked successfully!")),
-                );
+              try {
+                final currentUserID = (await _firebaseModel.getCurrentUserVO())?.id;
+                if (currentUserID == null) {
+                  context.showErrorSnackBar("Please login first.");
+                  return;
+                }
+                await _firebaseModel.toggleBookmark(book.id, currentUserID);
+                if (mounted) context.showSuccessSnackBar("Bookmarked successfully!");
+              } catch (e) {
+                if (mounted) context.showErrorSnackBar("Bookmark failed: $e");
               }
             },
             icon: const Icon(Icons.bookmark),
@@ -100,12 +103,10 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
             icon: const Icon(Icons.save_alt),
           ),
           IconButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (_) => _DonateDialogView(title: 'Are you sure about the donation?'),
-              );
-            },
+            onPressed: () => showDialog(
+              context: context,
+              builder: (_) => const _DonateDialogView(title: 'Are you sure about the donation?'),
+            ),
             icon: const Icon(Icons.card_giftcard),
           ),
         ],
@@ -113,75 +114,69 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
       body: Stack(
         children: [
           SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(kSP20x),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Center(
-                    child: CacheNetworkImageWidget(
-                      width: kBookDetailsOverViewImageWidth,
-                      height: kBookDetailsOverViewImageHeight,
-                      imageUrl: book.image,
-                    ),
+            padding: const EdgeInsets.all(kSP20x),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: CacheNetworkImageWidget(
+                    width: kBookDetailsOverViewImageWidth,
+                    height: kBookDetailsOverViewImageHeight,
+                    imageUrl: book.image,
                   ),
-                  const SizedBox(height: kSP10x),
-                  EasyTextWidget(
+                ),
+                const SizedBox(height: kSP10x),
+                EasyTextWidget(
+                  text: book.name,
+                  fontWeight: FontWeight.w600,
+                  fontSize: kFontSize16x,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: kSP5x),
+                EasyTextWidget(
+                  text: 'by ${book.author}',
+                  fontSize: kFontSize12x,
+                  textColor: Colors.black54,
+                ),
+                const SizedBox(height: kSP10x),
+                const _OverViewAndTimeView(),
+                const SizedBox(height: kSP20x),
+                _ReadAndPlayButtonView(
+                  icon: Icons.laptop_chromebook,
+                  buttonText: kReadText.tr(),
+                  isGhost: true,
+                  onTap: () => context.navigateToNextPage(BookReadDetailsPage(title: book.name)),
+                ),
+                const SizedBox(height: kSP10x),
+                _ReadAndPlayButtonView(
+                  icon: Icons.play_arrow,
+                  buttonText: kListenText.tr(),
+                  isGhost: false,
+                  onTap: () {
+                    requestPermissions().then((_) {
+                      _togglePlayPause();
+                      _showMiniPlayer();
+                    });
+                  },
+                ),
+                const SizedBox(height: kSP30x),
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: EasyTextWidget(
                     text: book.name,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                     fontSize: kFontSize16x,
-                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: kSP5x),
-                  EasyTextWidget(
-                    text: 'by ${book.author}',
-                    fontSize: kFontSize12x,
-                    textColor: Colors.black54,
-                  ),
-                  const SizedBox(height: kSP10x),
-                  const _OverViewAndTimeView(),
-                  const SizedBox(height: kSP20x),
-                  _ReadAndPlayButtonView(
-                    icon: Icons.laptop_chromebook,
-                    buttonText: kReadText.tr(),
-                    isGhost: true,
-                    onTap: () {
-                      context.navigateToNextPage(BookReadDetailsPage(
-                        title: book.name,
-                      ));
-                    },
-                  ),
-                  const SizedBox(height: kSP10x),
-                  _ReadAndPlayButtonView(
-                    icon: Icons.play_arrow,
-                    buttonText: kListenText.tr(),
-                    isGhost: false,
-                    onTap: () {
-                      requestPermissions().then((_) {
-                        _togglePlayPause();
-                        _showMiniPlayer();
-                      });
-                    },
-                  ),
-                  const SizedBox(height: kSP30x),
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: EasyTextWidget(
-                      text: book.name,
-                      fontWeight: FontWeight.w700,
-                      fontSize: kFontSize16x,
-                    ),
-                  ),
-                  const SizedBox(height: kSP10x),
-                  EasyTextWidget(
-                    textAlign: TextAlign.center,
-                    textColor: Colors.black54,
-                    text: book.overview,
-                    maxLines: 7,
-                  ),
-                  const SizedBox(height: kSP40x),
-                ],
-              ),
+                ),
+                const SizedBox(height: kSP10x),
+                EasyTextWidget(
+                  textAlign: TextAlign.center,
+                  textColor: Colors.black54,
+                  text: book.overview,
+                  maxLines: 7,
+                ),
+                const SizedBox(height: kSP40x),
+              ],
             ),
           ),
           AnimatedCrossFade(
@@ -193,7 +188,7 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
             secondChild: const SizedBox.shrink(),
             crossFadeState: showMiniPlayer ? CrossFadeState.showFirst : CrossFadeState.showSecond,
             duration: const Duration(seconds: 1),
-          )
+          ),
         ],
       ),
     );
@@ -201,9 +196,7 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
 }
 
 class _DonateDialogView extends StatelessWidget {
-  const _DonateDialogView({
-    required this.title,
-  });
+  const _DonateDialogView({required this.title});
 
   final String title;
 
@@ -214,9 +207,7 @@ class _DonateDialogView extends StatelessWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(
-            height: kSP30x,
-          ),
+          const SizedBox(height: kSP30x),
           EasyTextWidget(
             textAlign: TextAlign.center,
             text: title,
@@ -225,9 +216,7 @@ class _DonateDialogView extends StatelessWidget {
             textColor: kWhiteColor,
             maxLines: 2,
           ),
-          const SizedBox(
-            height: kSP20x,
-          ),
+          const SizedBox(height: kSP20x),
           PrimaryButtonWidget(
             radius: kSP5x,
             width: kBookOverviewDonateButtonWidth,
@@ -235,26 +224,20 @@ class _DonateDialogView extends StatelessWidget {
             backgroundColor: kWhiteColor,
             onPressed: () {
               context.navigateBack();
-              context.navigateToNextPage(DonatePage());
+              context.navigateToNextPage(const DonatePage());
             },
             buttonText: kYes.tr(),
           ),
-          const SizedBox(
-            height: kSP10x,
-          ),
+          const SizedBox(height: kSP10x),
           PrimaryButtonWidget(
             radius: kSP5x,
             width: kBookOverviewDonateButtonWidth,
             height: kBookOverviewDonateButtonHeight,
             backgroundColor: kAppYellowButtonColor,
-            onPressed: () {
-              context.navigateBack();
-            },
+            onPressed: () => context.navigateBack(),
             buttonText: kNo.tr(),
           ),
-          const SizedBox(
-            height: kSP30x,
-          ),
+          const SizedBox(height: kSP30x),
         ],
       ),
     );
@@ -266,11 +249,7 @@ class _MiniPlayerUI extends StatelessWidget {
   final VoidCallback onClose;
   final String bookImage;
 
-  const _MiniPlayerUI({
-    required this.audioPlayer,
-    required this.onClose,
-    required this.bookImage,
-  });
+  const _MiniPlayerUI({required this.audioPlayer, required this.onClose, required this.bookImage});
 
   @override
   Widget build(BuildContext context) {
@@ -278,14 +257,10 @@ class _MiniPlayerUI extends StatelessWidget {
       alignment: Alignment.bottomCenter,
       child: Container(
         height: kBookDetailsOverViewMiniPlayHeight,
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: Colors.black54,
-            ),
-          ),
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: Colors.black54)),
         ),
-        padding: EdgeInsets.all(12),
+        padding: const EdgeInsets.all(12),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -297,7 +272,7 @@ class _MiniPlayerUI extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                EasyTextWidget(
+                const EasyTextWidget(
                   text: "What the Says",
                   maxLines: 1,
                   fontWeight: FontWeight.w600,
@@ -317,11 +292,9 @@ class _MiniPlayerUI extends StatelessWidget {
             Row(
               children: [
                 IconButton(
-                  icon: Icon(
-                    Icons.replay_10,
-                  ),
+                  icon: const Icon(Icons.replay_10),
                   onPressed: () {
-                    audioPlayer.seek(audioPlayer.position - Duration(seconds: 10));
+                    audioPlayer.seek(audioPlayer.position - const Duration(seconds: 10));
                   },
                 ),
                 StreamBuilder<bool>(
@@ -329,9 +302,7 @@ class _MiniPlayerUI extends StatelessWidget {
                   builder: (context, snapshot) {
                     final playing = snapshot.data ?? false;
                     return IconButton(
-                      icon: Icon(
-                        playing ? Icons.pause : Icons.play_arrow,
-                      ),
+                      icon: Icon(playing ? Icons.pause : Icons.play_arrow),
                       onPressed: () {
                         playing ? audioPlayer.pause() : audioPlayer.play();
                       },
@@ -339,17 +310,13 @@ class _MiniPlayerUI extends StatelessWidget {
                   },
                 ),
                 IconButton(
-                  icon: Icon(
-                    Icons.forward_10,
-                  ),
+                  icon: const Icon(Icons.forward_10),
                   onPressed: () {
-                    audioPlayer.seek(audioPlayer.position + Duration(seconds: 10));
+                    audioPlayer.seek(audioPlayer.position + const Duration(seconds: 10));
                   },
                 ),
                 IconButton(
-                  icon: Icon(
-                    Icons.close,
-                  ),
+                  icon: const Icon(Icons.close),
                   onPressed: onClose,
                 ),
               ],
@@ -362,14 +329,9 @@ class _MiniPlayerUI extends StatelessWidget {
 }
 
 class _ReadAndPlayButtonView extends StatelessWidget {
-  const _ReadAndPlayButtonView({
-    required this.onTap,
-    required this.icon,
-    required this.buttonText,
-    required this.isGhost,
-  });
+  const _ReadAndPlayButtonView({required this.onTap, required this.icon, required this.buttonText, required this.isGhost});
 
-  final Function onTap;
+  final VoidCallback onTap;
   final IconData icon;
   final String buttonText;
   final bool isGhost;
@@ -382,31 +344,17 @@ class _ReadAndPlayButtonView extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(kSP10x),
         color: isGhost ? kWhiteColor : kAppPrimaryColor,
-        border: isGhost
-            ? Border.all(
-                color: kBlackColor,
-              )
-            : null,
+        border: isGhost ? Border.all(color: kBlackColor) : null,
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(kSP10x),
-        onTap: () {
-          onTap();
-        },
+        onTap: onTap,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: isGhost ? kBlackColor : kWhiteColor,
-            ),
-            const SizedBox(
-              width: kSP10x,
-            ),
-            EasyTextWidget(
-              text: buttonText,
-              textColor: isGhost ? kBlackColor : kWhiteColor,
-            )
+            Icon(icon, color: isGhost ? kBlackColor : kWhiteColor),
+            const SizedBox(width: kSP10x),
+            EasyTextWidget(text: buttonText, textColor: isGhost ? kBlackColor : kWhiteColor),
           ],
         ),
       ),
@@ -429,26 +377,18 @@ class _OverViewAndTimeView extends StatelessWidget {
             color: kBoxColor,
           ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.laptop_chromebook,
-                size: kBookDetailsOverViewAndTimeIconSize,
-              ),
-              const SizedBox(
-                width: kSP5x,
-              ),
+              const Icon(Icons.laptop_chromebook, size: kBookDetailsOverViewAndTimeIconSize),
+              const SizedBox(width: kSP5x),
               EasyTextWidget(
                 text: kOverviewText.tr(),
                 fontSize: kFontSize12x,
                 fontWeight: FontWeight.w600,
-              )
+              ),
             ],
           ),
         ),
-        const SizedBox(
-          width: kSP10x,
-        ),
+        const SizedBox(width: kSP10x),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: kSP10x),
           decoration: BoxDecoration(
@@ -456,20 +396,14 @@ class _OverViewAndTimeView extends StatelessWidget {
             color: kBoxColor,
           ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.access_time_outlined,
-                size: kBookDetailsOverViewAndTimeIconSize,
-              ),
-              const SizedBox(
-                width: kSP5x,
-              ),
-              EasyTextWidget(
+              const Icon(Icons.access_time_outlined, size: kBookDetailsOverViewAndTimeIconSize),
+              const SizedBox(width: kSP5x),
+              const EasyTextWidget(
                 text: '38 m',
                 fontSize: kFontSize12x,
                 fontWeight: FontWeight.w600,
-              )
+              ),
             ],
           ),
         ),

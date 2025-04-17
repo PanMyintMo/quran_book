@@ -64,13 +64,6 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
     _loadCategories();
   }
 
-  Future<void> _loadCategories() async {
-    final categories = await _firebaseModel.getAllCategories();
-    setState(() {
-      _categoryList = categories;
-    });
-  }
-
   @override
   void dispose() {
     _nameController.dispose();
@@ -79,6 +72,13 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
     _pdfController.dispose();
     _audioController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadCategories() async {
+    final categories = await _firebaseModel.getAllCategories();
+    setState(() {
+      _categoryList = categories;
+    });
   }
 
   Future<void> _pickImage() async {
@@ -134,63 +134,72 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
   }
 
   Future<void> _submitPost() async {
-    final name = _nameController.text;
-    final overview = _overviewController.text;
-    final author = _authorController.text;
+    final name = _nameController.text.trim();
+    final overview = _overviewController.text.trim();
+    final author = _authorController.text.trim();
+    final category = _selectedCategory;
 
-    if ((_selectedImage != null || widget.imageUrl != null) &&
+    if ((widget.imageUrl != null || _selectedImage != null) &&
         name.isNotEmpty &&
         overview.isNotEmpty &&
         author.isNotEmpty &&
         _pdfController.text.isNotEmpty &&
         _audioController.text.isNotEmpty &&
-        _selectedCategory != null) {
-      final id = const Uuid().v4();
-      final imageUrl = _selectedImage != null ? await _firebaseModel.uploadFile(_selectedImage!, 'images') : widget.imageUrl!;
-      final pdfUrl = _selectedPdf != null ? await _firebaseModel.uploadFile(_selectedPdf!, 'pdf') : '';
-      final audioUrl = _selectedAudio != null ? await _firebaseModel.uploadFile(_selectedAudio!, 'audio') : '';
+        category != null) {
+      try {
+        context.showLoadingDialog();
 
-      final book = BookVO(
-        id: id,
-        name: name,
-        overview: overview,
-        author: author,
-        image: imageUrl,
-        category: _selectedCategory!,
-        pdf: PdfVO(
+        final id = const Uuid().v4();
+        final imageUrl = _selectedImage != null ? await _firebaseModel.uploadFile(_selectedImage!, 'images') : widget.imageUrl!;
+
+        final pdfUrl = _selectedPdf != null ? await _firebaseModel.uploadFile(_selectedPdf!, 'pdf') : '';
+
+        final audioUrl = _selectedAudio != null ? await _firebaseModel.uploadFile(_selectedAudio!, 'audio') : '';
+
+        final book = BookVO(
           id: id,
-          name: _pdfController.text,
+          name: name,
+          overview: overview,
+          author: author,
           image: imageUrl,
-          url: pdfUrl,
+          category: category,
+          pdf: PdfVO(
+            id: id,
+            name: _pdfController.text,
+            image: imageUrl,
+            url: pdfUrl,
+            createAt: DateTime.now(),
+            updateAt: DateTime.now(),
+          ),
+          audio: AudioVO(
+            id: id,
+            name: _audioController.text,
+            url: audioUrl,
+            createAt: DateTime.now(),
+            updateAt: DateTime.now(),
+          ),
+          pages: {},
+          readBy: [],
           createAt: DateTime.now(),
           updateAt: DateTime.now(),
-        ),
-        audio: AudioVO(
-          id: id,
-          name: _audioController.text,
-          url: audioUrl,
-          createAt: DateTime.now(),
-          updateAt: DateTime.now(),
-        ),
-        pages: {},
-        readBy: [],
-        createAt: DateTime.now(),
-        updateAt: DateTime.now(),
-        userIDOfBookMark: widget.userIDOfBookMark ?? [],
-      );
-
-      await _firebaseModel.createBook(book);
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Post added successfully")),
+          userIDOfBookMark: widget.userIDOfBookMark ?? [],
         );
-        Navigator.pop(context);
+
+        await _firebaseModel.createBook(book);
+
+        if (mounted) {
+          context.hideLoadingDialog();
+          context.showSuccessSnackBar("Post added successfully");
+          Navigator.pop(context);
+        }
+      } catch (e) {
+        if (mounted) {
+          context.hideLoadingDialog();
+          context.showErrorSnackBar("Failed to add post: $e");
+        }
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all fields")),
-      );
+      context.showErrorSnackBar("Please fill all fields");
     }
   }
 

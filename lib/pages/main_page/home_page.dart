@@ -19,6 +19,7 @@ class _HomePageState extends State<HomePage> {
   final FirebaseModel _firebaseModel = FirebaseModel();
   List<BookVO> _books = [];
   List<BannerVO> _banners = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -27,65 +28,79 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadInitialData() async {
-    final books = await _firebaseModel.getAllBooks();
-    final banners = await _firebaseModel.getAllBanners();
-    setState(() {
-      _books = books;
-      _banners = banners;
-    });
+    try {
+      final books = await _firebaseModel.getAllBooks();
+      final banners = await _firebaseModel.getAllBanners();
+      if (mounted) {
+        setState(() {
+          _books = books;
+          _banners = banners;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load data: \$e')),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.all(kSP10x),
-        children: [
-          if (_banners.isNotEmpty)
-            SizedBox(
-              height: kHomePageBannerViewHeight,
-              child: PageView.builder(
-                itemCount: _banners.length,
-                itemBuilder: (_, index) {
-                  final banner = _banners[index];
-                  return CacheNetworkImageWidget(
-                    radius: kSP10x,
-                    imageUrl: banner.image,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  );
-                },
-              ),
-            ),
-          const SizedBox(height: kSP20x),
-          EasyTextWidget(
-            text: 'New Books',
-            fontWeight: FontWeight.bold,
-          ),
-          const SizedBox(height: kSP10x),
-          if (_books.isNotEmpty)
-            SizedBox(
-              height: kHomePageBookViewHeight,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: _books.length,
-                separatorBuilder: (_, __) => const SizedBox(width: kSP10x),
-                itemBuilder: (_, index) {
-                  final book = _books[index];
-                  return GestureDetector(
-                    onTap: () => context.navigateToNextPage(BookOverviewPage(isPlay: false, book: book)),
-                    child: CacheNetworkImageWidget(
-                      radius: kSP10x,
-                      imageUrl: book.image,
-                      width: kHomePageBookImageWidth,
-                      fit: BoxFit.cover,
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              padding: const EdgeInsets.all(kSP10x),
+              children: [
+                if (_banners.isNotEmpty)
+                  SizedBox(
+                    height: kHomePageBannerViewHeight,
+                    child: PageView.builder(
+                      itemCount: _banners.length,
+                      itemBuilder: (_, index) {
+                        final banner = _banners[index];
+                        return CacheNetworkImageWidget(
+                          radius: kSP10x,
+                          imageUrl: banner.image,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
+                  ),
+                const SizedBox(height: kSP20x),
+                const EasyTextWidget(
+                  text: 'New Books',
+                  fontWeight: FontWeight.bold,
+                ),
+                const SizedBox(height: kSP10x),
+                if (_books.isNotEmpty)
+                  SizedBox(
+                    height: kHomePageBookViewHeight,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _books.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: kSP10x),
+                      itemBuilder: (_, index) {
+                        final book = _books[index];
+                        return GestureDetector(
+                          onTap: () => context.navigateToNextPage(BookOverviewPage(isPlay: false, book: book)),
+                          child: CacheNetworkImageWidget(
+                            radius: kSP10x,
+                            imageUrl: book.image,
+                            width: kHomePageBookImageWidth,
+                            fit: BoxFit.cover,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
             ),
-        ],
-      ),
     );
   }
 }

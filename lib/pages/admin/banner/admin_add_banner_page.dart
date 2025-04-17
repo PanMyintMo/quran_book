@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/banner_vo.dart';
@@ -41,9 +40,7 @@ class _AdminAddBannerPageState extends State<AdminAddBannerPage> {
             leading: const Icon(Icons.photo_library),
             title: const Text("Gallery"),
             onTap: () async {
-              context.navigateBack(await PickerDelegateUtils.takePhoto(
-                isCamera: false,
-              ));
+              context.navigateBack(await PickerDelegateUtils.takePhoto(isCamera: false));
             },
           ),
         ],
@@ -57,39 +54,42 @@ class _AdminAddBannerPageState extends State<AdminAddBannerPage> {
   }
 
   Future<void> _submitBanner() async {
-    if (_selectedImage != null) {
-      final imageUrl = await _firebaseModel.uploadFile(_selectedImage!, 'banners');
+    try {
+      context.showLoadingDialog();
+
+      final String imageUrl;
+
+      if (_selectedImage != null) {
+        imageUrl = await _firebaseModel.uploadFile(_selectedImage!, 'banners');
+      } else if (widget.imageUrl != null) {
+        imageUrl = widget.imageUrl!;
+      } else {
+        if (mounted) {
+          context.hideLoadingDialog();
+          context.showErrorSnackBar("Please select an image");
+        }
+        return;
+      }
+
       final banner = BannerVO(
         id: const Uuid().v4(),
         image: imageUrl,
         createAt: DateTime.now(),
         updateAt: DateTime.now(),
       );
+
       await _firebaseModel.createBanner(banner);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Banner saved successfully")),
-        );
+
+      if (mounted) {
+        context.hideLoadingDialog();
+        context.showSuccessSnackBar(_selectedImage != null ? "Banner saved successfully" : "Banner updated successfully");
         Navigator.pop(context);
       }
-    } else if (widget.imageUrl != null) {
-      final banner = BannerVO(
-        id: const Uuid().v4(), // In a real case, pass the existing ID when editing
-        image: widget.imageUrl!,
-        createAt: DateTime.now(),
-        updateAt: DateTime.now(),
-      );
-      await _firebaseModel.createBanner(banner);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Banner updated successfully")),
-        );
-        Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        context.hideLoadingDialog();
+        context.showErrorSnackBar("Failed to save banner: $e");
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select an image")),
-      );
     }
   }
 

@@ -65,6 +65,7 @@ class _AdminAddDonationPageState extends State<AdminAddDonationPage> {
         ],
       ),
     );
+
     if (image != null) {
       setState(() {
         _selectedImage = File(image.path);
@@ -73,36 +74,44 @@ class _AdminAddDonationPageState extends State<AdminAddDonationPage> {
   }
 
   Future<void> _submitDonation() async {
-    final name = _nameController.text;
-    final account = _accountController.text;
+    final name = _nameController.text.trim();
+    final account = _accountController.text.trim();
 
     if ((_selectedImage != null || widget.imageUrl != null) && name.isNotEmpty && account.isNotEmpty) {
-      String imageUrl = widget.imageUrl ?? '';
-      if (_selectedImage != null) {
-        imageUrl = await _firebaseModel.uploadFile(_selectedImage!, 'donations');
-      }
+      try {
+        context.showLoadingDialog();
 
-      final donation = DonationVO(
-        id: const Uuid().v4(),
-        name: name,
-        accNumber: account,
-        image: imageUrl,
-        createAt: DateTime.now(),
-        updateAt: DateTime.now(),
-      );
+        String imageUrl = widget.imageUrl ?? '';
+        if (_selectedImage != null) {
+          imageUrl = await _firebaseModel.uploadFile(_selectedImage!, 'donations');
+        }
 
-      await _firebaseModel.createDonation(donation);
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Donation setup saved successfully")),
+        final donation = DonationVO(
+          id: const Uuid().v4(),
+          name: name,
+          accNumber: account,
+          image: imageUrl,
+          createAt: DateTime.now(),
+          updateAt: DateTime.now(),
         );
-        Navigator.pop(context);
+
+        await _firebaseModel.createDonation(donation);
+
+        if (mounted) {
+          context.hideLoadingDialog();
+          context.showSuccessSnackBar("Donation setup saved successfully");
+          Navigator.pop(context);
+        }
+      } catch (e) {
+        if (mounted) {
+          context.hideLoadingDialog();
+          context.showErrorSnackBar("Failed to save donation setup: $e");
+        }
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all fields")),
-      );
+      if (mounted) {
+        context.showErrorSnackBar("Please fill all fields");
+      }
     }
   }
 

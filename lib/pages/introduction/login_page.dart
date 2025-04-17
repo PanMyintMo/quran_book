@@ -30,27 +30,28 @@ class _LoginPageState extends State<LoginPage> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     try {
+      context.showLoadingDialog();
       await _firebaseModel.login(email, password);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Login successful")),
-        );
+      if (mounted) {
+        context.hideLoadingDialog();
+        context.showSuccessSnackBar('Login Successful');
         final user = await _firebaseModel.getCurrentUserVO();
-        if (user != null) {
+        if (user != null && mounted) {
           if (user.isAdmin) {
             context.navigateToNextPageWithRemoveUntil(const AdminHomePage());
           } else {
             context.navigateToNextPageWithRemoveUntil(const IndexPage());
           }
         } else {
-          context.navigateToNextPageWithRemoveUntil(const WelcomePage());
+          if (mounted) {
+            context.navigateToNextPageWithRemoveUntil(const WelcomePage());
+          }
         }
       }
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Login failed: ${e.toString()}")),
-        );
+      if (mounted) {
+        context.hideLoadingDialog();
+        context.showErrorSnackBar(e.toString());
       }
     }
   }
