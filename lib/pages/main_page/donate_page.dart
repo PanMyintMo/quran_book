@@ -18,33 +18,6 @@ class DonatePage extends StatefulWidget {
 
 class _DonatePageState extends State<DonatePage> {
   final FirebaseModel _firebaseModel = FirebaseModel();
-  List<DonationVO> _donationList = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadDonations();
-  }
-
-  Future<void> _loadDonations() async {
-    try {
-      final donations = await _firebaseModel.getAllDonations();
-      if (mounted) {
-        setState(() {
-          _donationList = donations;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load donations: \$e')),
-        );
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,60 +29,73 @@ class _DonatePageState extends State<DonatePage> {
           fontWeight: FontWeight.w600,
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.separated(
-              padding: const EdgeInsets.all(kSP20x),
-              itemCount: _donationList.length,
-              itemBuilder: (_, index) {
-                final donation = _donationList[index];
-                return Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(kSP10x),
-                    border: Border.all(color: kBlackColor),
+      body: StreamBuilder<List<DonationVO>>(
+        stream: _firebaseModel.watchAllDonations(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final donations = snapshot.data ?? [];
+
+          if (donations.isEmpty) {
+            return Center(child: EasyTextWidget(text: 'No donations available yet.'));
+          }
+
+          return ListView.separated(
+            padding: const EdgeInsets.all(kSP20x),
+            itemCount: donations.length,
+            itemBuilder: (_, index) {
+              final donation = donations[index];
+              return Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(kSP10x),
+                  border: Border.all(color: kBlackColor),
+                ),
+                child: ListTile(
+                  onTap: () {
+                    Clipboard.setData(ClipboardData(text: donation.accNumber));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: EasyTextWidget(text: kCopiedText.tr()),
+                      ),
+                    );
+                  },
+                  contentPadding: const EdgeInsets.all(0),
+                  leading: CacheNetworkImageWidget(
+                    width: kDonatePageImageSize,
+                    height: kDonatePageImageSize,
+                    imageUrl: donation.image,
                   ),
-                  child: ListTile(
-                    onTap: () {
-                      Clipboard.setData(ClipboardData(text: donation.accNumber));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: EasyTextWidget(text: kCopiedText.tr()),
-                        ),
-                      );
-                    },
-                    contentPadding: const EdgeInsets.all(0),
-                    leading: CacheNetworkImageWidget(
-                      width: kDonatePageImageSize,
-                      height: kDonatePageImageSize,
-                      imageUrl: donation.image,
-                    ),
-                    title: EasyTextWidget(
-                      text: donation.name,
-                      fontSize: kFontSize16x,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    subtitle: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        EasyTextWidget(
-                          text: donation.accNumber,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        const SizedBox(height: kSP20x),
-                        EasyTextWidget(
-                          text: kClickToCopyText.tr(),
-                          fontSize: kFontSize12x,
-                        ),
-                      ],
-                    ),
-                    isThreeLine: true,
+                  title: EasyTextWidget(
+                    text: donation.name,
+                    fontSize: kFontSize16x,
+                    fontWeight: FontWeight.w600,
                   ),
-                );
-              },
-              separatorBuilder: (_, __) => const SizedBox(height: kSP20x),
-            ),
+                  subtitle: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      EasyTextWidget(
+                        text: donation.accNumber,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      const SizedBox(height: kSP20x),
+                      EasyTextWidget(
+                        text: kClickToCopyText.tr(),
+                        fontSize: kFontSize12x,
+                      ),
+                    ],
+                  ),
+                  isThreeLine: true,
+                ),
+              );
+            },
+            separatorBuilder: (_, __) => const SizedBox(height: kSP20x),
+          );
+        },
+      ),
     );
   }
 }

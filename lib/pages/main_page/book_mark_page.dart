@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/book_vo.dart';
 import 'package:quran_book/pages/main_page/book_overview_page.dart';
@@ -15,92 +15,72 @@ import 'package:quran_book/utils/random_color_utils.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 import 'package:timeago/timeago.dart' as time_ago;
 
-class BookMarkPage extends StatefulWidget {
+class BookMarkPage extends StatelessWidget {
   const BookMarkPage({super.key});
 
   @override
-  State<BookMarkPage> createState() => _BookMarkPageState();
-}
-
-class _BookMarkPageState extends State<BookMarkPage> {
-  final GlobalKey<ScaffoldState> _key = GlobalKey();
-  final FirebaseModel _firebaseModel = FirebaseModel();
-  final _auth = FirebaseAuth.instance;
-  List<BookVO> _bookmarkedBooks = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadBookmarkedBooks();
-  }
-
-  Future<void> _loadBookmarkedBooks() async {
-    try {
-      setState(() => _isLoading = true);
-      final books = await _firebaseModel.getAllBooks();
-      final userId = _auth.currentUser?.uid;
-      if (mounted && userId != null) {
-        final bookmarks = books.where((book) => book.userIDOfBookMark.contains(userId)).toList();
-        setState(() {
-          _bookmarkedBooks = bookmarks;
-          _isLoading = false;
-        });
-      } else {
-        setState(() => _isLoading = false);
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        context.showErrorSnackBar("Failed to load bookmarks: $e");
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final FirebaseModel _firebaseModel = FirebaseModel();
+    final String? userId = FirebaseAuth.instance.currentUser?.uid;
+
     return Scaffold(
-      key: _key,
       drawer: const _HomePageDrawerView(),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(kSP10x),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Builder(builder: (context) {
+        child: Padding(
+          padding: const EdgeInsets.all(kSP10x),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Builder(
+                builder: (context) {
                   return _HomePageAppbarView(
                     onTapLeadingIcon: () => Scaffold.of(context).openDrawer(),
                   );
-                }),
-                const SizedBox(height: kSP20x),
-                EasyTextWidget(
-                  text: kBookmarkText.tr(),
-                  fontWeight: FontWeight.w600,
-                  fontSize: kFontSize16x,
-                ),
-                const SizedBox(height: kSP20x),
-                _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _bookmarkedBooks.isEmpty
-                        ? const Center(child: Text("No bookmarked books yet."))
-                        : Column(
-                            children: _bookmarkedBooks
-                                .map((book) => GestureDetector(
-                                      onTap: () {
-                                        context.navigateToNextPage(BookOverviewPage(isPlay: false, book: book));
-                                      },
-                                      child: _BookMarkItemView(
-                                        title: book.name,
-                                        subtitle: book.overview,
-                                        createdAt: book.createAt,
-                                      ),
-                                    ))
-                                .toList(),
-                          ),
-              ],
-            ),
+                },
+              ),
+              const SizedBox(height: kSP20x),
+              EasyTextWidget(
+                text: kBookmarkText.tr(),
+                fontWeight: FontWeight.w600,
+                fontSize: kFontSize16x,
+              ),
+              const SizedBox(height: kSP20x),
+              Expanded(
+                child: userId == null
+                    ? const Center(child: Text("User not logged in"))
+                    : StreamBuilder<List<BookVO>>(
+                        stream: _firebaseModel.watchAllBooks(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+
+                          final bookmarkedBooks = snapshot.data!.where((book) => book.userIDOfBookMark.contains(userId)).toList();
+
+                          if (bookmarkedBooks.isEmpty) {
+                            return const Center(child: Text("No bookmarked books yet."));
+                          }
+
+                          return ListView.builder(
+                            itemCount: bookmarkedBooks.length,
+                            itemBuilder: (_, index) {
+                              final book = bookmarkedBooks[index];
+                              return GestureDetector(
+                                onTap: () => context.navigateToNextPage(
+                                  BookOverviewPage(isPlay: false, book: book),
+                                ),
+                                child: _BookMarkItemView(
+                                  title: book.name,
+                                  subtitle: book.overview,
+                                  createdAt: book.createAt,
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+              ),
+            ],
           ),
         ),
       ),

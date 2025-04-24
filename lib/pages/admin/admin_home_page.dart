@@ -59,9 +59,11 @@ class _AdminHomePageState extends State<AdminHomePage> {
       appBar: AppBar(
         title: const EasyTextWidget(text: 'Dashboard Admin View'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(10),
+      body: RefreshIndicator(
+        onRefresh: _loadCounts,
         child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(), // ensures pull-to-refresh works
+          padding: const EdgeInsets.all(10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
