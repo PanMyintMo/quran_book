@@ -49,8 +49,6 @@ class FirebaseModel {
     await ref.delete();
   }
 
-  // ---------------------------- Firebase Realtime Database ----------------------------
-
   // ---------------------------- Book ----------------------------
   Future<void> createBook(BookVO book) async {
     await _database.child('books').child(book.id).set(book.toJson());
@@ -60,6 +58,13 @@ class FirebaseModel {
     final snapshot = await _database.child('books').get();
     return (snapshot.value as Map<dynamic, dynamic>?)?.entries.map((e) => BookVO.fromJson(Map<String, dynamic>.from(e.value))).toList() ??
         [];
+  }
+
+  Stream<List<BookVO>> watchAllBooks() {
+    return _database.child('books').onValue.map((event) {
+      final data = event.snapshot.value as Map<dynamic, dynamic>?;
+      return data?.entries.map((e) => BookVO.fromJson(Map<String, dynamic>.from(e.value))).toList() ?? [];
+    });
   }
 
   Future<void> updateBook(BookVO book) async {
@@ -100,6 +105,13 @@ class FirebaseModel {
         [];
   }
 
+  Stream<List<CategoryVO>> watchAllCategories() {
+    return _database.child('categories').onValue.map((event) {
+      final data = event.snapshot.value as Map<dynamic, dynamic>?;
+      return data?.entries.map((e) => CategoryVO.fromJson(Map<String, dynamic>.from(e.value))).toList() ?? [];
+    });
+  }
+
   Future<void> deleteCategory(String id, String imageUrl) async {
     await deleteFile(imageUrl);
     await _database.child('categories').child(id).remove();
@@ -114,6 +126,13 @@ class FirebaseModel {
     final snapshot = await _database.child('users').get();
     return (snapshot.value as Map<dynamic, dynamic>?)?.entries.map((e) => UserVO.fromJson(Map<String, dynamic>.from(e.value))).toList() ??
         [];
+  }
+
+  Stream<List<UserVO>> watchAllUsers() {
+    return _database.child('users').onValue.map((event) {
+      final data = event.snapshot.value as Map<dynamic, dynamic>?;
+      return data?.entries.map((e) => UserVO.fromJson(Map<String, dynamic>.from(e.value))).toList() ?? [];
+    });
   }
 
   Future<void> deleteUser(String id) async {
@@ -142,6 +161,13 @@ class FirebaseModel {
         [];
   }
 
+  Stream<List<DonationVO>> watchAllDonations() {
+    return _database.child('donations').onValue.map((event) {
+      final data = event.snapshot.value as Map<dynamic, dynamic>?;
+      return data?.entries.map((e) => DonationVO.fromJson(Map<String, dynamic>.from(e.value))).toList() ?? [];
+    });
+  }
+
   Future<void> deleteDonation(String id, String imageUrl) async {
     await deleteFile(imageUrl);
     await _database.child('donations').child(id).remove();
@@ -158,26 +184,32 @@ class FirebaseModel {
         [];
   }
 
+  Stream<List<BannerVO>> watchAllBanners() {
+    return _database.child('banners').onValue.map((event) {
+      final data = event.snapshot.value as Map<dynamic, dynamic>?;
+      return data?.entries.map((e) => BannerVO.fromJson(Map<String, dynamic>.from(e.value))).toList() ?? [];
+    });
+  }
+
   Future<void> deleteBanner(String id, String imageUrl) async {
     await deleteFile(imageUrl);
     await _database.child('banners').child(id).remove();
   }
 
-  // Total Categories Count
+  // ---------------------------- Total Count Methods ----------------------------
+
   Future<int> getTotalCategoryCount() async {
     final snapshot = await _database.child('categories').get();
     final map = snapshot.value as Map<dynamic, dynamic>?;
     return map?.length ?? 0;
   }
 
-// Total Book (Post) Count
   Future<int> getTotalBookCount() async {
     final snapshot = await _database.child('books').get();
     final map = snapshot.value as Map<dynamic, dynamic>?;
     return map?.length ?? 0;
   }
 
-// Total Reading Count (Unique Users Who Read Books)
   Future<int> getTotalReadingCount() async {
     final books = await getAllBooks();
     final readerIds = <String>{};
@@ -189,21 +221,18 @@ class FirebaseModel {
     return readerIds.length;
   }
 
-// Total User Count
   Future<int> getTotalUserCount() async {
     final snapshot = await _database.child('users').get();
     final map = snapshot.value as Map<dynamic, dynamic>?;
     return map?.length ?? 0;
   }
 
-// Total Banner Count
   Future<int> getTotalBannerCount() async {
     final snapshot = await _database.child('banners').get();
     final map = snapshot.value as Map<dynamic, dynamic>?;
     return map?.length ?? 0;
   }
 
-// Total Donation Count
   Future<int> getTotalDonationCount() async {
     final snapshot = await _database.child('donations').get();
     final map = snapshot.value as Map<dynamic, dynamic>?;

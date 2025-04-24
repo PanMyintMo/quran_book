@@ -13,39 +13,12 @@ class AdminUserManagementPage extends StatefulWidget {
 
 class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
   final FirebaseModel _firebaseModel = FirebaseModel();
-  List<UserVO> _users = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUsers();
-  }
-
-  Future<void> _loadUsers() async {
-    try {
-      setState(() => _isLoading = true);
-      final users = await _firebaseModel.getAllUsers();
-      if (mounted) {
-        setState(() {
-          _users = users;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        context.showErrorSnackBar("Failed to load users: $e");
-      }
-    }
-  }
 
   Future<void> _toggleAdmin(UserVO user) async {
     try {
       final updatedUser = user.copyWith(isAdmin: !user.isAdmin);
       context.showLoadingDialog();
       await _firebaseModel.createUser(updatedUser);
-      await _loadUsers();
       if (mounted) {
         context.hideLoadingDialog();
         context.showSuccessSnackBar("${updatedUser.name} is now ${updatedUser.isAdmin ? 'Admin' : 'User'}");
@@ -63,7 +36,6 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
       final updatedUser = user.copyWith(isDeleteAccount: !user.isDeleteAccount);
       context.showLoadingDialog();
       await _firebaseModel.createUser(updatedUser);
-      await _loadUsers();
       if (mounted) {
         context.hideLoadingDialog();
         context.showSuccessSnackBar("${updatedUser.name} account is now ${updatedUser.isDeleteAccount ? 'Deleted' : 'Active'}");
@@ -82,58 +54,69 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
       appBar: AppBar(
         title: const EasyTextWidget(text: 'User Management'),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _users.isEmpty
-              ? const Center(child: Text("No users found"))
-              : ListView.builder(
-                  itemCount: _users.length,
-                  itemBuilder: (context, index) {
-                    final user = _users[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: ListTile(
-                        title: EasyTextWidget(
-                          text: user.name,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            EasyTextWidget(text: user.email),
-                            EasyTextWidget(
-                              text: user.isAdmin ? 'Admin' : 'User',
-                              textColor: user.isAdmin ? Colors.green : Colors.grey,
-                            ),
-                            EasyTextWidget(
-                              text: user.isDeleteAccount ? 'Deleted' : 'Active',
-                              textColor: user.isDeleteAccount ? Colors.red : Colors.blue,
-                            ),
-                          ],
-                        ),
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (value) {
-                            if (value == 'toggle_admin') {
-                              _toggleAdmin(user);
-                            } else if (value == 'toggle_delete') {
-                              _toggleDeleteStatus(user);
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              value: 'toggle_admin',
-                              child: Text(user.isAdmin ? 'Revoke Admin' : 'Make Admin'),
-                            ),
-                            PopupMenuItem(
-                              value: 'toggle_delete',
-                              child: Text(user.isDeleteAccount ? 'Restore Account' : 'Delete Account'),
-                            ),
-                          ],
-                        ),
+      body: StreamBuilder<List<UserVO>>(
+        stream: _firebaseModel.watchAllUsers(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final users = snapshot.data ?? [];
+
+          if (users.isEmpty) {
+            return const Center(child: Text("No users found"));
+          }
+
+          return ListView.builder(
+            itemCount: users.length,
+            itemBuilder: (context, index) {
+              final user = users[index];
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ListTile(
+                  title: EasyTextWidget(
+                    text: user.name,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      EasyTextWidget(text: user.email),
+                      EasyTextWidget(
+                        text: user.isAdmin ? 'Admin' : 'User',
+                        textColor: user.isAdmin ? Colors.green : Colors.grey,
                       ),
-                    );
-                  },
+                      EasyTextWidget(
+                        text: user.isDeleteAccount ? 'Deleted' : 'Active',
+                        textColor: user.isDeleteAccount ? Colors.red : Colors.blue,
+                      ),
+                    ],
+                  ),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'toggle_admin') {
+                        _toggleAdmin(user);
+                      } else if (value == 'toggle_delete') {
+                        _toggleDeleteStatus(user);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'toggle_admin',
+                        child: Text(user.isAdmin ? 'Revoke Admin' : 'Make Admin'),
+                      ),
+                      PopupMenuItem(
+                        value: 'toggle_delete',
+                        child: Text(user.isDeleteAccount ? 'Restore Account' : 'Delete Account'),
+                      ),
+                    ],
+                  ),
                 ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
