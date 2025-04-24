@@ -25,6 +25,7 @@ class _LoginPageState extends State<LoginPage> {
   final FirebaseModel _firebaseModel = FirebaseModel();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isPasswordVisible = false;
 
   Future<void> _handleLogin() async {
     final email = _emailController.text.trim();
@@ -54,6 +55,13 @@ class _LoginPageState extends State<LoginPage> {
         context.showErrorSnackBar(e.toString());
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -108,13 +116,22 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(height: kSP10x),
               TextField(
                 controller: _passwordController,
-                obscureText: true,
+                obscureText: !_isPasswordVisible,
                 decoration: InputDecoration(
                   hintText: kLoginPasswordHintText.tr(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(kSP10x),
                   ),
-                  suffixIcon: const Icon(Icons.visibility_off),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                  ),
                 ),
               ),
               SizedBox(height: kSP10x),
@@ -136,7 +153,8 @@ class _LoginPageState extends State<LoginPage> {
                 height: kLoginPageButtonHeight,
                 onPressed: _handleLogin,
                 buttonText: kLogin.tr(),
-                buttonTextColor: Colors.white,
+                buttonTextColor: kWhiteColor,
+                backgroundColor: kAppPrimaryColor,
               ),
               SizedBox(height: kSP10x),
               Row(

@@ -162,4 +162,51 @@ class FirebaseModel {
     await deleteFile(imageUrl);
     await _database.child('banners').child(id).remove();
   }
+
+  // Total Categories Count
+  Future<int> getTotalCategoryCount() async {
+    final snapshot = await _database.child('categories').get();
+    final map = snapshot.value as Map<dynamic, dynamic>?;
+    return map?.length ?? 0;
+  }
+
+// Total Book (Post) Count
+  Future<int> getTotalBookCount() async {
+    final snapshot = await _database.child('books').get();
+    final map = snapshot.value as Map<dynamic, dynamic>?;
+    return map?.length ?? 0;
+  }
+
+// Total Reading Count (Unique Users Who Read Books)
+  Future<int> getTotalReadingCount() async {
+    final books = await getAllBooks();
+    final readerIds = <String>{};
+
+    for (final book in books) {
+      readerIds.addAll(book.readBy.map((user) => user.id));
+    }
+
+    return readerIds.length;
+  }
+
+// Total User Count
+  Future<int> getTotalUserCount() async {
+    final snapshot = await _database.child('users').get();
+    final map = snapshot.value as Map<dynamic, dynamic>?;
+    return map?.length ?? 0;
+  }
+
+// Total Banner Count
+  Future<int> getTotalBannerCount() async {
+    final snapshot = await _database.child('banners').get();
+    final map = snapshot.value as Map<dynamic, dynamic>?;
+    return map?.length ?? 0;
+  }
+
+// Total Donation Count
+  Future<int> getTotalDonationCount() async {
+    final snapshot = await _database.child('donations').get();
+    final map = snapshot.value as Map<dynamic, dynamic>?;
+    return map?.length ?? 0;
+  }
 }

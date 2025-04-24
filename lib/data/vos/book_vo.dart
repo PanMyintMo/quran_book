@@ -34,21 +34,32 @@ class BookVO {
     required this.userIDOfBookMark,
   });
 
-  factory BookVO.fromJson(Map<String, dynamic> json) => BookVO(
-        id: json['id'],
-        name: json['name'],
-        overview: json['overview'],
-        author: json['author'],
-        image: json['image'],
-        pdf: PdfVO.fromJson(json['pdf']),
-        audio: json['audio'] != null ? AudioVO.fromJson(json['audio']) : null,
-        category: CategoryVO.fromJson(json['category']),
-        pages: Map<String, String>.from(json['pages'] ?? {}),
-        readBy: (json['readBy'] as List<dynamic>?)?.map((e) => UserVO.fromJson(e)).toList() ?? [],
-        createAt: DateTime.parse(json['createAt']),
-        updateAt: DateTime.parse(json['updateAt']),
-        userIDOfBookMark: (json['userIDOfBookMark'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      );
+  factory BookVO.fromJson(Map<String, dynamic> json) {
+    final originalPDFMap = json['pdf'];
+    final Map<String, dynamic> convertedPDFMap = Map.from(originalPDFMap as Map);
+
+    final originalAudioMap = json['pdf'];
+    final Map<String, dynamic> convertedAudioMap = Map.from(originalAudioMap as Map);
+
+    final originalCategoryMap = json['category'];
+    final Map<String, dynamic> convertedCategoryMap = Map.from(originalCategoryMap as Map);
+
+    return BookVO(
+      id: json['id'],
+      name: json['name'],
+      overview: json['overview'],
+      author: json['author'],
+      image: json['image'],
+      pdf: PdfVO.fromJson(convertedPDFMap),
+      audio: json['audio'] != null ? AudioVO.fromJson(convertedAudioMap) : null,
+      category: CategoryVO.fromJson(convertedCategoryMap),
+      pages: Map<String, String>.from(json['pages'] ?? {}),
+      readBy: (json['readBy'] as List<dynamic>?)?.map((e) => UserVO.fromJson(e)).toList() ?? [],
+      createAt: DateTime.parse(json['createAt']),
+      updateAt: DateTime.parse(json['updateAt']),
+      userIDOfBookMark: (json['userIDOfBookMark'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,

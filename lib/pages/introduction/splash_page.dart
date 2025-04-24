@@ -37,13 +37,13 @@ class _SplashPageState extends State<SplashPage> {
 
       if (mounted) {
         if (currentUser.isAdmin) {
-          context.navigateToNextPage(const AdminHomePage());
+          context.navigateToNextPageWithRemoveUntil(const AdminHomePage());
         } else {
-          context.navigateToNextPage(const IndexPage());
+          context.navigateToNextPageWithRemoveUntil(const IndexPage());
         }
       }
     } else {
-      if (mounted) context.navigateToNextPage(const WelcomePage());
+      if (mounted) context.navigateToNextPageWithRemoveUntil(const WelcomePage());
     }
   }
 

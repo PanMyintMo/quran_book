@@ -46,6 +46,8 @@ class _BookMarkPageState extends State<BookMarkPage> {
           _bookmarkedBooks = bookmarks;
           _isLoading = false;
         });
+      } else {
+        setState(() => _isLoading = false);
       }
     } catch (e) {
       if (mounted) {

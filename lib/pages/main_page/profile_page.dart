@@ -40,7 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
       await _firebaseModel.currentUser?.delete();
       await _firebaseModel.logout();
       if (context.mounted) {
-        context.navigateToNextPageWithRemoveUntil(WelcomePage());
+        context.navigateToNextPageWithRemoveUntil(const WelcomePage());
       }
     }
   }
@@ -56,7 +56,41 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
       body: _user == null
-          ? const Center(child: CircularProgressIndicator())
+          ? Padding(
+              padding: const EdgeInsets.all(kSP20x),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.person_outline, size: 100, color: Colors.grey),
+                  const SizedBox(height: kSP20x),
+                  EasyTextWidget(
+                    text: 'Guest User',
+                    fontWeight: FontWeight.w600,
+                    fontSize: kFontSize21x,
+                  ),
+                  const SizedBox(height: kSP20x),
+                  EasyTextWidget(
+                    text: 'You are using the app as a guest.',
+                    fontWeight: FontWeight.w400,
+                    fontSize: kFontSize16x,
+                  ),
+                  const SizedBox(height: kSP40x),
+                  PrimaryButtonWidget(
+                    height: kProfilePageButtonHeight,
+                    width: double.infinity,
+                    onPressed: () async {
+                      await _firebaseModel.logout();
+                      if (context.mounted) {
+                        context.navigateToNextPageWithRemoveUntil(const WelcomePage());
+                      }
+                    },
+                    buttonText: kLogoutText.tr(),
+                    backgroundColor: Colors.red,
+                    buttonFontWeight: FontWeight.w600,
+                  ),
+                ],
+              ),
+            )
           : SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(kSP20x),
@@ -103,7 +137,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       onPressed: () async {
                         await _firebaseModel.logout();
                         if (context.mounted) {
-                          context.navigateToNextPageWithRemoveUntil(WelcomePage());
+                          context.navigateToNextPageWithRemoveUntil(const WelcomePage());
                         }
                       },
                       buttonText: kLogoutText.tr(),

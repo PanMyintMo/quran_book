@@ -246,28 +246,42 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
               decoration: const InputDecoration(labelText: 'Author'),
             ),
             const SizedBox(height: 16),
-            TextField(
-              enabled: false,
-              controller: _pdfController,
-              readOnly: true,
-              decoration: InputDecoration(
-                labelText: 'PDF File',
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.attach_file),
-                  onPressed: _pickPdf,
+            GestureDetector(
+              onTap: () {
+                _pickPdf();
+              },
+              child: AbsorbPointer(
+                child: TextField(
+                  enabled: false,
+                  controller: _pdfController,
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    labelText: 'PDF File',
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.attach_file),
+                      onPressed: _pickPdf,
+                    ),
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 16),
-            TextField(
-              enabled: false,
-              controller: _audioController,
-              readOnly: true,
-              decoration: InputDecoration(
-                labelText: 'Audio File',
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.audiotrack),
-                  onPressed: _pickAudio,
+            GestureDetector(
+              onTap: () {
+                _pickAudio();
+              },
+              child: AbsorbPointer(
+                child: TextField(
+                  enabled: false,
+                  controller: _audioController,
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    labelText: 'Audio File',
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.audiotrack),
+                      onPressed: _pickAudio,
+                    ),
+                  ),
                 ),
               ),
             ),

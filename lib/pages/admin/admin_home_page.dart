@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/pages/admin/banner/admin_banner_home_page.dart';
 import 'package:quran_book/pages/admin/category/admin_category_home_page.dart';
 import 'package:quran_book/pages/admin/donation/admin_donation_home_page.dart';
@@ -9,8 +10,48 @@ import 'package:quran_book/utils/asset_image_utils.dart';
 import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 
-class AdminHomePage extends StatelessWidget {
+class AdminHomePage extends StatefulWidget {
   const AdminHomePage({super.key});
+
+  @override
+  State<AdminHomePage> createState() => _AdminHomePageState();
+}
+
+class _AdminHomePageState extends State<AdminHomePage> {
+  int categoryCount = 0;
+  int postCount = 0;
+  int readingCount = 0;
+  int userCount = 0;
+  int bannerCount = 0;
+  int donationCount = 0;
+
+  final _firebaseModel = FirebaseModel();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCounts();
+  }
+
+  Future<void> _loadCounts() async {
+    final categories = await _firebaseModel.getTotalCategoryCount();
+    final posts = await _firebaseModel.getTotalBookCount();
+    final readings = await _firebaseModel.getTotalReadingCount();
+    final users = await _firebaseModel.getTotalUserCount();
+    final banners = await _firebaseModel.getTotalBannerCount();
+    final donations = await _firebaseModel.getTotalDonationCount();
+
+    if (mounted) {
+      setState(() {
+        categoryCount = categories;
+        postCount = posts;
+        readingCount = readings;
+        userCount = users;
+        bannerCount = banners;
+        donationCount = donations;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,52 +80,40 @@ class AdminHomePage extends StatelessWidget {
                 childAspectRatio: 5 / 3,
                 children: [
                   _CardItemView(
-                    count: '30',
+                    count: '$categoryCount',
                     label: 'Categories',
                     iconPath: AssetImageUtils.kAdminCategoryIcon,
-                    onTap: () {
-                      context.navigateToNextPage(const AdminCategoryHomePage());
-                    },
+                    onTap: () => context.navigateToNextPage(const AdminCategoryHomePage()),
                   ),
                   _CardItemView(
-                    count: '30',
+                    count: '$postCount',
                     label: 'Posts',
                     iconPath: AssetImageUtils.kAdminPostIcon,
-                    onTap: () {
-                      context.navigateToNextPage(const AdminPostPage());
-                    },
+                    onTap: () => context.navigateToNextPage(const AdminPostPage()),
                   ),
                   _CardItemView(
-                    count: '30',
+                    count: '$readingCount',
                     label: 'Reading',
                     iconPath: AssetImageUtils.kAdminReadingIcon,
-                    onTap: () {
-                      context.navigateToNextPage(const AdminReadingPage());
-                    },
+                    onTap: () => context.navigateToNextPage(const AdminReadingPage()),
                   ),
                   _CardItemView(
-                    count: '30',
+                    count: '$userCount',
                     label: 'Users',
                     iconPath: AssetImageUtils.kAdminUserIcon,
-                    onTap: () {
-                      context.navigateToNextPage(const AdminUserManagementPage());
-                    },
+                    onTap: () => context.navigateToNextPage(const AdminUserManagementPage()),
                   ),
                   _CardItemView(
-                    count: '30',
+                    count: '$bannerCount',
                     label: 'Banners',
                     iconPath: AssetImageUtils.kAdminBannerIcon,
-                    onTap: () {
-                      context.navigateToNextPage(const AdminBannerManagementPage());
-                    },
+                    onTap: () => context.navigateToNextPage(const AdminBannerManagementPage()),
                   ),
                   _CardItemView(
-                    count: '30',
+                    count: '$donationCount',
                     label: 'Donation',
                     iconPath: AssetImageUtils.kAdminDonationIcon,
-                    onTap: () {
-                      context.navigateToNextPage(const AdminDonationSetupPage());
-                    },
+                    onTap: () => context.navigateToNextPage(const AdminDonationSetupPage()),
                   ),
                 ],
               ),

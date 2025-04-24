@@ -24,6 +24,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _repeatPasswordController = TextEditingController();
+  bool _isPasswordVisible = false;
+  bool _isRepeatPasswordVisible = false;
 
   Future<void> _handleRegister() async {
     final name = _nameController.text.trim();
@@ -77,6 +79,15 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _repeatPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
@@ -107,9 +118,25 @@ class _RegisterPageState extends State<RegisterPage> {
               SizedBox(height: kSP20x),
               _buildTextField(kRegisterEmailTitleText.tr(), kRegisterEmailHintText.tr(), _emailController),
               SizedBox(height: kSP20x),
-              _buildPasswordField(kRegisterPasswordTitleText.tr(), kRegisterPasswordHintText.tr(), _passwordController),
+              _buildPasswordField(
+                kRegisterPasswordTitleText.tr(),
+                kRegisterPasswordHintText.tr(),
+                _passwordController,
+                _isPasswordVisible,
+                () {
+                  setState(() => _isPasswordVisible = !_isPasswordVisible);
+                },
+              ),
               SizedBox(height: kSP20x),
-              _buildPasswordField(kRegisterRepeatPasswordTitleText.tr(), kRegisterRepeatPasswordHintText.tr(), _repeatPasswordController),
+              _buildPasswordField(
+                kRegisterRepeatPasswordTitleText.tr(),
+                kRegisterRepeatPasswordHintText.tr(),
+                _repeatPasswordController,
+                _isRepeatPasswordVisible,
+                () {
+                  setState(() => _isRepeatPasswordVisible = !_isRepeatPasswordVisible);
+                },
+              ),
               SizedBox(height: kSP20x),
               PrimaryButtonWidget(
                 width: double.infinity,
@@ -117,7 +144,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 backgroundColor: kAppPrimaryColor,
                 onPressed: _handleRegister,
                 buttonTextColor: kWhiteColor,
-                buttonText: kLogin.tr(),
+                buttonText: kRegister.tr(),
               ),
               SizedBox(height: kSP20x),
               Row(
@@ -187,7 +214,13 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Widget _buildPasswordField(String label, String hintText, TextEditingController controller) {
+  Widget _buildPasswordField(
+    String label,
+    String hintText,
+    TextEditingController controller,
+    bool isVisible,
+    VoidCallback toggleVisibility,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -195,13 +228,16 @@ class _RegisterPageState extends State<RegisterPage> {
         SizedBox(height: kSP10x),
         TextField(
           controller: controller,
-          obscureText: true,
+          obscureText: !isVisible,
           decoration: InputDecoration(
             hintText: hintText,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(kSP10x),
             ),
-            suffixIcon: const Icon(Icons.visibility_off),
+            suffixIcon: IconButton(
+              icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off),
+              onPressed: toggleVisibility,
+            ),
           ),
         ),
       ],
