@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/pages/admin/banner/admin_banner_home_page.dart';
@@ -6,6 +7,8 @@ import 'package:quran_book/pages/admin/donation/admin_donation_home_page.dart';
 import 'package:quran_book/pages/admin/post/admin_post_page.dart';
 import 'package:quran_book/pages/admin/reading/admin_reading_page.dart';
 import 'package:quran_book/pages/admin/user/admin_user_home_page.dart';
+import 'package:quran_book/pages/introduction/login_page.dart';
+import 'package:quran_book/resources/strings.dart';
 import 'package:quran_book/utils/asset_image_utils.dart';
 import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
@@ -58,6 +61,28 @@ class _AdminHomePageState extends State<AdminHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const EasyTextWidget(text: 'Dashboard Admin View'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () async {
+              context.showLoadingDialog();
+              try {
+                await FirebaseModel().logout();
+                if (context.mounted) {
+                  context.hideLoadingDialog();
+                  context.showSuccessSnackBar(kLogoutText.tr());
+                  context.navigateToNextPageWithRemoveUntil(LoginPage());
+                }
+              } catch (error) {
+                if (context.mounted) {
+                  context.hideLoadingDialog();
+                  context.showErrorSnackBar(error.toString());
+                }
+              }
+            },
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: _loadCounts,
