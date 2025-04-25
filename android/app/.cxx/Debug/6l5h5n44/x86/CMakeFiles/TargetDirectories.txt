@@ -1,0 +1,2 @@
+C:/Users/Windows 10/Downloads/quran_book/android/app/.cxx/Debug/6l5h5n44/x86/CMakeFiles/edit_cache.dir
+C:/Users/Windows 10/Downloads/quran_book/android/app/.cxx/Debug/6l5h5n44/x86/CMakeFiles/rebuild_cache.dir
