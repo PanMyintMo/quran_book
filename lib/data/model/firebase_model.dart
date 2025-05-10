@@ -18,15 +18,31 @@ class FirebaseModel {
   // ---------------------------- Firebase Auth ----------------------------
 
   Future<UserCredential> login(String email, String password) async {
-    return await _auth.signInWithEmailAndPassword(email: email, password: password);
+    try {
+      return await _auth.signInWithEmailAndPassword(email: email, password: password);
+    } on FirebaseAuthException catch (e) {
+      throw Exception('Login failed: ${e.message}');
+    } catch (e) {
+      throw Exception('Unexpected error during login: ${e.toString()}');
+    }
   }
 
   Future<UserCredential> register(String email, String password) async {
-    return await _auth.createUserWithEmailAndPassword(email: email, password: password);
+    try {
+      return await _auth.createUserWithEmailAndPassword(email: email, password: password);
+    } on FirebaseAuthException catch (e) {
+      throw Exception('Registration failed: ${e.message}');
+    } catch (e) {
+      throw Exception('Unexpected error during registration: ${e.toString()}');
+    }
   }
 
   Future<void> logout() async {
-    await _auth.signOut();
+    try {
+      await _auth.signOut();
+    } catch (e) {
+      throw Exception('Logout failed: ${e.toString()}');
+    }
   }
 
   bool isLoggedIn() {
@@ -38,26 +54,45 @@ class FirebaseModel {
   // ---------------------------- Firebase Storage ----------------------------
 
   Future<String> uploadFile(File file, String folder) async {
-    final fileName = const Uuid().v4();
-    final storageRef = _storage.ref('$folder/$fileName');
-    await storageRef.putFile(file);
-    return await storageRef.getDownloadURL();
+    try {
+      final fileName = const Uuid().v4();
+      final storageRef = _storage.ref('$folder/$fileName');
+      await storageRef.putFile(file);
+      return await storageRef.getDownloadURL();
+    } on FirebaseException catch (e) {
+      throw Exception('File upload failed: ${e.message}');
+    } catch (e) {
+      throw Exception('Unexpected error during file upload: ${e.toString()}');
+    }
   }
 
   Future<void> deleteFile(String url) async {
-    final ref = _storage.refFromURL(url);
-    await ref.delete();
+    try {
+      final ref = _storage.refFromURL(url);
+      await ref.delete();
+    } catch (e) {
+      throw Exception('File deletion failed: ${e.toString()}');
+    }
   }
 
   // ---------------------------- Book ----------------------------
+
   Future<void> createBook(BookVO book) async {
-    await _database.child('books').child(book.id).set(book.toJson());
+    try {
+      await _database.child('books').child(book.id).set(book.toJson());
+    } catch (e) {
+      throw Exception('Failed to create book: ${e.toString()}');
+    }
   }
 
   Future<List<BookVO>> getAllBooks() async {
-    final snapshot = await _database.child('books').get();
-    return (snapshot.value as Map<dynamic, dynamic>?)?.entries.map((e) => BookVO.fromJson(Map<String, dynamic>.from(e.value))).toList() ??
-        [];
+    try {
+      final snapshot = await _database.child('books').get();
+      return (snapshot.value as Map<dynamic, dynamic>?)?.entries.map((e) => BookVO.fromJson(Map<String, dynamic>.from(e.value))).toList() ??
+          [];
+    } catch (e) {
+      throw Exception('Failed to fetch books: ${e.toString()}');
+    }
   }
 
   Stream<List<BookVO>> watchAllBooks() {
@@ -68,41 +103,62 @@ class FirebaseModel {
   }
 
   Future<void> updateBook(BookVO book) async {
-    await _database.child('books').child(book.id).update(book.toJson());
+    try {
+      await _database.child('books').child(book.id).update(book.toJson());
+    } catch (e) {
+      throw Exception('Failed to update book: ${e.toString()}');
+    }
   }
 
   Future<void> deleteBook(String id) async {
-    await _database.child('books').child(id).remove();
+    try {
+      await _database.child('books').child(id).remove();
+    } catch (e) {
+      throw Exception('Failed to delete book: ${e.toString()}');
+    }
   }
 
   Future<void> toggleBookmark(String bookId, String userId) async {
-    final bookSnapshot = await _database.child('books').child(bookId).get();
-    if (!bookSnapshot.exists) return;
+    try {
+      final bookSnapshot = await _database.child('books').child(bookId).get();
+      if (!bookSnapshot.exists) return;
 
-    final bookData = Map<String, dynamic>.from(bookSnapshot.value as Map);
-    final List<String> userIDs = (bookData['userIDOfBookMark'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+      final bookData = Map<String, dynamic>.from(bookSnapshot.value as Map);
+      final List<String> userIDs = (bookData['userIDOfBookMark'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
 
-    if (userIDs.contains(userId)) {
-      userIDs.remove(userId);
-    } else {
-      userIDs.add(userId);
+      if (userIDs.contains(userId)) {
+        userIDs.remove(userId);
+      } else {
+        userIDs.add(userId);
+      }
+
+      await _database.child('books').child(bookId).update({'userIDOfBookMark': userIDs});
+    } catch (e) {
+      throw Exception('Failed to toggle bookmark: ${e.toString()}');
     }
-
-    await _database.child('books').child(bookId).update({'userIDOfBookMark': userIDs});
   }
 
   // ---------------------------- Category ----------------------------
+
   Future<void> createCategory(CategoryVO category) async {
-    await _database.child('categories').child(category.id).set(category.toJson());
+    try {
+      await _database.child('categories').child(category.id).set(category.toJson());
+    } catch (e) {
+      throw Exception('Failed to create category: ${e.toString()}');
+    }
   }
 
   Future<List<CategoryVO>> getAllCategories() async {
-    final snapshot = await _database.child('categories').get();
-    return (snapshot.value as Map<dynamic, dynamic>?)
-            ?.entries
-            .map((e) => CategoryVO.fromJson(Map<String, dynamic>.from(e.value)))
-            .toList() ??
-        [];
+    try {
+      final snapshot = await _database.child('categories').get();
+      return (snapshot.value as Map<dynamic, dynamic>?)
+              ?.entries
+              .map((e) => CategoryVO.fromJson(Map<String, dynamic>.from(e.value)))
+              .toList() ??
+          [];
+    } catch (e) {
+      throw Exception('Failed to fetch categories: ${e.toString()}');
+    }
   }
 
   Stream<List<CategoryVO>> watchAllCategories() {
@@ -113,19 +169,32 @@ class FirebaseModel {
   }
 
   Future<void> deleteCategory(String id, String imageUrl) async {
-    await deleteFile(imageUrl);
-    await _database.child('categories').child(id).remove();
+    try {
+      await deleteFile(imageUrl);
+      await _database.child('categories').child(id).remove();
+    } catch (e) {
+      throw Exception('Failed to delete category: ${e.toString()}');
+    }
   }
 
   // ---------------------------- User ----------------------------
+
   Future<void> createUser(UserVO user) async {
-    await _database.child('users').child(user.id).set(user.toJson());
+    try {
+      await _database.child('users').child(user.id).set(user.toJson());
+    } catch (e) {
+      throw Exception('Failed to create user: ${e.toString()}');
+    }
   }
 
   Future<List<UserVO>> getAllUsers() async {
-    final snapshot = await _database.child('users').get();
-    return (snapshot.value as Map<dynamic, dynamic>?)?.entries.map((e) => UserVO.fromJson(Map<String, dynamic>.from(e.value))).toList() ??
-        [];
+    try {
+      final snapshot = await _database.child('users').get();
+      return (snapshot.value as Map<dynamic, dynamic>?)?.entries.map((e) => UserVO.fromJson(Map<String, dynamic>.from(e.value))).toList() ??
+          [];
+    } catch (e) {
+      throw Exception('Failed to fetch users: ${e.toString()}');
+    }
   }
 
   Stream<List<UserVO>> watchAllUsers() {
@@ -136,29 +205,46 @@ class FirebaseModel {
   }
 
   Future<void> deleteUser(String id) async {
-    await _database.child('users').child(id).remove();
+    try {
+      await _database.child('users').child(id).remove();
+    } catch (e) {
+      throw Exception('Failed to delete user: ${e.toString()}');
+    }
   }
 
   Future<UserVO?> getCurrentUserVO() async {
-    final userId = currentUser?.uid;
-    if (userId == null) return null;
-    final snapshot = await _database.child('users').child(userId).get();
-    if (!snapshot.exists) return null;
-    return UserVO.fromJson(Map<String, dynamic>.from(snapshot.value as Map));
+    try {
+      final userId = currentUser?.uid;
+      if (userId == null) return null;
+      final snapshot = await _database.child('users').child(userId).get();
+      if (!snapshot.exists) return null;
+      return UserVO.fromJson(Map<String, dynamic>.from(snapshot.value as Map));
+    } catch (e) {
+      throw Exception('Failed to get current user: ${e.toString()}');
+    }
   }
 
   // ---------------------------- Donation ----------------------------
+
   Future<void> createDonation(DonationVO donation) async {
-    await _database.child('donations').child(donation.id).set(donation.toJson());
+    try {
+      await _database.child('donations').child(donation.id).set(donation.toJson());
+    } catch (e) {
+      throw Exception('Failed to create donation: ${e.toString()}');
+    }
   }
 
   Future<List<DonationVO>> getAllDonations() async {
-    final snapshot = await _database.child('donations').get();
-    return (snapshot.value as Map<dynamic, dynamic>?)
-            ?.entries
-            .map((e) => DonationVO.fromJson(Map<String, dynamic>.from(e.value)))
-            .toList() ??
-        [];
+    try {
+      final snapshot = await _database.child('donations').get();
+      return (snapshot.value as Map<dynamic, dynamic>?)
+              ?.entries
+              .map((e) => DonationVO.fromJson(Map<String, dynamic>.from(e.value)))
+              .toList() ??
+          [];
+    } catch (e) {
+      throw Exception('Failed to fetch donations: ${e.toString()}');
+    }
   }
 
   Stream<List<DonationVO>> watchAllDonations() {
@@ -169,19 +255,35 @@ class FirebaseModel {
   }
 
   Future<void> deleteDonation(String id, String imageUrl) async {
-    await deleteFile(imageUrl);
-    await _database.child('donations').child(id).remove();
+    try {
+      await deleteFile(imageUrl);
+      await _database.child('donations').child(id).remove();
+    } catch (e) {
+      throw Exception('Failed to delete donation: ${e.toString()}');
+    }
   }
 
   // ---------------------------- Banner ----------------------------
+
   Future<void> createBanner(BannerVO banner) async {
-    await _database.child('banners').child(banner.id).set(banner.toJson());
+    try {
+      await _database.child('banners').child(banner.id).set(banner.toJson());
+    } catch (e) {
+      throw Exception('Failed to create banner: ${e.toString()}');
+    }
   }
 
   Future<List<BannerVO>> getAllBanners() async {
-    final snapshot = await _database.child('banners').get();
-    return (snapshot.value as Map<dynamic, dynamic>?)?.entries.map((e) => BannerVO.fromJson(Map<String, dynamic>.from(e.value))).toList() ??
-        [];
+    try {
+      final snapshot = await _database.child('banners').get();
+      return (snapshot.value as Map<dynamic, dynamic>?)
+              ?.entries
+              .map((e) => BannerVO.fromJson(Map<String, dynamic>.from(e.value)))
+              .toList() ??
+          [];
+    } catch (e) {
+      throw Exception('Failed to fetch banners: ${e.toString()}');
+    }
   }
 
   Stream<List<BannerVO>> watchAllBanners() {
@@ -192,50 +294,78 @@ class FirebaseModel {
   }
 
   Future<void> deleteBanner(String id, String imageUrl) async {
-    await deleteFile(imageUrl);
-    await _database.child('banners').child(id).remove();
+    try {
+      await deleteFile(imageUrl);
+      await _database.child('banners').child(id).remove();
+    } catch (e) {
+      throw Exception('Failed to delete banner: ${e.toString()}');
+    }
   }
 
   // ---------------------------- Total Count Methods ----------------------------
 
   Future<int> getTotalCategoryCount() async {
-    final snapshot = await _database.child('categories').get();
-    final map = snapshot.value as Map<dynamic, dynamic>?;
-    return map?.length ?? 0;
+    try {
+      final snapshot = await _database.child('categories').get();
+      final map = snapshot.value as Map<dynamic, dynamic>?;
+      return map?.length ?? 0;
+    } catch (e) {
+      throw Exception('Failed to get category count: ${e.toString()}');
+    }
   }
 
   Future<int> getTotalBookCount() async {
-    final snapshot = await _database.child('books').get();
-    final map = snapshot.value as Map<dynamic, dynamic>?;
-    return map?.length ?? 0;
+    try {
+      final snapshot = await _database.child('books').get();
+      final map = snapshot.value as Map<dynamic, dynamic>?;
+      return map?.length ?? 0;
+    } catch (e) {
+      throw Exception('Failed to get book count: ${e.toString()}');
+    }
   }
 
   Future<int> getTotalReadingCount() async {
-    final books = await getAllBooks();
-    final readerIds = <String>{};
+    try {
+      final books = await getAllBooks();
+      final readerIds = <String>{};
 
-    for (final book in books) {
-      readerIds.addAll(book.readBy.map((user) => user.id));
+      for (final book in books) {
+        readerIds.addAll(book.readBy.map((user) => user.id));
+      }
+
+      return readerIds.length;
+    } catch (e) {
+      throw Exception('Failed to get total reading count: ${e.toString()}');
     }
-
-    return readerIds.length;
   }
 
   Future<int> getTotalUserCount() async {
-    final snapshot = await _database.child('users').get();
-    final map = snapshot.value as Map<dynamic, dynamic>?;
-    return map?.length ?? 0;
+    try {
+      final snapshot = await _database.child('users').get();
+      final map = snapshot.value as Map<dynamic, dynamic>?;
+      return map?.length ?? 0;
+    } catch (e) {
+      throw Exception('Failed to get user count: ${e.toString()}');
+    }
   }
 
   Future<int> getTotalBannerCount() async {
-    final snapshot = await _database.child('banners').get();
-    final map = snapshot.value as Map<dynamic, dynamic>?;
-    return map?.length ?? 0;
+    try {
+      final snapshot = await _database.child('banners').get();
+      final map = snapshot.value as Map<dynamic, dynamic>?;
+      return map?.length ?? 0;
+    } catch (e) {
+      throw Exception('Failed to get banner count: ${e.toString()}');
+    }
   }
 
   Future<int> getTotalDonationCount() async {
-    final snapshot = await _database.child('donations').get();
-    final map = snapshot.value as Map<dynamic, dynamic>?;
-    return map?.length ?? 0;
+    try {
+      final snapshot = await _database.child('donations').get();
+      final map = snapshot.value as Map<dynamic, dynamic>?;
+      return map?.length ?? 0;
+    } catch (e) {
+      throw Exception('Failed to get donation count: ${e.toString()}');
+    }
   }
 }

@@ -44,6 +44,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     try {
+      context.showLoadingDialog();
       final userCredential = await _firebaseModel.register(email, password);
       final user = userCredential.user;
       if (user != null) {
@@ -60,22 +61,22 @@ class _RegisterPageState extends State<RegisterPage> {
             updateAt: DateTime.now(),
           ),
         );
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Registration successful")),
-          );
+        if (mounted) {
+          context.hideLoadingDialog();
+          context.showSuccessSnackBar("Registration successful");
           context.navigateToNextPageWithRemoveUntil(const LoginPage());
         }
       }
     } catch (e) {
-      _showMessage("Registration failed: ${e.toString()}");
+      if (mounted) {
+        context.hideLoadingDialog();
+        _showMessage("Registration failed: ${e.toString()}");
+      }
     }
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    context.showErrorSnackBar(message);
   }
 
   @override
@@ -152,7 +153,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const Expanded(child: Divider()),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: kSP10x),
-                    child: EasyTextWidget(text: kRegisterContinueWithText),
+                    child: EasyTextWidget(text: kRegisterContinueWithText.tr()),
                   ),
                   const Expanded(child: Divider()),
                 ],

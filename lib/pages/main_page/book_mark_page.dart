@@ -20,7 +20,7 @@ class BookMarkPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final FirebaseModel _firebaseModel = FirebaseModel();
+    final FirebaseModel firebaseModel = FirebaseModel();
     final String? userId = FirebaseAuth.instance.currentUser?.uid;
 
     return Scaffold(
@@ -49,7 +49,7 @@ class BookMarkPage extends StatelessWidget {
                 child: userId == null
                     ? const Center(child: Text("User not logged in"))
                     : StreamBuilder<List<BookVO>>(
-                        stream: _firebaseModel.watchAllBooks(),
+                        stream: firebaseModel.watchAllBooks(),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
                             return const Center(child: CircularProgressIndicator());
@@ -170,21 +170,49 @@ class _HomePageDrawerView extends StatelessWidget {
               ],
             ),
           ),
-          _buildDrawerItem(context, icon: Icons.language, label: kDrawerLanguageText, onTap: () {
+          _buildDrawerItem(context, icon: Icons.language, label: kDrawerLanguageText.tr(), onTap: () {
             context.navigateToNextPage(const LanguagePage());
           }),
-          _buildDrawerItem(context, icon: Icons.notifications, label: kDrawerNotificationText, onTap: () {}),
-          _buildDrawerItem(context, icon: Icons.rate_review, label: kDrawerWriteAnAppStoreReviewText, onTap: () {}),
-          _buildDrawerItem(context, icon: Icons.share, label: kDrawerShareTheAppText, onTap: () {}),
-          _buildDrawerItem(context, icon: Icons.settings, label: kDrawerSettingText, onTap: () {
+          _buildDrawerItem(context, icon: Icons.notifications, label: kDrawerNotificationText.tr(), onTap: () {
+            _showComingSoonDialog(context);
+          }),
+          _buildDrawerItem(context, icon: Icons.rate_review, label: kDrawerWriteAnAppStoreReviewText.tr(), onTap: () {
+            _showComingSoonDialog(context);
+          }),
+          _buildDrawerItem(context, icon: Icons.share, label: kDrawerShareTheAppText.tr(), onTap: () {
+            _showComingSoonDialog(context);
+          }),
+          _buildDrawerItem(context, icon: Icons.settings, label: kDrawerSettingText.tr(), onTap: () {
             context.navigateToNextPage(const SettingPage());
           }),
-          _buildDrawerItem(context, icon: Icons.brightness_6, label: kDrawerThemeText, onTap: () {
+          _buildDrawerItem(context, icon: Icons.brightness_6, label: kDrawerThemeText.tr(), onTap: () {
             context.navigateToNextPage(const SettingPage());
           }),
-          _buildDrawerItem(context, icon: Icons.phone, label: kDrawerContactUsText, onTap: () {}),
-          _buildDrawerItem(context, icon: Icons.help_outline, label: kDrawerHelpAndSupportText, onTap: () {}),
-          _buildDrawerItem(context, icon: Icons.info_outline, label: kDrawerAboutUsText, onTap: () {}),
+          _buildDrawerItem(context, icon: Icons.phone, label: kDrawerContactUsText.tr(), onTap: () {
+            _showComingSoonDialog(context);
+          }),
+          _buildDrawerItem(context, icon: Icons.help_outline, label: kDrawerHelpAndSupportText.tr(), onTap: () {
+            _showComingSoonDialog(context);
+          }),
+          _buildDrawerItem(context, icon: Icons.info_outline, label: kDrawerAboutUsText.tr(), onTap: () {
+            _showComingSoonDialog(context);
+          }),
+        ],
+      ),
+    );
+  }
+
+  void _showComingSoonDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Coming Soon'),
+        content: const Text('This feature will available after uploading on PlayStore!'),
+        actions: [
+          TextButton(
+            onPressed: () => context.navigateBack(),
+            child: const Text('OK'),
+          ),
         ],
       ),
     );

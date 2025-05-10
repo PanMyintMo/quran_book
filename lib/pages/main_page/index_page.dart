@@ -19,13 +19,15 @@ class _IndexPageState extends State<IndexPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _index,
-        children: [
-          HomePage(),
-          BookMarkPage(),
-          ProfilePage(),
-        ],
+      body: SafeArea(
+        child: IndexedStack(
+          index: _index,
+          children: [
+            HomePage(),
+            BookMarkPage(),
+            ProfilePage(),
+          ],
+        ),
       ),
       bottomNavigationBar: Builder(
         builder: (context) {

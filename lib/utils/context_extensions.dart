@@ -37,7 +37,11 @@ extension ContextExtensions on BuildContext {
   void showErrorSnackBar(String message) {
     ScaffoldMessenger.of(this).showSnackBar(
       SnackBar(
-        content: EasyTextWidget(text: message, textColor: Colors.white),
+        content: EasyTextWidget(
+          text: message,
+          textColor: Colors.white,
+          maxLines: 10,
+        ),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 3),
@@ -48,7 +52,11 @@ extension ContextExtensions on BuildContext {
   void showSuccessSnackBar(String message) {
     ScaffoldMessenger.of(this).showSnackBar(
       SnackBar(
-        content: EasyTextWidget(text: message, textColor: Colors.white),
+        content: EasyTextWidget(
+          text: message,
+          textColor: Colors.white,
+          maxLines: 10,
+        ),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 3),
