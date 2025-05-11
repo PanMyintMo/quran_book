@@ -36,10 +36,7 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
     isPlaying = widget.isPlay;
     showMiniPlayer = widget.isPlay;
     if (widget.book.audio?.url.isNotEmpty ?? false) {
-      _audioPlayer.setUrl(widget.book.audio!.url).catchError((e) {
-        if (mounted) context.showErrorSnackBar("Failed to load audio: $e");
-        return e;
-      });
+      _audioPlayer.setUrl(widget.book.audio!.url);
     }
   }
 
@@ -87,7 +84,9 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
               try {
                 final currentUserID = (await _firebaseModel.getCurrentUserVO())?.id;
                 if (currentUserID == null) {
-                  context.showErrorSnackBar("Please login first.");
+                  if (context.mounted) {
+                    context.showErrorSnackBar("Please login first.");
+                  }
                   return;
                 }
                 await _firebaseModel.toggleBookmark(book.id, currentUserID);

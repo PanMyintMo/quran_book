@@ -38,7 +38,7 @@ class BookVO {
     final originalPDFMap = json['pdf'];
     final Map<String, dynamic> convertedPDFMap = Map.from(originalPDFMap as Map);
 
-    final originalAudioMap = json['pdf'];
+    final originalAudioMap = json['audio'];
     final Map<String, dynamic> convertedAudioMap = Map.from(originalAudioMap as Map);
 
     final originalCategoryMap = json['category'];

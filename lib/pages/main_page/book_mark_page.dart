@@ -11,6 +11,7 @@ import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
 import 'package:quran_book/utils/asset_image_utils.dart';
 import 'package:quran_book/utils/context_extensions.dart';
+import 'package:quran_book/utils/get_package_info_utils.dart';
 import 'package:quran_book/utils/random_color_utils.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 import 'package:timeago/timeago.dart' as time_ago;
@@ -153,21 +154,35 @@ class _HomePageDrawerView extends StatelessWidget {
         children: [
           DrawerHeader(
             decoration: const BoxDecoration(color: Colors.white),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  AssetImageUtils.kAppIcon,
-                  height: kHomePageDrawerAppIconHeight,
-                ),
-                const SizedBox(height: kSP10x),
-                EasyTextWidget(
-                  text: kDrawerWelcomeText.tr(),
-                  fontSize: kFontSize18x,
-                  fontWeight: FontWeight.bold,
-                ),
-                const EasyTextWidget(text: 'v 1.0.0'),
-              ],
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    AssetImageUtils.kAppIcon,
+                    height: kHomePageDrawerAppIconHeight,
+                  ),
+                  const SizedBox(height: kSP10x),
+                  EasyTextWidget(
+                    text: kDrawerWelcomeText.tr(),
+                    fontSize: kFontSize18x,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  FutureBuilder<String>(
+                      future: GetPackageInfoUtils.getAppVersion(),
+                      builder: (_, snapShot) {
+                        if (snapShot.connectionState == ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        if (snapShot.hasError) {
+                          return Center(child: EasyTextWidget(text: snapShot.error.toString()));
+                        }
+                        return EasyTextWidget(text: snapShot.data.toString());
+                      }),
+                ],
+              ),
             ),
           ),
           _buildDrawerItem(context, icon: Icons.language, label: kDrawerLanguageText.tr(), onTap: () {

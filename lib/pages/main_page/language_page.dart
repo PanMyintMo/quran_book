@@ -66,8 +66,8 @@ class _LanguagePageState extends State<LanguagePage> {
           if (mounted) {
             setState(() {
               selectedLanguage = language;
-              // final bloc = context.read<LocalAndThemeBloc>();
-              // bloc.setLocaleWithLanguage(selectedLanguage, context);
+              final bloc = context.read<LocalAndThemeBloc>();
+              bloc.setLocaleWithLanguage(selectedLanguage, context);
             });
           }
         },

@@ -46,17 +46,17 @@ class _IndexPageState extends State<IndexPage> {
               BottomNavigationBarItem(
                 icon: Icon(Icons.home_filled),
                 activeIcon: Icon(Icons.home),
-                label: kHomePageText.tr(),
+                label: context.tr(kHomePageText),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.bookmark_border),
                 activeIcon: Icon(Icons.bookmark),
-                label: kBookmarkText.tr(),
+                label: context.tr(kBookmarkText),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.person_2_outlined),
                 activeIcon: Icon(Icons.person),
-                label: kProfileText.tr(),
+                label: context.tr(kProfileText),
               ),
             ],
           );
