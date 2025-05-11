@@ -5,6 +5,7 @@ import 'package:quran_book/bloc/main_page/local_and_theme_bloc.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
+import 'package:quran_book/utils/get_package_info_utils.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 
 class SettingPage extends StatelessWidget {
@@ -55,7 +56,7 @@ class SettingPage extends StatelessWidget {
                   Icons.language,
                   kDrawerLanguageText.tr(),
                 ),
-                _buildSettingItem(Icons.notifications, kDrawerNotificationText.tr()),
+                //  _buildSettingItem(Icons.notifications, kDrawerNotificationText.tr()),
                 const SizedBox(
                   height: kSP20x,
                 ),
@@ -72,7 +73,19 @@ class SettingPage extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: kSP20x),
-            child: Text("Version 1.1", style: TextStyle(color: Colors.black54)),
+            child: FutureBuilder<String>(
+                future: GetPackageInfoUtils.getAppVersion(),
+                builder: (_, snapShot) {
+                  if (snapShot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (snapShot.hasError) {
+                    return Center(child: EasyTextWidget(text: snapShot.error.toString()));
+                  }
+                  return EasyTextWidget(text: "Version: ${snapShot.data.toString()}", textColor: Colors.black54);
+                }),
           ),
         ],
       ),

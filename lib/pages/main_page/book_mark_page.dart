@@ -179,7 +179,7 @@ class _HomePageDrawerView extends StatelessWidget {
                         if (snapShot.hasError) {
                           return Center(child: EasyTextWidget(text: snapShot.error.toString()));
                         }
-                        return EasyTextWidget(text: snapShot.data.toString());
+                        return EasyTextWidget(text: "Version: ${snapShot.data.toString()}");
                       }),
                 ],
               ),
@@ -188,20 +188,20 @@ class _HomePageDrawerView extends StatelessWidget {
           _buildDrawerItem(context, icon: Icons.language, label: kDrawerLanguageText.tr(), onTap: () {
             context.navigateToNextPage(const LanguagePage());
           }),
-          _buildDrawerItem(context, icon: Icons.notifications, label: kDrawerNotificationText.tr(), onTap: () {
-            _showComingSoonDialog(context);
-          }),
-          _buildDrawerItem(context, icon: Icons.rate_review, label: kDrawerWriteAnAppStoreReviewText.tr(), onTap: () {
-            _showComingSoonDialog(context);
-          }),
-          _buildDrawerItem(context, icon: Icons.share, label: kDrawerShareTheAppText.tr(), onTap: () {
-            _showComingSoonDialog(context);
-          }),
           _buildDrawerItem(context, icon: Icons.settings, label: kDrawerSettingText.tr(), onTap: () {
             context.navigateToNextPage(const SettingPage());
           }),
           _buildDrawerItem(context, icon: Icons.brightness_6, label: kDrawerThemeText.tr(), onTap: () {
             context.navigateToNextPage(const SettingPage());
+          }),
+          // _buildDrawerItem(context, icon: Icons.notifications, label: kDrawerNotificationText.tr(), onTap: () {
+          //   _showComingSoonDialog(context);
+          // }),
+          _buildDrawerItem(context, icon: Icons.rate_review, label: kDrawerWriteAnAppStoreReviewText.tr(), onTap: () {
+            _showComingSoonDialog(context);
+          }),
+          _buildDrawerItem(context, icon: Icons.share, label: kDrawerShareTheAppText.tr(), onTap: () {
+            _showComingSoonDialog(context);
           }),
           _buildDrawerItem(context, icon: Icons.phone, label: kDrawerContactUsText.tr(), onTap: () {
             _showComingSoonDialog(context);
