@@ -56,29 +56,42 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               const SizedBox(height: kSP20x),
-              const EasyTextWidget(
-                text: 'New Books',
-                fontWeight: FontWeight.bold,
-              ),
-              const SizedBox(height: kSP10x),
               if (books.isNotEmpty)
                 SizedBox(
-                  height: kHomePageBookViewHeight,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
+                  height: MediaQuery.of(context).size.height * 0.8,
+                  child: GridView.builder(
+                    padding: EdgeInsets.zero,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 1,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
                     itemCount: books.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: kSP10x),
                     itemBuilder: (_, index) {
                       final book = books[index];
                       return GestureDetector(
                         onTap: () => context.navigateToNextPage(
                           BookOverviewPage(isPlay: false, book: book),
                         ),
-                        child: CacheNetworkImageWidget(
-                          radius: kSP10x,
-                          imageUrl: book.image,
-                          width: kHomePageBookImageWidth,
-                          fit: BoxFit.cover,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 10,
+                          children: [
+                            Expanded(
+                              child: CacheNetworkImageWidget(
+                                radius: kSP10x,
+                                imageUrl: book.image,
+                                width: kHomePageBookImageWidth,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            EasyTextWidget(
+                              text: book.name,
+                              maxLines: 2,
+                            ),
+                          ],
                         ),
                       );
                     },
