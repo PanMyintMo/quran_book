@@ -144,7 +144,10 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                   icon: Icons.laptop_chromebook,
                   buttonText: kReadText.tr(),
                   isGhost: true,
-                  onTap: () => context.navigateToNextPage(BookReadDetailsPage(title: book.name)),
+                  onTap: () => context.navigateToNextPage(BookReadDetailsPage(
+                    title: book.name,
+                    pdfUrl: book.pdf.url,
+                  )),
                 ),
                 const SizedBox(height: kSP10x),
                 _ReadAndPlayButtonView(
