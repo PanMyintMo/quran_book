@@ -28,39 +28,42 @@ class _BookReadDetailsPageState extends State<BookReadDetailsPage> {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () async {
-              showModalBottomSheet(
-                backgroundColor: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(kSP10x),
-                ),
-                context: context,
-                builder: (_) => FutureBuilder<List<String>>(
-                  future: extractPdfTitlesWithDio(widget.pdfUrl),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Container(
-                        margin: const EdgeInsets.all(kSP20x),
-                        padding: const EdgeInsets.all(kSP20x),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade100,
-                          borderRadius: BorderRadius.circular(kSP20x),
-                        ),
-                        child: const Text("Failed to load titles"),
-                      );
-                    } else {
-                      final titles = snapshot.data ?? [];
-                      return _MenuBottomOverView(title: titles);
-                    }
-                  },
-                ),
-              );
-            },
-          ),
+          // FutureBuilder<List<String>>(
+          //   future: extractPdfTitlesWithDio(widget.pdfUrl),
+          //   builder: (context, snapshot) {
+          //     if (snapshot.connectionState == ConnectionState.waiting) {
+          //       return const Center(child: CircularProgressIndicator());
+          //     } else if (snapshot.hasError) {
+          //       return Container(
+          //         margin: const EdgeInsets.all(kSP20x),
+          //         padding: const EdgeInsets.all(kSP20x),
+          //         decoration: BoxDecoration(
+          //           color: Colors.red.shade100,
+          //           borderRadius: BorderRadius.circular(kSP20x),
+          //         ),
+          //         child: const Text("Failed to load titles"),
+          //       );
+          //     } else {
+          //       final titles = snapshot.data ?? [];
+          //       if (titles.isEmpty) {
+          //         return const SizedBox();
+          //       }
+          //       return IconButton(
+          //         icon: const Icon(Icons.menu),
+          //         onPressed: () async {
+          //           showModalBottomSheet(
+          //             backgroundColor: Colors.transparent,
+          //             shape: RoundedRectangleBorder(
+          //               borderRadius: BorderRadius.circular(kSP10x),
+          //             ),
+          //             context: context,
+          //             builder: (_) => _MenuBottomOverView(title: titles),
+          //           );
+          //         },
+          //       );
+          //     }
+          //   },
+          // ),
         ],
         centerTitle: true,
         title: EasyTextWidget(
