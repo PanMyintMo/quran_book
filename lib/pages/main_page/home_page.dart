@@ -58,16 +58,10 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: kSP20x),
               if (books.isNotEmpty)
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.8,
-                  child: GridView.builder(
+                  height: MediaQuery.of(context).size.height * 0.35, // adjust height
+                  child: ListView.builder(
                     padding: EdgeInsets.zero,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 1,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                    ),
+                    scrollDirection: Axis.horizontal,
                     itemCount: books.length,
                     itemBuilder: (_, index) {
                       final book = books[index];
@@ -75,28 +69,32 @@ class _HomePageState extends State<HomePage> {
                         onTap: () => context.navigateToNextPage(
                           BookOverviewPage(isPlay: false, book: book),
                         ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          spacing: 10,
-                          children: [
-                            Expanded(
-                              child: CacheNetworkImageWidget(
-                                radius: kSP10x,
-                                imageUrl: book.image,
-                                width: kHomePageBookImageWidth,
-                                fit: BoxFit.cover,
+                        child: Container(
+                          width: 150, // control item width
+                          margin: const EdgeInsets.only(right: 10),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Expanded(
+                                child: CacheNetworkImageWidget(
+                                  radius: kSP10x,
+                                  imageUrl: book.image,
+                                  width: kHomePageBookImageWidth,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                            ),
-                            EasyTextWidget(
-                              text: book.name,
-                              maxLines: 2,
-                            ),
-                          ],
+                              const SizedBox(height: 10),
+                              EasyTextWidget(
+                                text: book.name,
+                                maxLines: 2,
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
                   ),
-                ),
+                )
             ],
           );
         },
