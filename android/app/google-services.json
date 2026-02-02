@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "496161030293",
+    "firebase_url": "https://quran-book-30ddf-default-rtdb.firebaseio.com",
     "project_id": "quran-book-30ddf",
     "storage_bucket": "quran-book-30ddf.firebasestorage.app"
   },
@@ -12,7 +13,12 @@
           "package_name": "com.example.quran_book"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "496161030293-680n0k6mja6h046n96fagf5c1alg0su4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBgePfZ0Q3Uc1Q3DDz4NIgKe5hWBQvntOc"
@@ -20,7 +26,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "496161030293-680n0k6mja6h046n96fagf5c1alg0su4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "496161030293-qi7o1v272mg7m43uveatq6ghng70epbh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.quranbook"
+              }
+            }
+          ]
         }
       }
     }

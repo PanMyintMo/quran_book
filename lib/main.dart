@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quran_book/bloc/main_page/local_and_theme_bloc.dart';
+import 'package:quran_book/firebase_options.dart';
 import 'package:quran_book/pages/introduction/splash_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/strings.dart';
@@ -13,7 +14,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
-  await Firebase.initializeApp();
+ // await Firebase.initializeApp();
+ await Firebase.initializeApp(
+  options: DefaultFirebaseOptions.currentPlatform,
+);
+
+
   runApp(
     EasyLocalization(
       supportedLocales: [
