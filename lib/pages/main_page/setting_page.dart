@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quran_book/bloc/main_page/local_and_theme_bloc.dart';
-import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
 import 'package:quran_book/utils/get_package_info_utils.dart';
@@ -13,113 +12,135 @@ class SettingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bloc = context.read<LocalAndThemeBloc>();
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: EasyTextWidget(
-          text: kDrawerSettingText.tr(),
+          text:    kDrawerSettingText.tr(),
+           textColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black, 
           fontWeight: FontWeight.w600,
+          fontSize: 16,
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
       ),
       body: Column(
         children: [
+          /// 🔹 Theme Switch
           Selector<LocalAndThemeBloc, bool>(
-              selector: (_, bloc) => bloc.isDarkMode,
-              builder: (context, isDarkMode, _) {
-                return Padding(
-                  padding: const EdgeInsets.all(kSP10x),
-                  child: Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(kSP10x),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildThemeOption(kLightModeText.tr(), !isDarkMode, context),
-                        _buildThemeOption(kDarkModeText.tr(), isDarkMode, context),
-                      ],
-                    ),
+            selector: (_, bloc) => bloc.isDarkMode,
+            builder: (context, isDarkMode, _) {
+              return Padding(
+                padding: const EdgeInsets.all(kSP10x),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(kSP10x),
                   ),
-                );
-              }),
-          const SizedBox(
-            height: kSP20x,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildThemeOption(
+                        context,
+                        label: kLightModeText.tr(),
+                        value: false,
+                        groupValue: isDarkMode,
+                        onChanged: () => bloc.setDarkMode(false),
+                      ),
+                      _buildThemeOption(
+                        context,
+                        label: kDarkModeText.tr(),
+                        value: true,
+                        groupValue: isDarkMode,
+                        onChanged: () => bloc.setDarkMode(true),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
+
+          const SizedBox(height: kSP20x),
+
           Expanded(
             child: ListView(
+              padding: EdgeInsets.zero,
               children: [
-                _buildSettingItem(
-                  Icons.language,
-                  kDrawerLanguageText.tr(),
-                ),
-                //  _buildSettingItem(Icons.notifications, kDrawerNotificationText.tr()),
-                const SizedBox(
-                  height: kSP20x,
-                ),
-                _buildSettingItem(Icons.star, kDrawerWriteAnAppStoreReviewText.tr()),
-                _buildSettingItem(Icons.share, kDrawerShareTheAppText.tr()),
-                const SizedBox(
-                  height: kSP20x,
-                ),
-                _buildSettingItem(Icons.info, kDrawerAboutUsText.tr()),
-                _buildSettingItem(Icons.contact_mail, kDrawerContactUsText.tr()),
-                _buildSettingItem(Icons.help, kDrawerHelpAndSupportText.tr()),
+                _buildSettingItem(context, Icons.language, kDrawerLanguageText.tr()),
+                const SizedBox(height: kSP20x),
+                _buildSettingItem(context, Icons.star, kDrawerWriteAnAppStoreReviewText.tr()),
+                _buildSettingItem(context, Icons.share, kDrawerShareTheAppText.tr()),
+                const SizedBox(height: kSP20x),
+                _buildSettingItem(context, Icons.info, kDrawerAboutUsText.tr()),
+                _buildSettingItem(context, Icons.contact_mail, kDrawerContactUsText.tr()),
+                _buildSettingItem(context, Icons.help, kDrawerHelpAndSupportText.tr()),
               ],
             ),
           ),
+
           Padding(
             padding: const EdgeInsets.symmetric(vertical: kSP20x),
             child: FutureBuilder<String>(
-                future: GetPackageInfoUtils.getAppVersion(),
-                builder: (_, snapShot) {
-                  if (snapShot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  if (snapShot.hasError) {
-                    return Center(child: EasyTextWidget(text: snapShot.error.toString()));
-                  }
-                  return EasyTextWidget(text: "Version: ${snapShot.data.toString()}", textColor: Colors.black54);
-                }),
+              future: GetPackageInfoUtils.getAppVersion(),
+              builder: (_, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                }
+                return EasyTextWidget(
+                  text: "Version: ${snapshot.data}",
+                  textColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black54,
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildThemeOption(String text, bool isSelected, BuildContext context) {
+  // -------------------------
+  // Theme Option
+  // -------------------------
+  Widget _buildThemeOption(
+    BuildContext context, {
+    required String label,
+    required bool value,
+    required bool groupValue,
+    required VoidCallback onChanged,
+  }) {
+    final textColor = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black;
     return Column(
       children: [
-        Radio(
-          value: text,
-          groupValue: isSelected ? text : null,
-          onChanged: (value) {
-            // final bloc = context.read<LocalAndThemeBloc>();
-            // bloc.toggleTheme();
-          },
+        Radio<bool>(
+          value: value,
+          groupValue: groupValue,
+          onChanged: (_) => onChanged(),
+          activeColor: Theme.of(context).colorScheme.primary,
         ),
-        Text(text, style: TextStyle(fontSize: kFontSize16x)),
+        Text(label, style: TextStyle(fontSize: kFontSize16x, color: textColor)),
       ],
     );
   }
 
-  Widget _buildSettingItem(IconData icon, String title) {
+  // -------------------------
+  // Setting Item
+  // -------------------------
+  Widget _buildSettingItem(BuildContext context, IconData icon, String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: kSP10x, vertical: kSP10x),
       child: Container(
         decoration: BoxDecoration(
-          color: kAppPrimaryColor,
+          color: Theme.of(context).colorScheme.onSecondary,
           borderRadius: BorderRadius.circular(8),
         ),
         child: ListTile(
-          leading: Icon(icon, color: Colors.white),
-          title: Text(title, style: TextStyle(color: Colors.white)),
-          trailing: Icon(Icons.arrow_forward_ios, color: Colors.white),
+          leading: Icon(icon, color: Theme.of(context).iconTheme.color),
+          title: Text(title, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color)),
+          trailing: Icon(Icons.arrow_forward_ios, color: Theme.of(context).iconTheme.color),
           onTap: () {},
         ),
       ),
