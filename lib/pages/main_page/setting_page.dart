@@ -2,8 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quran_book/bloc/main_page/local_and_theme_bloc.dart';
+import 'package:quran_book/pages/main_page/language_page.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
+import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/utils/get_package_info_utils.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 
@@ -70,14 +72,27 @@ class SettingPage extends StatelessWidget {
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                _buildSettingItem(context, Icons.language, kDrawerLanguageText.tr()),
+                _buildSettingItem(context, Icons.language, kDrawerLanguageText.tr(),onPress: () {
+                  context.navigateToNextPage(LanguagePage());
+                  
+                },),
                 const SizedBox(height: kSP20x),
-                _buildSettingItem(context, Icons.star, kDrawerWriteAnAppStoreReviewText.tr()),
-                _buildSettingItem(context, Icons.share, kDrawerShareTheAppText.tr()),
+                _buildSettingItem(context, Icons.star, kDrawerWriteAnAppStoreReviewText.tr(),onPress: () {
+                  
+                },),
+                _buildSettingItem(context, Icons.share, kDrawerShareTheAppText.tr(),onPress: () {
+                  
+                },),
                 const SizedBox(height: kSP20x),
-                _buildSettingItem(context, Icons.info, kDrawerAboutUsText.tr()),
-                _buildSettingItem(context, Icons.contact_mail, kDrawerContactUsText.tr()),
-                _buildSettingItem(context, Icons.help, kDrawerHelpAndSupportText.tr()),
+                _buildSettingItem(context, Icons.info, kDrawerAboutUsText.tr(),onPress: () {
+                  
+                },),
+                _buildSettingItem(context, Icons.contact_mail, kDrawerContactUsText.tr(),onPress: () {
+                  
+                },),
+                _buildSettingItem(context, Icons.help, kDrawerHelpAndSupportText.tr(),onPress: () {
+                  
+                },),
               ],
             ),
           ),
@@ -129,7 +144,7 @@ class SettingPage extends StatelessWidget {
   // -------------------------
   // Setting Item
   // -------------------------
-  Widget _buildSettingItem(BuildContext context, IconData icon, String title) {
+  Widget _buildSettingItem(BuildContext context, IconData icon, String title,{required VoidCallback onPress}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: kSP10x, vertical: kSP10x),
       child: Container(
@@ -141,7 +156,10 @@ class SettingPage extends StatelessWidget {
           leading: Icon(icon, color: Theme.of(context).iconTheme.color),
           title: Text(title, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color)),
           trailing: Icon(Icons.arrow_forward_ios, color: Theme.of(context).iconTheme.color),
-          onTap: () {},
+          onTap: onPress,
+          // onTap: () {
+          //   context.navigateToNextPage(LanguagePage());
+          // },
         ),
       ),
     );
