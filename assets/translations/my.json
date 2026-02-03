@@ -45,7 +45,7 @@
   "login_email_hint": "သင့်အီးမေးလ်ထည့်ပါ",
   "login_password": "စကားဝှက်",
   "login_password_hint": "သင့်စကားဝှက်ထည့်ပါ",
-  "login_forget_password": "စကားဝှက်မေ့နေပါသလား? ပြန်လည်ပြုပြင်ပါ",
+  "login_forget_password": "စကားဝှက်မေ့နေပါသလား?",
   "login_or_with": "သို့မဟုတ် အကောင့်ဝင်ရန်",
   "login_no_account": "အကောင့်မရှိဘူးလား?",
   "create_new_password": "စကားဝှက်အသစ်ဖန်တီးပါ",

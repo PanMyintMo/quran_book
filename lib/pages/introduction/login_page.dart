@@ -4,6 +4,7 @@ import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/pages/admin/admin_home_page.dart';
 import 'package:quran_book/pages/introduction/forget_password_page.dart';
 import 'package:quran_book/pages/introduction/register_page.dart';
+import 'package:quran_book/pages/introduction/reset_password_page.dart';
 import 'package:quran_book/pages/introduction/welcome_page.dart';
 import 'package:quran_book/pages/main_page/index_page.dart';
 import 'package:quran_book/resources/colors.dart';
@@ -139,7 +140,9 @@ class _LoginPageState extends State<LoginPage> {
                 alignment: Alignment.centerRight,
                 child: GestureDetector(
                   onTap: () {
-                    context.navigateToNextPage(const ForgotPasswordPage());
+                    
+                    context.navigateToNextPage(ResetPasswordPage());
+                  //  context.navigateToNextPage(const ForgotPasswordPage());
                   },
                   child: EasyTextWidget(
                     text: kLoginForgetPasswordLabelText.tr(),
@@ -170,21 +173,23 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
               SizedBox(height: kSP10x),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildSocialLoginButton(
-                    kGoogle.tr(),
-                    AssetImageUtils.kGoogleIcon,
-                  ),
-                  SizedBox(width: kSP20x),
-                  _buildSocialLoginButton(
-                    kApple.tr(),
-                    AssetImageUtils.kAppleIcon,
-                  ),
-                ],
-              ),
-              SizedBox(height: kSP20x),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: [
+              //     _buildSocialLoginButton(
+              //       kGoogle.tr(),
+              //       AssetImageUtils.kGoogleIcon,
+              //     ),
+              //     SizedBox(width: kSP20x),
+              //     _buildSocialLoginButton(
+              //       kApple.tr(),
+              //       AssetImageUtils.kAppleIcon,
+              //     ),
+              //   ],
+              // ),
+              // SizedBox(height: kSP20x),
+             
+             
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
