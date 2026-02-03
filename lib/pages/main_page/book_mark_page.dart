@@ -144,7 +144,7 @@ class _BookMarkItemView extends StatelessWidget {
 }
 
 class HomePageDrawerView extends StatelessWidget {
-  const HomePageDrawerView();
+  const HomePageDrawerView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -167,6 +167,7 @@ class HomePageDrawerView extends StatelessWidget {
                     text: kDrawerWelcomeText.tr(),
                     fontSize: kFontSize18x,
                     fontWeight: FontWeight.bold,
+                     textColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black, 
                   ),
                   FutureBuilder<String>(
                       future: GetPackageInfoUtils.getAppVersion(),
@@ -251,7 +252,7 @@ class HomePageDrawerView extends StatelessWidget {
 }
 
 class HomePageAppbarView extends StatelessWidget {
-  const HomePageAppbarView({required this.onTapLeadingIcon});
+  const HomePageAppbarView({super.key, required this.onTapLeadingIcon});
 
   final VoidCallback onTapLeadingIcon;
 

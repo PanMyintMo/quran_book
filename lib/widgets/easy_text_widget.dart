@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
 
 class EasyTextWidget extends StatelessWidget {
   const EasyTextWidget({
     super.key,
     required this.text,
-    this.textColor = kBlackColor,
+    this.textColor, // make optional
     this.fontSize = kFontSize14x,
     this.fontFamily,
     this.textAlign,
@@ -15,7 +14,7 @@ class EasyTextWidget extends StatelessWidget {
   });
 
   final String text;
-  final Color textColor;
+  final Color? textColor; // optional
   final double fontSize;
   final String? fontFamily;
   final TextAlign? textAlign;
@@ -24,16 +23,19 @@ class EasyTextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Use provided color if not null, otherwise use theme
+    final color = textColor ?? Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black;
+
     return Text(
       text,
       textAlign: textAlign,
       maxLines: maxLines,
+      overflow: TextOverflow.ellipsis,
       style: TextStyle(
         fontWeight: fontWeight,
         fontFamily: fontFamily,
-        color: textColor,
+        color: color,
         fontSize: fontSize,
-        overflow: TextOverflow.ellipsis,
       ),
     );
   }
