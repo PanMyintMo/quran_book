@@ -32,7 +32,7 @@ class OnBoardingPage extends StatelessWidget {
                 height: kSP40x,
               ),
               EasyTextWidget(
-                text: 'Starting To Live With The AI- Quran',
+                text: 'Welcome',
                 fontWeight: FontWeight.bold,
                 textColor: kWhiteColor,
                 fontSize: kFontSize32x,

@@ -25,7 +25,7 @@ class BookMarkPage extends StatelessWidget {
     final String? userId = FirebaseAuth.instance.currentUser?.uid;
 
     return Scaffold(
-      drawer: const _HomePageDrawerView(),
+      drawer: const HomePageDrawerView(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(kSP10x),
@@ -34,7 +34,7 @@ class BookMarkPage extends StatelessWidget {
             children: [
               Builder(
                 builder: (context) {
-                  return _HomePageAppbarView(
+                  return HomePageAppbarView(
                     onTapLeadingIcon: () => Scaffold.of(context).openDrawer(),
                   );
                 },
@@ -143,8 +143,8 @@ class _BookMarkItemView extends StatelessWidget {
   }
 }
 
-class _HomePageDrawerView extends StatelessWidget {
-  const _HomePageDrawerView();
+class HomePageDrawerView extends StatelessWidget {
+  const HomePageDrawerView();
 
   @override
   Widget build(BuildContext context) {
@@ -250,8 +250,8 @@ class _HomePageDrawerView extends StatelessWidget {
   }
 }
 
-class _HomePageAppbarView extends StatelessWidget {
-  const _HomePageAppbarView({required this.onTapLeadingIcon});
+class HomePageAppbarView extends StatelessWidget {
+  const HomePageAppbarView({required this.onTapLeadingIcon});
 
   final VoidCallback onTapLeadingIcon;
 

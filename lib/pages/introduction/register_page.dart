@@ -147,32 +147,32 @@ class _RegisterPageState extends State<RegisterPage> {
                 buttonTextColor: kWhiteColor,
                 buttonText: kRegister.tr(),
               ),
-              SizedBox(height: kSP20x),
-              Row(
-                children: [
-                  const Expanded(child: Divider()),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: kSP10x),
-                    child: EasyTextWidget(text: kRegisterContinueWithText.tr()),
-                  ),
-                  const Expanded(child: Divider()),
-                ],
-              ),
-              SizedBox(height: kSP20x),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildSocialLoginButton(
-                    kGoogle.tr(),
-                    AssetImageUtils.kGoogleIcon,
-                  ),
-                  SizedBox(width: kSP20x),
-                  _buildSocialLoginButton(
-                    kApple.tr(),
-                    AssetImageUtils.kAppleIcon,
-                  ),
-                ],
-              ),
+              // SizedBox(height: kSP20x),
+              // Row(
+              //   children: [
+              //     const Expanded(child: Divider()),
+              //     Padding(
+              //       padding: const EdgeInsets.symmetric(horizontal: kSP10x),
+              //       child: EasyTextWidget(text: kRegisterContinueWithText.tr()),
+              //     ),
+              //     const Expanded(child: Divider()),
+              //   ],
+              // ),
+              // SizedBox(height: kSP20x),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: [
+              //     _buildSocialLoginButton(
+              //       kGoogle.tr(),
+              //       AssetImageUtils.kGoogleIcon,
+              //     ),
+              //     SizedBox(width: kSP20x),
+              //     _buildSocialLoginButton(
+              //       kApple.tr(),
+              //       AssetImageUtils.kAppleIcon,
+              //     ),
+              //   ],
+              // ),
               SizedBox(height: kSP20x),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

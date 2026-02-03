@@ -25,25 +25,36 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   Future<void> _checkLoginStatus() async {
+    // 🔹 User not logged in → Welcome
     if (!_firebaseModel.isLoggedIn()) {
-      if (mounted) context.navigateToNextPage(const WelcomePage());
+      if (mounted) {
+        context.navigateToNextPageWithRemoveUntil(const WelcomePage());
+      }
       return;
     }
 
-    final userId = _firebaseModel.currentUser?.uid;
-    if (userId != null) {
-      final users = await _firebaseModel.getAllUsers();
-      final currentUser = users.firstWhere((user) => user.id == userId);
+    try {
+      // 🔹 Fetch ONLY current user (no permission issue)
+      final currentUser = await _firebaseModel.getCurrentUserVO();
 
-      if (mounted) {
-        if (currentUser.isAdmin) {
-          context.navigateToNextPageWithRemoveUntil(const AdminHomePage());
-        } else {
-          context.navigateToNextPageWithRemoveUntil(const IndexPage());
-        }
+      if (!mounted) return;
+
+      if (currentUser == null) {
+        context.navigateToNextPageWithRemoveUntil(const WelcomePage());
+        return;
       }
-    } else {
-      if (mounted) context.navigateToNextPageWithRemoveUntil(const WelcomePage());
+
+      // 🔹 Admin / Normal user routing
+      if (currentUser.isAdmin) {
+        context.navigateToNextPageWithRemoveUntil(const AdminHomePage());
+      } else {
+        context.navigateToNextPageWithRemoveUntil(const IndexPage());
+      }
+    } catch (e) {
+      // 🔹 Safety fallback
+      if (mounted) {
+        context.navigateToNextPageWithRemoveUntil(const WelcomePage());
+      }
     }
   }
 

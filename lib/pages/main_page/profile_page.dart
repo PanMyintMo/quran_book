@@ -4,6 +4,7 @@ import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/user_vo.dart';
 import 'package:quran_book/pages/introduction/login_page.dart';
 import 'package:quran_book/pages/introduction/welcome_page.dart';
+import 'package:quran_book/pages/main_page/book_mark_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
@@ -49,6 +50,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const HomePageDrawerView(),
       appBar: AppBar(
         centerTitle: true,
         title: EasyTextWidget(
