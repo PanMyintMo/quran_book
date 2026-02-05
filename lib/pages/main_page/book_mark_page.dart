@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/book_vo.dart';
+import 'package:quran_book/pages/main_page/about_us_page.dart';
 import 'package:quran_book/pages/main_page/book_overview_page.dart';
 import 'package:quran_book/pages/main_page/language_page.dart';
 import 'package:quran_book/pages/main_page/setting_page.dart';
@@ -211,7 +212,9 @@ class HomePageDrawerView extends StatelessWidget {
             _showComingSoonDialog(context);
           }),
           _buildDrawerItem(context, icon: Icons.info_outline, label: kDrawerAboutUsText.tr(), onTap: () {
-            _showComingSoonDialog(context);
+            context.navigateToNextPage(AboutUsPage());
+
+           // _showComingSoonDialog(context);
           }),
         ],
       ),
