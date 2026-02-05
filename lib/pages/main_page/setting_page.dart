@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quran_book/bloc/main_page/local_and_theme_bloc.dart';
+import 'package:quran_book/pages/help_support_page.dart';
 import 'package:quran_book/pages/main_page/language_page.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
@@ -91,6 +92,8 @@ class SettingPage extends StatelessWidget {
                   
                 },),
                 _buildSettingItem(context, Icons.help, kDrawerHelpAndSupportText.tr(),onPress: () {
+
+                  context.navigateToNextPage(HelpSupportPage());
                   
                 },),
               ],

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/book_vo.dart';
+import 'package:quran_book/pages/help_support_page.dart';
 import 'package:quran_book/pages/main_page/about_us_page.dart';
 import 'package:quran_book/pages/main_page/book_overview_page.dart';
 import 'package:quran_book/pages/main_page/language_page.dart';
@@ -54,13 +55,18 @@ class BookMarkPage extends StatelessWidget {
                         stream: firebaseModel.watchAllBooks(),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
-                            return const Center(child: CircularProgressIndicator());
+                            return const Center(
+                                child: CircularProgressIndicator());
                           }
 
-                          final bookmarkedBooks = snapshot.data!.where((book) => book.userIDOfBookMark.contains(userId)).toList();
+                          final bookmarkedBooks = snapshot.data!
+                              .where((book) =>
+                                  book.userIDOfBookMark.contains(userId))
+                              .toList();
 
                           if (bookmarkedBooks.isEmpty) {
-                            return const Center(child: Text("No bookmarked books yet."));
+                            return const Center(
+                                child: Text("No bookmarked books yet."));
                           }
 
                           return ListView.builder(
@@ -168,53 +174,70 @@ class HomePageDrawerView extends StatelessWidget {
                     text: kDrawerWelcomeText.tr(),
                     fontSize: kFontSize18x,
                     fontWeight: FontWeight.bold,
-                     textColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black, 
+                    textColor: Theme.of(context).textTheme.bodyMedium?.color ??
+                        Colors.black,
                   ),
                   FutureBuilder<String>(
                       future: GetPackageInfoUtils.getAppVersion(),
                       builder: (_, snapShot) {
-                        if (snapShot.connectionState == ConnectionState.waiting) {
+                        if (snapShot.connectionState ==
+                            ConnectionState.waiting) {
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
                         }
                         if (snapShot.hasError) {
-                          return Center(child: EasyTextWidget(text: snapShot.error.toString()));
+                          return Center(
+                              child: EasyTextWidget(
+                                  text: snapShot.error.toString()));
                         }
-                        return EasyTextWidget(text: "Version: ${snapShot.data.toString()}");
+                        return EasyTextWidget(
+                            text: "Version: ${snapShot.data.toString()}");
                       }),
                 ],
               ),
             ),
           ),
-          _buildDrawerItem(context, icon: Icons.language, label: kDrawerLanguageText.tr(), onTap: () {
+          _buildDrawerItem(context,
+              icon: Icons.language, label: kDrawerLanguageText.tr(), onTap: () {
             context.navigateToNextPage(const LanguagePage());
           }),
-          _buildDrawerItem(context, icon: Icons.settings, label: kDrawerSettingText.tr(), onTap: () {
+          _buildDrawerItem(context,
+              icon: Icons.settings, label: kDrawerSettingText.tr(), onTap: () {
             context.navigateToNextPage(const SettingPage());
           }),
-          _buildDrawerItem(context, icon: Icons.brightness_6, label: kDrawerThemeText.tr(), onTap: () {
+          _buildDrawerItem(context,
+              icon: Icons.brightness_6,
+              label: kDrawerThemeText.tr(), onTap: () {
             context.navigateToNextPage(const SettingPage());
           }),
           // _buildDrawerItem(context, icon: Icons.notifications, label: kDrawerNotificationText.tr(), onTap: () {
           //   _showComingSoonDialog(context);
           // }),
-          _buildDrawerItem(context, icon: Icons.rate_review, label: kDrawerWriteAnAppStoreReviewText.tr(), onTap: () {
+          _buildDrawerItem(context,
+              icon: Icons.rate_review,
+              label: kDrawerWriteAnAppStoreReviewText.tr(), onTap: () {
             _showComingSoonDialog(context);
           }),
-          _buildDrawerItem(context, icon: Icons.share, label: kDrawerShareTheAppText.tr(), onTap: () {
+          _buildDrawerItem(context,
+              icon: Icons.share, label: kDrawerShareTheAppText.tr(), onTap: () {
             _showComingSoonDialog(context);
           }),
-          _buildDrawerItem(context, icon: Icons.phone, label: kDrawerContactUsText.tr(), onTap: () {
+          _buildDrawerItem(context,
+              icon: Icons.phone, label: kDrawerContactUsText.tr(), onTap: () {
             _showComingSoonDialog(context);
           }),
-          _buildDrawerItem(context, icon: Icons.help_outline, label: kDrawerHelpAndSupportText.tr(), onTap: () {
-            _showComingSoonDialog(context);
+          _buildDrawerItem(context,
+              icon: Icons.help_outline,
+              label: kDrawerHelpAndSupportText.tr(), onTap: () {
+            context.navigateToNextPage(HelpSupportPage());
           }),
-          _buildDrawerItem(context, icon: Icons.info_outline, label: kDrawerAboutUsText.tr(), onTap: () {
+          _buildDrawerItem(context,
+              icon: Icons.info_outline,
+              label: kDrawerAboutUsText.tr(), onTap: () {
             context.navigateToNextPage(AboutUsPage());
 
-           // _showComingSoonDialog(context);
+            // _showComingSoonDialog(context);
           }),
         ],
       ),
@@ -226,7 +249,8 @@ class HomePageDrawerView extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Coming Soon'),
-        content: const Text('This feature will available after uploading on PlayStore!'),
+        content: const Text(
+            'This feature will available after uploading on PlayStore!'),
         actions: [
           TextButton(
             onPressed: () => context.navigateBack(),
