@@ -1,6 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/book_vo.dart';
@@ -79,6 +81,34 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
 
   void _showMiniPlayer() => setState(() => showMiniPlayer = true);
 
+  Future<void> _downloadPdf() async {
+    final book = widget.book;
+    final pdfUrl = book.pdf.url;
+    if (pdfUrl.isEmpty) {
+      if (mounted) context.showErrorSnackBar("No PDF available to download.");
+      return;
+    }
+
+    try {
+      if (mounted) context.showLoadingDialog(message: "Downloading...");
+      final dir = await getApplicationDocumentsDirectory();
+      final sanitizedName =
+          book.name.replaceAll(RegExp(r'[^\w\s-]'), '').trim().replaceAll(' ', '_');
+      final fileName = '${sanitizedName}_${book.id}.pdf';
+      final filePath = '${dir.path}/$fileName';
+
+      await Dio().download(pdfUrl, filePath);
+      if (!mounted) return;
+      context.hideLoadingDialog();
+      context.showSuccessSnackBar("Downloaded: $fileName");
+    } catch (e) {
+      if (mounted) {
+        context.hideLoadingDialog();
+        context.showErrorSnackBar("Download failed: $e");
+      }
+    }
+  }
+
   void _hideMiniPlayer() {
     setState(() {
       showMiniPlayer = false;
@@ -139,7 +169,7 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                   Icon(_isBookmarked ? Icons.bookmark : Icons.bookmark_border),
             ),
             IconButton(
-              onPressed: () {},
+              onPressed: _downloadPdf,
               icon: const Icon(Icons.save_alt),
             ),
             IconButton(
