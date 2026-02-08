@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quran_book/bloc/main_page/local_and_theme_bloc.dart';
 import 'package:quran_book/pages/help_support_page.dart';
+import 'package:quran_book/pages/main_page/about_us_page.dart';
 import 'package:quran_book/pages/main_page/language_page.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
@@ -86,6 +87,7 @@ class SettingPage extends StatelessWidget {
                 },),
                 const SizedBox(height: kSP20x),
                 _buildSettingItem(context, Icons.info, kDrawerAboutUsText.tr(),onPress: () {
+                  context.navigateToNextPage(AboutUsPage());
                   
                 },),
                 _buildSettingItem(context, Icons.contact_mail, kDrawerContactUsText.tr(),onPress: () {

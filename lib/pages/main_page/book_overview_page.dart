@@ -29,6 +29,9 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
   final FirebaseModel _firebaseModel = FirebaseModel();
   bool isPlaying = false;
   bool showMiniPlayer = false;
+  bool _isBookmarked = false;
+  String? _currentUserId;
+  String? _unbookmarkedBookId;
 
   @override
   void initState() {
@@ -38,6 +41,17 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
     if (widget.book.audio?.url.isNotEmpty ?? false) {
       _audioPlayer.setUrl(widget.book.audio!.url);
     }
+    _loadBookmarkState();
+  }
+
+  Future<void> _loadBookmarkState() async {
+    final user = await _firebaseModel.getCurrentUserVO();
+    if (!mounted) return;
+    setState(() {
+      _currentUserId = user?.id;
+      _isBookmarked = _currentUserId != null &&
+          widget.book.userIDOfBookMark.contains(_currentUserId);
+    });
   }
 
   @override
@@ -76,120 +90,223 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
   @override
   Widget build(BuildContext context) {
     final book = widget.book;
-    return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(
-            onPressed: () async {
-              try {
-                final currentUserID = (await _firebaseModel.getCurrentUserVO())?.id;
-                if (currentUserID == null) {
-                  if (context.mounted) {
-                    context.showErrorSnackBar("Please login first.");
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          Navigator.of(context).pop(_unbookmarkedBookId);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          actions: [
+            IconButton(
+              onPressed: () async {
+                try {
+                  final userId = _currentUserId ??
+                      (await _firebaseModel.getCurrentUserVO())?.id;
+
+                  if (userId == null) {
+                    if (mounted)
+                      context.showErrorSnackBar("Please login first.");
+                    return;
                   }
-                  return;
+
+                  await _firebaseModel.toggleBookmark(book.id, userId);
+                  if (!mounted) return;
+
+                  setState(() {
+                    _isBookmarked = !_isBookmarked;
+
+                    if (_isBookmarked) {
+                      book.userIDOfBookMark.add(userId); // ✅ ADD locally
+                    } else {
+                      book.userIDOfBookMark.remove(userId); // ✅ REMOVE locally
+                      _unbookmarkedBookId = book.id;
+                    }
+                  });
+
+                  context.showSuccessSnackBar(
+                    _isBookmarked
+                        ? "Bookmarked successfully!"
+                        : "Removed from bookmarks.",
+                  );
+                } catch (e) {
+                  if (mounted) context.showErrorSnackBar("Bookmark failed: $e");
                 }
-                await _firebaseModel.toggleBookmark(book.id, currentUserID);
-                if (mounted) context.showSuccessSnackBar("Bookmarked successfully!");
-              } catch (e) {
-                if (mounted) context.showErrorSnackBar("Bookmark failed: $e");
-              }
-            },
-            icon: const Icon(Icons.bookmark),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.save_alt),
-          ),
-          IconButton(
-            onPressed: () => showDialog(
-              context: context,
-              builder: (_) => const _DonateDialogView(title: 'Are you sure about the donation?'),
+              },
+              icon:
+                  Icon(_isBookmarked ? Icons.bookmark : Icons.bookmark_border),
             ),
-            icon: const Icon(Icons.card_giftcard),
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(kSP20x),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Center(
-                  child: CacheNetworkImageWidget(
-                    width: kBookDetailsOverViewImageWidth,
-                    height: kBookDetailsOverViewImageHeight,
-                    imageUrl: book.image,
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.save_alt),
+            ),
+            IconButton(
+              onPressed: () => showDialog(
+                context: context,
+                builder: (_) => const _DonateDialogView(
+                    title: 'Are you sure about the donation?'),
+              ),
+              icon: const Icon(Icons.card_giftcard),
+            ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.all(kSP20x),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: CacheNetworkImageWidget(
+                      width: kBookDetailsOverViewImageWidth,
+                      height: kBookDetailsOverViewImageHeight,
+                      imageUrl: book.image,
+                    ),
                   ),
-                ),
-                const SizedBox(height: kSP10x),
-                EasyTextWidget(
-                  text: book.name,
-                  fontWeight: FontWeight.w600,
-                  fontSize: kFontSize16x,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: kSP5x),
-                EasyTextWidget(
-                  text: 'by ${book.author}',
-                  fontSize: kFontSize12x,
-                  textColor: Colors.black54,
-                ),
-                const SizedBox(height: kSP10x),
-                const _OverViewAndTimeView(),
-                const SizedBox(height: kSP20x),
-                _ReadAndPlayButtonView(
-                  icon: Icons.laptop_chromebook,
-                  buttonText: kReadText.tr(),
-                  isGhost: true,
-                  onTap: () => context.navigateToNextPage(BookReadDetailsPage(
-                    title: book.name,
-                    pdfUrl: book.pdf.url,
-                  )),
-                ),
-                const SizedBox(height: kSP10x),
-                _ReadAndPlayButtonView(
-                  icon: Icons.play_arrow,
-                  buttonText: kListenText.tr(),
-                  isGhost: false,
-                  onTap: () {
-                    requestPermissions().then((_) {
-                      _togglePlayPause();
-                      _showMiniPlayer();
-                    });
-                  },
-                ),
-                const SizedBox(height: kSP30x),
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: EasyTextWidget(
+                  const SizedBox(height: kSP10x),
+                  EasyTextWidget(
                     text: book.name,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     fontSize: kFontSize16x,
+                    textAlign: TextAlign.center,
                   ),
-                ),
-                const SizedBox(height: kSP10x),
-                EasyTextWidget(
-                  textAlign: TextAlign.center,
-                  textColor: Colors.black54,
-                  text: book.overview,
-                  maxLines: 7,
-                ),
-                const SizedBox(height: kSP40x),
-              ],
+                  const SizedBox(height: kSP5x),
+                  EasyTextWidget(
+                    text: 'by ${book.author}',
+                    fontSize: kFontSize12x,
+                    textColor: Colors.black54,
+                  ),
+                  const SizedBox(height: kSP10x),
+                  _HorizontalInfoSlider(author: book.author),
+                  const SizedBox(height: kSP20x),
+                  _ReadAndPlayButtonView(
+                    icon: Icons.laptop_chromebook,
+                    buttonText: kReadText.tr(),
+                    isGhost: true,
+                    onTap: () => context.navigateToNextPage(BookReadDetailsPage(
+                      title: book.name,
+                      pdfUrl: book.pdf.url,
+                    )),
+                  ),
+                  const SizedBox(height: kSP10x),
+                  _ReadAndPlayButtonView(
+                    icon: Icons.play_arrow,
+                    buttonText: kListenText.tr(),
+                    isGhost: false,
+                    onTap: () {
+                      requestPermissions().then((_) {
+                        _togglePlayPause();
+                        _showMiniPlayer();
+                      });
+                    },
+                  ),
+                  const SizedBox(height: kSP30x),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: EasyTextWidget(
+                      text: book.name,
+                      fontWeight: FontWeight.w700,
+                      fontSize: kFontSize16x,
+                    ),
+                  ),
+                  const SizedBox(height: kSP10x),
+                  EasyTextWidget(
+                    textAlign: TextAlign.center,
+                    textColor: Colors.black54,
+                    text: book.overview,
+                    maxLines: 7,
+                  ),
+                  const SizedBox(height: kSP40x),
+                ],
+              ),
             ),
-          ),
-          AnimatedCrossFade(
-            firstChild: _MiniPlayerUI(
-              audioPlayer: _audioPlayer,
-              onClose: _hideMiniPlayer,
-              bookImage: book.image,
+            AnimatedCrossFade(
+              firstChild: _MiniPlayerUI(
+                audioPlayer: _audioPlayer,
+                onClose: _hideMiniPlayer,
+                bookImage: book.image,
+              ),
+              secondChild: const SizedBox.shrink(),
+              crossFadeState: showMiniPlayer
+                  ? CrossFadeState.showFirst
+                  : CrossFadeState.showSecond,
+              duration: const Duration(seconds: 1),
             ),
-            secondChild: const SizedBox.shrink(),
-            crossFadeState: showMiniPlayer ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-            duration: const Duration(seconds: 1),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Horizontal slider so users can see at a glance that content scrolls horizontally.
+class _HorizontalInfoSlider extends StatelessWidget {
+  const _HorizontalInfoSlider({required this.author});
+
+  final String author;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 44,
+      child: Scrollbar(
+        thumbVisibility: true,
+        trackVisibility: true,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          clipBehavior: Clip.none,
+          children: [
+            _InfoChip(
+              icon: Icons.laptop_chromebook,
+              label: kOverviewText.tr(),
+            ),
+            const SizedBox(width: kSP10x),
+            _InfoChip(
+              icon: Icons.access_time_outlined,
+              label: '38 m',
+            ),
+            const SizedBox(width: kSP10x),
+            _InfoChip(
+              icon: Icons.person_outline,
+              label: author,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  const _InfoChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: kSP10x, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(kSP20x),
+        color: kBoxColor,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: kBookDetailsOverViewAndTimeIconSize),
+          const SizedBox(width: kSP5x),
+          Flexible(
+            child: EasyTextWidget(
+              text: label,
+              fontSize: kFontSize12x,
+              fontWeight: FontWeight.w600,
+              maxLines: 1,
+            ),
           ),
         ],
       ),
@@ -251,7 +368,10 @@ class _MiniPlayerUI extends StatelessWidget {
   final VoidCallback onClose;
   final String bookImage;
 
-  const _MiniPlayerUI({required this.audioPlayer, required this.onClose, required this.bookImage});
+  const _MiniPlayerUI(
+      {required this.audioPlayer,
+      required this.onClose,
+      required this.bookImage});
 
   @override
   Widget build(BuildContext context) {
@@ -284,7 +404,8 @@ class _MiniPlayerUI extends StatelessWidget {
                   builder: (context, snapshot) {
                     final duration = snapshot.data ?? Duration.zero;
                     return EasyTextWidget(
-                      text: "${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')} left",
+                      text:
+                          "${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')} left",
                       fontWeight: FontWeight.w600,
                     );
                   },
@@ -296,7 +417,8 @@ class _MiniPlayerUI extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.replay_10),
                   onPressed: () {
-                    audioPlayer.seek(audioPlayer.position - const Duration(seconds: 10));
+                    audioPlayer.seek(
+                        audioPlayer.position - const Duration(seconds: 10));
                   },
                 ),
                 StreamBuilder<bool>(
@@ -314,7 +436,8 @@ class _MiniPlayerUI extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.forward_10),
                   onPressed: () {
-                    audioPlayer.seek(audioPlayer.position + const Duration(seconds: 10));
+                    audioPlayer.seek(
+                        audioPlayer.position + const Duration(seconds: 10));
                   },
                 ),
                 IconButton(
@@ -331,7 +454,11 @@ class _MiniPlayerUI extends StatelessWidget {
 }
 
 class _ReadAndPlayButtonView extends StatelessWidget {
-  const _ReadAndPlayButtonView({required this.onTap, required this.icon, required this.buttonText, required this.isGhost});
+  const _ReadAndPlayButtonView(
+      {required this.onTap,
+      required this.icon,
+      required this.buttonText,
+      required this.isGhost});
 
   final VoidCallback onTap;
   final IconData icon;
@@ -356,7 +483,9 @@ class _ReadAndPlayButtonView extends StatelessWidget {
           children: [
             Icon(icon, color: isGhost ? kBlackColor : kWhiteColor),
             const SizedBox(width: kSP10x),
-            EasyTextWidget(text: buttonText, textColor: isGhost ? kBlackColor : kWhiteColor),
+            EasyTextWidget(
+                text: buttonText,
+                textColor: isGhost ? kBlackColor : kWhiteColor),
           ],
         ),
       ),
@@ -364,52 +493,3 @@ class _ReadAndPlayButtonView extends StatelessWidget {
   }
 }
 
-class _OverViewAndTimeView extends StatelessWidget {
-  const _OverViewAndTimeView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: kSP10x),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(kSP20x),
-            color: kBoxColor,
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.laptop_chromebook, size: kBookDetailsOverViewAndTimeIconSize),
-              const SizedBox(width: kSP5x),
-              EasyTextWidget(
-                text: kOverviewText.tr(),
-                fontSize: kFontSize12x,
-                fontWeight: FontWeight.w600,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: kSP10x),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: kSP10x),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(kSP20x),
-            color: kBoxColor,
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.access_time_outlined, size: kBookDetailsOverViewAndTimeIconSize),
-              const SizedBox(width: kSP5x),
-              const EasyTextWidget(
-                text: '38 m',
-                fontSize: kFontSize12x,
-                fontWeight: FontWeight.w600,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}

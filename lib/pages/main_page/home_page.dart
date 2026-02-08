@@ -47,7 +47,8 @@ class _HomePageState extends State<HomePage> {
                   Builder(
                     builder: (context) {
                       return HomePageAppbarView(
-                        onTapLeadingIcon: () => Scaffold.of(context).openDrawer(),
+                        onTapLeadingIcon: () =>
+                            Scaffold.of(context).openDrawer(),
                       );
                     },
                   ),
@@ -73,45 +74,59 @@ class _HomePageState extends State<HomePage> {
                               },
                             ),
                           ),
-
                         const SizedBox(height: kSP20x),
-
-                        if (books.isNotEmpty)
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.35,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: books.length,
-                              itemBuilder: (_, index) {
-                                final book = books[index];
-                                return GestureDetector(
-                                  onTap: () => context.navigateToNextPage(
-                                    BookOverviewPage(isPlay: false, book: book),
-                                  ),
-                                  child: Container(
-                                    width: 150,
-                                    margin: const EdgeInsets.only(right: 10),
-                                    child: Column(
-                                      children: [
-                                        Expanded(
-                                          child: CacheNetworkImageWidget(
-                                            radius: kSP10x,
-                                            imageUrl: book.image,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 10),
-                                        EasyTextWidget(
-                                          text: book.name,
-                                          maxLines: 2,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
+                        if (books.isNotEmpty) ...[
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: EasyTextWidget(
+                              text: 'Books',
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18,
                             ),
                           ),
+                          const SizedBox(height: kSP10x),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.35,
+                            child: Scrollbar(
+                              thumbVisibility: true,
+                              trackVisibility: true,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.only(bottom: 8),
+                                itemCount: books.length,
+                                itemBuilder: (_, index) {
+                                  final book = books[index];
+                                  return GestureDetector(
+                                    onTap: () => context.navigateToNextPage(
+                                      BookOverviewPage(
+                                          isPlay: false, book: book),
+                                    ),
+                                    child: Container(
+                                      width: 150,
+                                      margin: const EdgeInsets.only(right: 10),
+                                      child: Column(
+                                        children: [
+                                          Expanded(
+                                            child: CacheNetworkImageWidget(
+                                              radius: kSP10x,
+                                              imageUrl: book.image,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 10),
+                                          EasyTextWidget(
+                                            text: book.name,
+                                            maxLines: 2,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

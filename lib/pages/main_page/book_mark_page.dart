@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -18,14 +20,92 @@ import 'package:quran_book/utils/random_color_utils.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 import 'package:timeago/timeago.dart' as time_ago;
 
-class BookMarkPage extends StatelessWidget {
+class BookMarkPage extends StatefulWidget {
   const BookMarkPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final FirebaseModel firebaseModel = FirebaseModel();
-    final String? userId = FirebaseAuth.instance.currentUser?.uid;
+  State<BookMarkPage> createState() => _BookMarkPageState();
+}
 
+class _BookMarkPageState extends State<BookMarkPage>
+    with RouteAware, WidgetsBindingObserver {
+  final FirebaseModel _firebaseModel = FirebaseModel();
+  String? _userId;
+  List<BookVO>? _bookmarkedBooks;
+  StreamSubscription<List<BookVO>>? _booksSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _userId = FirebaseAuth.instance.currentUser?.uid;
+    WidgetsBinding.instance.addObserver(this);
+    _subscribeToBooks();
+  }
+
+  void _subscribeToBooks() {
+    _booksSubscription?.cancel();
+    _booksSubscription = _firebaseModel.watchAllBooks().listen((allBooks) {
+      if (!mounted || _userId == null) return;
+      final bookmarked = allBooks
+          .where((book) => book.userIDOfBookMark.contains(_userId))
+          .toList();
+      setState(() => _bookmarkedBooks = bookmarked);
+    });
+  }
+
+  Future<void> _refreshBookmarks() async {
+    if (_userId == null) return;
+    try {
+      final allBooks = await _firebaseModel.getAllBooks();
+      if (!mounted) return;
+      setState(() {
+        _bookmarkedBooks = allBooks
+            .where((book) => book.userIDOfBookMark.contains(_userId))
+            .toList();
+      });
+    } catch (_) {
+      // Keep current list on error
+    }
+  }
+
+  @override
+  void dispose() {
+    _booksSubscription?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    BookMarkRouteObserver.instance.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      BookMarkRouteObserver.instance.subscribe(this, route);
+    }
+  }
+
+  @override
+  void didPopNext() {
+    // User returned from BookOverviewPage — refresh list so unbookmarked items disappear
+    setState(() {
+      _userId = FirebaseAuth.instance.currentUser?.uid;
+    });
+    _refreshBookmarks();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() {
+        _userId = FirebaseAuth.instance.currentUser?.uid;
+      });
+      _refreshBookmarks();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       drawer: const HomePageDrawerView(),
       body: SafeArea(
@@ -49,44 +129,49 @@ class BookMarkPage extends StatelessWidget {
               ),
               const SizedBox(height: kSP20x),
               Expanded(
-                child: userId == null
+                child: _userId == null
                     ? const Center(child: Text("User not logged in"))
-                    : StreamBuilder<List<BookVO>>(
-                        stream: firebaseModel.watchAllBooks(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          }
-
-                          final bookmarkedBooks = snapshot.data!
-                              .where((book) =>
-                                  book.userIDOfBookMark.contains(userId))
-                              .toList();
-
-                          if (bookmarkedBooks.isEmpty) {
-                            return const Center(
-                                child: Text("No bookmarked books yet."));
-                          }
-
-                          return ListView.builder(
-                            itemCount: bookmarkedBooks.length,
-                            itemBuilder: (_, index) {
-                              final book = bookmarkedBooks[index];
-                              return GestureDetector(
-                                onTap: () => context.navigateToNextPage(
-                                  BookOverviewPage(isPlay: false, book: book),
-                                ),
-                                child: _BookMarkItemView(
-                                  title: book.name,
-                                  subtitle: book.overview,
-                                  createdAt: book.createAt,
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
+                    : _bookmarkedBooks == null
+                        ? const Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : _bookmarkedBooks!.isEmpty
+                            ? const Center(
+                                child: Text("No bookmarked books yet."),
+                              )
+                            : ListView.builder(
+                                itemCount: _bookmarkedBooks!.length,
+                                itemBuilder: (_, index) {
+                                  final book = _bookmarkedBooks![index];
+                                  return GestureDetector(
+                                    onTap: () async {
+                                      final unbookmarkedId = await context
+                                          .navigateToNextPage(
+                                        BookOverviewPage(
+                                            isPlay: false, book: book),
+                                      ) as String?;
+                                      
+                                      if (!mounted) return;
+                                      // Remove unbookmarked book from list immediately
+                                      if (unbookmarkedId != null &&
+                                          _bookmarkedBooks != null) {
+                                        setState(() {
+                                          _bookmarkedBooks = _bookmarkedBooks!
+                                              .where((b) => b.id != unbookmarkedId)
+                                              .toList();
+                                        });
+                                      } else {
+                                        _refreshBookmarks();
+                                      }
+                                    },
+                                    child: _BookMarkItemView(
+                                      title: book.name,
+                                      subtitle: book.overview,
+                                      createdAt: book.createAt,
+                                    ),
+                                  );
+                                },
+                              ),
               ),
             ],
           ),
@@ -94,6 +179,12 @@ class BookMarkPage extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Route observer so BookMarkPage knows when user returns from BookOverviewPage.
+class BookMarkRouteObserver extends RouteObserver<PageRoute<dynamic>> {
+  BookMarkRouteObserver._();
+  static final BookMarkRouteObserver instance = BookMarkRouteObserver._();
 }
 
 class _BookMarkItemView extends StatelessWidget {

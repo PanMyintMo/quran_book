@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quran_book/bloc/main_page/local_and_theme_bloc.dart';
 import 'package:quran_book/firebase_options.dart';
+import 'package:quran_book/pages/main_page/book_mark_page.dart';
 import 'package:quran_book/pages/introduction/splash_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/strings.dart';
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<LocalAndThemeBloc>(builder: (context, bloc, _) {
       return MaterialApp(
+        navigatorObservers: [BookMarkRouteObserver.instance],
         locale: bloc.locale,
         supportedLocales: context.supportedLocales,
         localizationsDelegates: context.localizationDelegates,
