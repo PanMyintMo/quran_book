@@ -14,7 +14,8 @@ class AdminAddCategoryPage extends StatefulWidget {
   final String? subtitle;
   final String? imageUrl;
 
-  const AdminAddCategoryPage({super.key, this.name, this.subtitle, this.imageUrl});
+  const AdminAddCategoryPage(
+      {super.key, this.name, this.subtitle, this.imageUrl});
 
   @override
   State<AdminAddCategoryPage> createState() => _AdminAddCategoryPageState();
@@ -59,7 +60,8 @@ class _AdminAddCategoryPageState extends State<AdminAddCategoryPage> {
             leading: const Icon(Icons.photo_library),
             title: const Text("Gallery"),
             onTap: () async {
-              context.navigateBack(await PickerDelegateUtils.takePhoto(isCamera: false));
+              context.navigateBack(
+                  await PickerDelegateUtils.takePhoto(isCamera: false));
             },
           ),
         ],
@@ -77,13 +79,16 @@ class _AdminAddCategoryPageState extends State<AdminAddCategoryPage> {
     final name = _nameController.text.trim();
     final subtitle = _subtitleController.text.trim();
 
-    if ((_selectedImage != null || widget.imageUrl != null) && name.isNotEmpty && subtitle.isNotEmpty) {
+    if ((_selectedImage != null || widget.imageUrl != null) &&
+        name.isNotEmpty &&
+        subtitle.isNotEmpty) {
       try {
         context.showLoadingDialog();
 
         String imageUrl = widget.imageUrl ?? '';
         if (_selectedImage != null) {
-          imageUrl = await _firebaseModel.uploadFile(_selectedImage!, 'categories');
+          imageUrl =
+              await _firebaseModel.uploadFile(_selectedImage!, 'categories');
         }
 
         final category = CategoryVO(
@@ -121,47 +126,68 @@ class _AdminAddCategoryPageState extends State<AdminAddCategoryPage> {
     final imageWidget = _selectedImage != null
         ? Image.file(_selectedImage!, fit: BoxFit.cover)
         : widget.imageUrl != null
-            ? CacheNetworkImageWidget(imageUrl: widget.imageUrl!, fit: BoxFit.cover)
+            ? CacheNetworkImageWidget(
+                imageUrl: widget.imageUrl!,
+                fit: BoxFit.cover,
+              )
             : const Center(child: Text("Tap to select image"));
 
     return Scaffold(
-      appBar: AppBar(title: const EasyTextWidget(text: "Add New Category")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onTap: _pickImage,
-              child: Container(
-                height: 150,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(10),
+      appBar: AppBar(
+        title: const EasyTextWidget(text: "Add New Category"),
+      ),
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+            top: 16,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  height: 150,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  clipBehavior: Clip.hardEdge,
+                  child: imageWidget,
                 ),
-                child: imageWidget,
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Category Name'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _subtitleController,
-              decoration: const InputDecoration(labelText: 'Subtitle'),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _submitCategory,
-                child: const Text("Add Category"),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Category Name',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              TextField(
+                controller: _subtitleController,
+                decoration: const InputDecoration(
+                  labelText: 'Subtitle',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: _submitCategory,
+                  child: const Text("Add Category"),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
