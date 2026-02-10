@@ -139,67 +139,89 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
     final author = _authorController.text.trim();
     final category = _selectedCategory;
 
-    if ((widget.imageUrl != null || _selectedImage != null) &&
-        name.isNotEmpty &&
-        overview.isNotEmpty &&
-        author.isNotEmpty &&
-        _pdfController.text.isNotEmpty &&
-        _audioController.text.isNotEmpty &&
-        category != null) {
-      try {
-        context.showLoadingDialog();
+    // Validate required fields (audio is optional)
+    if ((widget.imageUrl == null && _selectedImage == null) ||
+        name.isEmpty ||
+        overview.isEmpty ||
+        author.isEmpty ||
+        (_pdfController.text.isEmpty && _selectedPdf == null) ||
+        category == null) {
+      context.showErrorSnackBar("Please fill all required fields (image, name, overview, author, PDF, category)");
+      return;
+    }
 
-        final id = const Uuid().v4();
-        final imageUrl = _selectedImage != null ? await _firebaseModel.uploadFile(_selectedImage!, 'images') : widget.imageUrl!;
+    try {
+      context.showLoadingDialog();
 
-        final pdfUrl = _selectedPdf != null ? await _firebaseModel.uploadFile(_selectedPdf!, 'pdf') : '';
+      final id = const Uuid().v4();
 
-        final audioUrl = _selectedAudio != null ? await _firebaseModel.uploadFile(_selectedAudio!, 'audio') : '';
+      // Upload image
+      String imageUrl;
+      if (_selectedImage != null) {
+        imageUrl = await _firebaseModel.uploadFile(_selectedImage!, 'images');
+      } else {
+        imageUrl = widget.imageUrl!;
+      }
 
-        final book = BookVO(
+      // Upload PDF if selected
+      String pdfUrl = '';
+      if (_selectedPdf != null) {
+        pdfUrl = await _firebaseModel.uploadFile(_selectedPdf!, 'pdf');
+      }
+
+      // Upload audio if selected (optional)
+      String audioUrl = '';
+      if (_selectedAudio != null) {
+        audioUrl = await _firebaseModel.uploadFile(_selectedAudio!, 'audio');
+      }
+
+      // Create audio VO only if audio is provided
+      AudioVO? audioVO;
+      if (_audioController.text.isNotEmpty && audioUrl.isNotEmpty) {
+        audioVO = AudioVO(
           id: id,
-          name: name,
-          overview: overview,
-          author: author,
-          image: imageUrl,
-          category: category,
-          pdf: PdfVO(
-            id: id,
-            name: _pdfController.text,
-            image: imageUrl,
-            url: pdfUrl,
-            createAt: DateTime.now(),
-            updateAt: DateTime.now(),
-          ),
-          audio: AudioVO(
-            id: id,
-            name: _audioController.text,
-            url: audioUrl,
-            createAt: DateTime.now(),
-            updateAt: DateTime.now(),
-          ),
-          pages: {},
-          readBy: [],
+          name: _audioController.text,
+          url: audioUrl,
           createAt: DateTime.now(),
           updateAt: DateTime.now(),
-          userIDOfBookMark: widget.userIDOfBookMark ?? [],
         );
-
-        await _firebaseModel.createBook(book);
-
-        if (mounted) {
-          context.hideLoadingDialog();
-          context.showSuccessSnackBar("Post added successfully");
-          Navigator.pop(context);
-        }
-      } catch (e) {
-        if (mounted) {
-          context.hideLoadingDialog();
-          context.showErrorSnackBar("Failed to add post: $e");
-        }
       }
-    } else {
-      context.showErrorSnackBar("Please fill all fields");
+
+      final book = BookVO(
+        id: id,
+        name: name,
+        overview: overview,
+        author: author,
+        image: imageUrl,
+        category: category,
+        pdf: PdfVO(
+          id: id,
+          name: _pdfController.text,
+          image: imageUrl,
+          url: pdfUrl,
+          createAt: DateTime.now(),
+          updateAt: DateTime.now(),
+        ),
+        audio: audioVO,
+        pages: {},
+        readBy: [],
+        createAt: DateTime.now(),
+        updateAt: DateTime.now(),
+        userIDOfBookMark: widget.userIDOfBookMark ?? [],
+      );
+
+      await _firebaseModel.createBook(book);
+
+      if (mounted) {
+        context.hideLoadingDialog();
+        context.showSuccessSnackBar("Post added successfully");
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        context.hideLoadingDialog();
+        context.showErrorSnackBar("Failed to add post: $e");
+      }
     }
   }
 

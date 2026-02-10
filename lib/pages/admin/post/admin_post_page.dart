@@ -34,21 +34,35 @@ class _AdminPostPageState extends State<AdminPostPage> {
     }
   }
 
-  void _openPdf(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      context.showErrorSnackBar("Could not open PDF link.");
+  Future<void> _openPdf(String url) async {
+    if (url.isEmpty) {
+      if (mounted) context.showErrorSnackBar("PDF URL is not available.");
+      return;
+    }
+    try {
+      final uri = Uri.parse(url);
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched && mounted) {
+        context.showErrorSnackBar("Could not open PDF link.");
+      }
+    } catch (e) {
+      if (mounted) context.showErrorSnackBar("Error opening PDF: $e");
     }
   }
 
-  void _openAudio(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      context.showErrorSnackBar("Could not open audio link.");
+  Future<void> _openAudio(String url) async {
+    if (url.isEmpty) {
+      if (mounted) context.showErrorSnackBar("Audio URL is not available.");
+      return;
+    }
+    try {
+      final uri = Uri.parse(url);
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched && mounted) {
+        context.showErrorSnackBar("Could not open audio link.");
+      }
+    } catch (e) {
+      if (mounted) context.showErrorSnackBar("Error opening audio: $e");
     }
   }
 

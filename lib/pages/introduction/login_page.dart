@@ -2,7 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/pages/admin/admin_home_page.dart';
-import 'package:quran_book/pages/introduction/forget_password_page.dart';
+// import 'package:quran_book/pages/introduction/forget_password_page.dart';
 import 'package:quran_book/pages/introduction/register_page.dart';
 import 'package:quran_book/pages/introduction/reset_password_page.dart';
 import 'package:quran_book/pages/introduction/welcome_page.dart';
@@ -160,19 +160,20 @@ class _LoginPageState extends State<LoginPage> {
                 backgroundColor: kAppPrimaryColor,
               ),
               SizedBox(height: kSP10x),
-              Row(
-                children: [
-                  const Expanded(child: Divider()),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: kSP10x),
-                    child: EasyTextWidget(
-                      text: kLoginOrLoginWithText.tr(),
-                    ),
-                  ),
-                  const Expanded(child: Divider()),
-                ],
-              ),
-              SizedBox(height: kSP10x),
+              // Google/Apple login not implemented yet - hidden
+              // Row(
+              //   children: [
+              //     const Expanded(child: Divider()),
+              //     Padding(
+              //       padding: const EdgeInsets.symmetric(horizontal: kSP10x),
+              //       child: EasyTextWidget(
+              //         text: kLoginOrLoginWithText.tr(),
+              //       ),
+              //     ),
+              //     const Expanded(child: Divider()),
+              //   ],
+              // ),
+              // SizedBox(height: kSP10x),
               // Row(
               //   mainAxisAlignment: MainAxisAlignment.center,
               //   children: [
@@ -188,8 +189,6 @@ class _LoginPageState extends State<LoginPage> {
               //   ],
               // ),
               // SizedBox(height: kSP20x),
-             
-             
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -210,25 +209,26 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildSocialLoginButton(String label, String assetPath) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: kWhiteColor,
-        side: const BorderSide(color: kBlackColor),
-        minimumSize: const Size(kGoogleAppleButtonWidth, kGoogleAppleButtonHeight),
-      ),
-      onPressed: () {},
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset(assetPath, height: kGoogleAppleImageHeight),
-          SizedBox(width: kSP10x),
-          EasyTextWidget(
-            text: label,
-            textColor: kBlackColor,
-          ),
-        ],
-      ),
-    );
-  }
+  // Google/Apple login not implemented - keeping for future use
+  // Widget _buildSocialLoginButton(String label, String assetPath) {
+  //   return ElevatedButton(
+  //     style: ElevatedButton.styleFrom(
+  //       backgroundColor: kWhiteColor,
+  //       side: const BorderSide(color: kBlackColor),
+  //       minimumSize: const Size(kGoogleAppleButtonWidth, kGoogleAppleButtonHeight),
+  //     ),
+  //     onPressed: () {},
+  //     child: Row(
+  //       mainAxisSize: MainAxisSize.min,
+  //       children: [
+  //         Image.asset(assetPath, height: kGoogleAppleImageHeight),
+  //         SizedBox(width: kSP10x),
+  //         EasyTextWidget(
+  //           text: label,
+  //           textColor: kBlackColor,
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 }

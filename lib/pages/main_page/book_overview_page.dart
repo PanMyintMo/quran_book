@@ -210,7 +210,11 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                     textColor: Colors.black54,
                   ),
                   const SizedBox(height: kSP10x),
-                  _HorizontalInfoSlider(author: book.author),
+                  _HorizontalInfoSlider(
+                    author: book.author,
+                    audioPlayer: _audioPlayer,
+                    hasAudio: book.audio?.url.isNotEmpty ?? false,
+                  ),
                   const SizedBox(height: kSP20x),
                   _ReadAndPlayButtonView(
                     icon: Icons.laptop_chromebook,
@@ -274,9 +278,15 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
 
 /// Horizontal slider so users can see at a glance that content scrolls horizontally.
 class _HorizontalInfoSlider extends StatelessWidget {
-  const _HorizontalInfoSlider({required this.author});
+  const _HorizontalInfoSlider({
+    required this.author,
+    required this.audioPlayer,
+    required this.hasAudio,
+  });
 
   final String author;
+  final AudioPlayer audioPlayer;
+  final bool hasAudio;
 
   @override
   Widget build(BuildContext context) {
@@ -291,14 +301,35 @@ class _HorizontalInfoSlider extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             _InfoChip(
-              icon: Icons.laptop_chromebook,
+              icon: Icons.menu_book,
               label: kOverviewText.tr(),
             ),
             const SizedBox(width: kSP10x),
-            _InfoChip(
-              icon: Icons.access_time_outlined,
-              label: '38 m',
-            ),
+            if (hasAudio)
+              StreamBuilder<Duration?>(
+                stream: audioPlayer.durationStream,
+                builder: (context, snapshot) {
+                  final duration = snapshot.data;
+                  String durationText = 'Audio';
+                  if (duration != null) {
+                    final minutes = duration.inMinutes;
+                    if (minutes > 0) {
+                      durationText = '$minutes min';
+                    } else {
+                      durationText = '${duration.inSeconds} sec';
+                    }
+                  }
+                  return _InfoChip(
+                    icon: Icons.access_time_outlined,
+                    label: durationText,
+                  );
+                },
+              )
+            else
+              _InfoChip(
+                icon: Icons.access_time_outlined,
+                label: 'No Audio',
+              ),
             const SizedBox(width: kSP10x),
             _InfoChip(
               icon: Icons.person_outline,

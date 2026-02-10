@@ -125,42 +125,54 @@ class _AdminAddDonationPageState extends State<AdminAddDonationPage> {
 
     return Scaffold(
       appBar: AppBar(title: const EasyTextWidget(text: "Add Donation Setup")),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: _pickImage,
-              child: Container(
-                height: 150,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(10),
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  height: 150,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  clipBehavior: Clip.hardEdge,
+                  child: imageWidget,
                 ),
-                child: imageWidget,
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Bank Name'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _accountController,
-              decoration: const InputDecoration(labelText: 'Account Number'),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _submitDonation,
-                child: const Text("Save Setup"),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Bank Name',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            )
-          ],
+              const SizedBox(height: 16),
+              TextField(
+                controller: _accountController,
+                decoration: const InputDecoration(
+                  labelText: 'Account Number',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: _submitDonation,
+                  child: const Text("Save Setup"),
+                ),
+              ),
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
       ),
     );

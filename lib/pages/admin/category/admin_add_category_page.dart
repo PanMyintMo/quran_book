@@ -139,12 +139,7 @@ class _AdminAddCategoryPageState extends State<AdminAddCategoryPage> {
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-            top: 16,
-          ),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -186,6 +181,7 @@ class _AdminAddCategoryPageState extends State<AdminAddCategoryPage> {
                   child: const Text("Add Category"),
                 ),
               ),
+              const SizedBox(height: 32),
             ],
           ),
         ),

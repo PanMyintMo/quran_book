@@ -53,6 +53,12 @@ class _ProfilePageState extends State<ProfilePage> {
       drawer: const HomePageDrawerView(),
       appBar: AppBar(
         centerTitle: true,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
         title: EasyTextWidget(
           text: kProfileText.tr(),
           fontWeight: FontWeight.w600,

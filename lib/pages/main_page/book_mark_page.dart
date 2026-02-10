@@ -8,6 +8,7 @@ import 'package:quran_book/data/vos/book_vo.dart';
 import 'package:quran_book/pages/help_support_page.dart';
 import 'package:quran_book/pages/main_page/about_us_page.dart';
 import 'package:quran_book/pages/main_page/book_overview_page.dart';
+import 'package:quran_book/pages/main_page/contact_us_page.dart';
 import 'package:quran_book/pages/main_page/language_page.dart';
 import 'package:quran_book/pages/main_page/setting_page.dart';
 import 'package:quran_book/resources/colors.dart';
@@ -251,7 +252,7 @@ class HomePageDrawerView extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: const BoxDecoration(color: Colors.white),
+            decoration: BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor),
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -316,7 +317,7 @@ class HomePageDrawerView extends StatelessWidget {
           }),
           _buildDrawerItem(context,
               icon: Icons.phone, label: kDrawerContactUsText.tr(), onTap: () {
-            _showComingSoonDialog(context);
+            context.navigateToNextPage(const ContactUsPage());
           }),
           _buildDrawerItem(context,
               icon: Icons.help_outline,
@@ -370,9 +371,16 @@ class HomePageDrawerView extends StatelessWidget {
 }
 
 class HomePageAppbarView extends StatelessWidget {
-  const HomePageAppbarView({super.key, required this.onTapLeadingIcon});
+  const HomePageAppbarView({
+    super.key,
+    required this.onTapLeadingIcon,
+    this.onTapBookmark,
+    this.showBookmarkIcon = false,
+  });
 
   final VoidCallback onTapLeadingIcon;
+  final VoidCallback? onTapBookmark;
+  final bool showBookmarkIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -385,7 +393,13 @@ class HomePageAppbarView extends StatelessWidget {
           width: kHomePageAppIconWidth,
           height: kHomePageAppIconHeight,
         ),
-        const SizedBox(width: kSP40x),
+        if (showBookmarkIcon && onTapBookmark != null)
+          IconButton(
+            icon: const Icon(Icons.bookmark_border),
+            onPressed: onTapBookmark,
+          )
+        else
+          const SizedBox(width: kSP40x),
       ],
     );
   }

@@ -245,25 +245,26 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Widget _buildSocialLoginButton(String label, String assetPath) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: kWhiteColor,
-        side: const BorderSide(color: kBlackColor),
-        minimumSize: const Size(kGoogleAppleButtonWidth, kGoogleAppleButtonHeight),
-      ),
-      onPressed: () {},
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset(assetPath, height: kGoogleAppleImageHeight),
-          SizedBox(width: kSP10x),
-          EasyTextWidget(
-            text: label,
-            textColor: kBlackColor,
-          ),
-        ],
-      ),
-    );
-  }
+  // Google/Apple login not implemented - keeping for future use
+  // Widget _buildSocialLoginButton(String label, String assetPath) {
+  //   return ElevatedButton(
+  //     style: ElevatedButton.styleFrom(
+  //       backgroundColor: kWhiteColor,
+  //       side: const BorderSide(color: kBlackColor),
+  //       minimumSize: const Size(kGoogleAppleButtonWidth, kGoogleAppleButtonHeight),
+  //     ),
+  //     onPressed: () {},
+  //     child: Row(
+  //       mainAxisSize: MainAxisSize.min,
+  //       children: [
+  //         Image.asset(assetPath, height: kGoogleAppleImageHeight),
+  //         SizedBox(width: kSP10x),
+  //         EasyTextWidget(
+  //           text: label,
+  //           textColor: kBlackColor,
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 }

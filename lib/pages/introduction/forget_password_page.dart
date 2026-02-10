@@ -16,7 +16,7 @@ class ForgotPasswordPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: kWhiteColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: kSP20x),

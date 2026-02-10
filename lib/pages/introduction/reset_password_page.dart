@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/pages/introduction/login_page.dart';
 import 'package:quran_book/resources/colors.dart';
@@ -17,17 +18,75 @@ class ResetPasswordPage extends StatefulWidget {
 }
 
 class _ResetPasswordPageState extends State<ResetPasswordPage> {
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
+
+  @override
+  void dispose() {
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handlePasswordReset() async {
+    final newPassword = _newPasswordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+
+    if (newPassword.isEmpty || confirmPassword.isEmpty) {
+      context.showErrorSnackBar("Please fill all fields");
+      return;
+    }
+
+    if (newPassword != confirmPassword) {
+      context.showErrorSnackBar("Passwords do not match");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      context.showErrorSnackBar("Password must be at least 6 characters");
+      return;
+    }
+
+    try {
+      context.showLoadingDialog();
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await user.updatePassword(newPassword);
+        if (mounted) {
+          context.hideLoadingDialog();
+          context.showSuccessSnackBar("Password updated successfully");
+          context.navigateToNextPageWithRemoveUntil(const LoginPage());
+        }
+      } else {
+        if (mounted) {
+          context.hideLoadingDialog();
+          context.showErrorSnackBar("Please login first to change password");
+          context.navigateToNextPageWithRemoveUntil(const LoginPage());
+        }
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        context.hideLoadingDialog();
+        context.showErrorSnackBar("Failed: ${e.message}");
+      }
+    } catch (e) {
+      if (mounted) {
+        context.hideLoadingDialog();
+        context.showErrorSnackBar("Failed: ${e.toString()}");
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: kWhiteColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: kSP20x),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -53,6 +112,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
             /// New Password
             _buildPasswordField(
+              controller: _newPasswordController,
               label: kCreateNewPasswordTitleText.tr(),
               hintText: kCreateNewPasswordTitleHintText.tr(),
               obscureText: _obscureNewPassword,
@@ -67,6 +127,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
             /// Confirm Password
             _buildPasswordField(
+              controller: _confirmPasswordController,
               label: kCreateNewPasswordRepeatTitleText.tr(),
               hintText: kCreateNewPasswordRepeatTitleHintText.tr(),
               obscureText: _obscureConfirmPassword,
@@ -83,12 +144,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               width: double.infinity,
               backgroundColor: kAppPrimaryColor,
               height: kResetPasswordSubmitHeight,
-              onPressed: () {
-                context.navigateToNextPageWithRemoveUntil(LoginPage());
-              },
+              onPressed: _handlePasswordReset,
               buttonText: kSubmit.tr(),
               buttonTextColor: kWhiteColor,
             ),
+            SizedBox(height: kSP40x),
           ],
         ),
       ),
@@ -96,6 +156,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   }
 
   Widget _buildPasswordField({
+    required TextEditingController controller,
     required String label,
     required String hintText,
     required bool obscureText,
@@ -107,6 +168,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         EasyTextWidget(text: label, fontWeight: FontWeight.bold),
         SizedBox(height: kSP10x),
         TextField(
+          controller: controller,
           obscureText: obscureText,
           enableSuggestions: false,
           autocorrect: false,
@@ -117,9 +179,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             ),
             suffixIcon: IconButton(
               icon: Icon(
-                obscureText
-                    ? Icons.visibility_off
-                    : Icons.visibility,
+                obscureText ? Icons.visibility_off : Icons.visibility,
               ),
               onPressed: onToggle,
             ),

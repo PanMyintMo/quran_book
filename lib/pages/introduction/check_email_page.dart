@@ -16,7 +16,7 @@ class CheckEmailPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: kSP20x),
@@ -24,7 +24,7 @@ class CheckEmailPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(height: kSP40x),
-            Icon(Icons.email, size: kCheckEmailIconSize, color: Colors.black),
+            Icon(Icons.email, size: kCheckEmailIconSize, color: Theme.of(context).iconTheme.color),
             SizedBox(height: kSP10x),
             EasyTextWidget(
               text: kCheckYourEmailLabelText.tr(),
