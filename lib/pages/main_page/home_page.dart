@@ -76,28 +76,10 @@ class _HomePageState extends State<HomePage> {
                           ),
                         const SizedBox(height: kSP20x),
                         if (books.isNotEmpty) ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              EasyTextWidget(
-                                text: 'Books',
-                                fontWeight: FontWeight.w600,
-                                fontSize: 18,
-                              ),
-                              Row(
-                                children: [
-                                  Icon(Icons.swipe, size: 16, color: Colors.grey),
-                                  const SizedBox(width: 4),
-                                  EasyTextWidget(
-                                    text: 'Swipe',
-                                    fontSize: 12,
-                                    textColor: Colors.grey,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
-                                ],
-                              ),
-                            ],
+                          EasyTextWidget(
+                            text: 'Books',
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18,
                           ),
                           const SizedBox(height: kSP10x),
                           SizedBox(

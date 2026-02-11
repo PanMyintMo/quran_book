@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
@@ -101,6 +102,12 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
       if (!mounted) return;
       context.hideLoadingDialog();
       context.showSuccessSnackBar("Downloaded: $fileName");
+
+      // Auto-open the downloaded file
+      final result = await OpenFilex.open(filePath);
+      if (result.type != ResultType.done && mounted) {
+        context.showErrorSnackBar("Could not open file: ${result.message}");
+      }
     } catch (e) {
       if (mounted) {
         context.hideLoadingDialog();
@@ -207,7 +214,7 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                   EasyTextWidget(
                     text: 'by ${book.author}',
                     fontSize: kFontSize12x,
-                    textColor: Colors.black54,
+                    textColor: Theme.of(context).textTheme.bodySmall?.color,
                   ),
                   const SizedBox(height: kSP10x),
                   _HorizontalInfoSlider(
@@ -249,7 +256,7 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                   const SizedBox(height: kSP10x),
                   EasyTextWidget(
                     textAlign: TextAlign.center,
-                    textColor: Colors.black54,
+                    textColor: Theme.of(context).textTheme.bodySmall?.color,
                     text: book.overview,
                     maxLines: 7,
                   ),

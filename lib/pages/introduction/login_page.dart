@@ -5,7 +5,6 @@ import 'package:quran_book/pages/admin/admin_home_page.dart';
 // import 'package:quran_book/pages/introduction/forget_password_page.dart';
 import 'package:quran_book/pages/introduction/register_page.dart';
 import 'package:quran_book/pages/introduction/reset_password_page.dart';
-import 'package:quran_book/pages/introduction/welcome_page.dart';
 import 'package:quran_book/pages/main_page/index_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
@@ -31,6 +30,12 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _handleLogin() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      context.showErrorSnackBar('Please enter email and password');
+      return;
+    }
+
     try {
       context.showLoadingDialog();
       await _firebaseModel.login(email, password);
@@ -45,8 +50,9 @@ class _LoginPageState extends State<LoginPage> {
             context.navigateToNextPageWithRemoveUntil(const IndexPage());
           }
         } else {
+          // If user data not found in Firestore, still go to IndexPage since Firebase Auth login succeeded
           if (mounted) {
-            context.navigateToNextPageWithRemoveUntil(const WelcomePage());
+            context.navigateToNextPageWithRemoveUntil(const IndexPage());
           }
         }
       }
