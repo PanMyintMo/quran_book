@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
 import 'package:quran_book/utils/context_extensions.dart';
@@ -13,12 +12,17 @@ class ContactUsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: EasyTextWidget(
           text: kDrawerContactUsText.tr(),
           fontWeight: FontWeight.w600,
+          textColor: theme.appBarTheme.titleTextStyle?.color ??
+              theme.textTheme.bodyMedium?.color,
         ),
       ),
       body: SingleChildScrollView(
@@ -30,7 +34,7 @@ class ContactUsPage extends StatelessWidget {
               child: Icon(
                 Icons.contact_support,
                 size: 80,
-                color: kAppPrimaryColor,
+                color: isDark ? Colors.white : theme.colorScheme.primary,
               ),
             ),
             const SizedBox(height: kSP20x),
@@ -45,7 +49,8 @@ class ContactUsPage extends StatelessWidget {
             Center(
               child: EasyTextWidget(
                 text: 'We would love to hear from you!',
-                textColor: Colors.grey,
+                textColor:
+                    theme.textTheme.bodySmall?.color ?? Colors.grey,
                 textAlign: TextAlign.center,
               ),
             ),
@@ -181,6 +186,10 @@ class _ContactItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return InkWell(
       onTap: onTap,
       onLongPress: onLongPress,
@@ -188,7 +197,9 @@ class _ContactItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(kSP15x),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(
+            color: isDark ? Colors.white24 : Colors.grey.shade300,
+          ),
           borderRadius: BorderRadius.circular(kSP10x),
         ),
         child: Row(
@@ -197,10 +208,13 @@ class _ContactItem extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(kSP10x),
               decoration: BoxDecoration(
-                color: kAppPrimaryColor.withOpacity(0.1),
+                color: colorScheme.primary.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(kSP10x),
               ),
-              child: Icon(icon, color: kAppPrimaryColor),
+              child: Icon(
+                icon,
+                color: isDark ? Colors.white : colorScheme.primary,
+              ),
             ),
             const SizedBox(width: kSP15x),
             Expanded(
@@ -215,14 +229,20 @@ class _ContactItem extends StatelessWidget {
                   const SizedBox(height: kSP5x),
                   EasyTextWidget(
                     text: subtitle,
-                    textColor: Colors.grey,
+                    textColor:
+                        theme.textTheme.bodySmall?.color ?? Colors.grey,
                     fontSize: kFontSize14x,
                   ),
                 ],
               ),
             ),
             if (onTap != null)
-              Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: theme.iconTheme.color?.withOpacity(0.7) ??
+                    (isDark ? Colors.white70 : Colors.grey),
+              ),
           ],
         ),
       ),
@@ -243,23 +263,31 @@ class _SocialButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final iconColor = isDark ? Colors.white : theme.colorScheme.primary;
+    
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(kSP10x),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: kSP15x, vertical: kSP10x),
         decoration: BoxDecoration(
-          color: kAppPrimaryColor.withOpacity(0.1),
+          color: theme.colorScheme.primary.withOpacity(0.12),
           borderRadius: BorderRadius.circular(kSP10x),
         ),
         child: Column(
           children: [
-            Icon(icon, color: kAppPrimaryColor, size: 28),
+            Icon(
+              icon,
+              color: iconColor,
+              size: 28,
+            ),
             const SizedBox(height: kSP5x),
             EasyTextWidget(
               text: label,
               fontSize: kFontSize12x,
-              textColor: kAppPrimaryColor,
+              textColor: iconColor,
             ),
           ],
         ),

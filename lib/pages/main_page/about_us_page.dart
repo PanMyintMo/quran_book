@@ -13,7 +13,8 @@ class AboutUsPage extends StatelessWidget {
     final cardColor = theme.cardColor; // automatically adapts to light/dark
     final titleColor = theme.colorScheme.primary; // primary color for title
     final bodyColor = theme.textTheme.bodyMedium?.color ?? Colors.black87;
-
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Scaffold(
       appBar: AppBar(
         title: EasyTextWidget(
@@ -86,17 +87,17 @@ class AboutUsPage extends StatelessWidget {
                       IconButton(
                         onPressed: () {},
                         icon: const Icon(Icons.facebook),
-                        color: theme.colorScheme.primary,
+                        color: isDark ? Colors.white : theme.colorScheme.primary,
                       ),
                       IconButton(
                         onPressed: () {},
                         icon: const Icon(Icons.email),
-                        color: theme.colorScheme.primary,
+                        color: isDark ? Colors.white : theme.colorScheme.primary,
                       ),
                       IconButton(
                         onPressed: () {},
                         icon: const Icon(Icons.phone),
-                        color: theme.colorScheme.primary,
+                        color: isDark ? Colors.white : theme.colorScheme.primary,
                       ),
                     ],
                   )
