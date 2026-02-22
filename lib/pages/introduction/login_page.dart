@@ -73,6 +73,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: kSP20x),
@@ -198,9 +199,10 @@ class _LoginPageState extends State<LoginPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  EasyTextWidget(text: kLoginDoNoHaveAnAccountText.tr()),
+                  EasyTextWidget(text: kLoginDoNoHaveAnAccountText.tr(), textColor: isDarkMode ? kWhiteColor : Colors.grey),
                   PrimaryButtonWidget(
                     buttonText: kRegister.tr(),
+                    buttonTextColor: isDarkMode ? kWhiteColor : kAppPrimaryColor,
                     buttonFontWeight: FontWeight.bold,
                     onPressed: () {
                       context.navigateToNextPageWithReplacement(const RegisterPage());

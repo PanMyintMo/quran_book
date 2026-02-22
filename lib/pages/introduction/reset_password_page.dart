@@ -1,6 +1,9 @@
+import 'dart:math' as logger;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:quran_book/pages/introduction/login_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
@@ -37,20 +40,24 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     final email = _emailController.text.trim();
 
     if (email.isEmpty) {
+      Logger().e("Please enter your email address");
       context.showErrorSnackBar("Please enter your email address");
       return;
     }
 
     // Basic email validation
     if (!email.contains('@') || !email.contains('.')) {
+      Logger().e("Please enter a valid email address");
       context.showErrorSnackBar("Please enter a valid email address");
       return;
     }
 
     try {
+      Logger().d("Sending reset email to $email");
       context.showLoadingDialog();
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       if (mounted) {
+        Logger().d("Password reset email sent! Check your inbox.");
         context.hideLoadingDialog();
         context.showSuccessSnackBar("Password reset email sent! Check your inbox.");
         setState(() {
@@ -58,11 +65,13 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         });
       }
     } on FirebaseAuthException catch (e) {
+      Logger().e("Failed to send password reset email: ${e.message}");
       if (mounted) {
         context.hideLoadingDialog();
         context.showErrorSnackBar("Failed: ${e.message}");
       }
     } catch (e) {
+      Logger().e("Failed to send password reset email: ${e.toString()}");
       if (mounted) {
         context.hideLoadingDialog();
         context.showErrorSnackBar("Failed: ${e.toString()}");
@@ -121,6 +130,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -245,7 +255,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               },
               child: EasyTextWidget(
                 text: "Back to Login",
-                textColor: kAppPrimaryColor,
+                textColor: isDarkMode ? kWhiteColor : kAppPrimaryColor,
               ),
             ),
 
