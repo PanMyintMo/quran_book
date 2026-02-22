@@ -12,6 +12,7 @@ class HelpSupportPage extends StatelessWidget {
     final textColor = theme.textTheme.bodyMedium?.color ?? Colors.black;
     final cardColor = theme.cardColor;
     final titleColor = theme.colorScheme.primary;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -53,7 +54,7 @@ class HelpSupportPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: titleColor,
+                      color: isDark ? Colors.white : titleColor,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -78,21 +79,21 @@ class HelpSupportPage extends StatelessWidget {
                           // Add your email action
                         },
                         icon: const Icon(Icons.email),
-                        color: theme.colorScheme.primary,
+                        color: isDark ? Colors.white : theme.colorScheme.primary,
                       ),
                       IconButton(
                         onPressed: () {
                           // Add your phone action
                         },
                         icon: const Icon(Icons.phone),
-                        color: theme.colorScheme.primary,
+                        color: isDark ? Colors.white : theme.colorScheme.primary,
                       ),
                       IconButton(
                         onPressed: () {
                           // Add any chat/support link
                         },
                         icon: const Icon(Icons.chat),
-                        color: theme.colorScheme.primary,
+                        color: isDark ? Colors.white : theme.colorScheme.primary,
                       ),
                     ],
                   )

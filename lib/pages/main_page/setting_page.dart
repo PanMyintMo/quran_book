@@ -133,14 +133,19 @@ class SettingPage extends StatelessWidget {
     required bool groupValue,
     required VoidCallback onChanged,
   }) {
-    final textColor = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black;
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final textColor = theme.textTheme.bodyMedium?.color ?? Colors.black;
+    // Use white for dark mode, primary color for light mode
+    final radioColor = isDarkMode ? Colors.white : theme.colorScheme.primary;
+    
     return Column(
       children: [
         Radio<bool>(
           value: value,
           groupValue: groupValue,
           onChanged: (_) => onChanged(),
-          activeColor: Theme.of(context).colorScheme.primary,
+          activeColor: radioColor,
         ),
         Text(label, style: TextStyle(fontSize: kFontSize16x, color: textColor)),
       ],
@@ -151,17 +156,34 @@ class SettingPage extends StatelessWidget {
   // Setting Item
   // -------------------------
   Widget _buildSettingItem(BuildContext context, IconData icon, String title,{required VoidCallback onPress}) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: kSP10x, vertical: kSP10x),
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.onSecondary,
+          // Use a proper surface color so it looks good in both
+          // light and dark themes instead of misusing onSecondary.
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(8),
         ),
         child: ListTile(
-          leading: Icon(icon, color: Theme.of(context).iconTheme.color),
-          title: Text(title, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color)),
-          trailing: Icon(Icons.arrow_forward_ios, color: Theme.of(context).iconTheme.color),
+          leading: Icon(
+            icon,
+            color: theme.iconTheme.color ?? colorScheme.primary,
+          ),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontSize: kFontSize16x,
+              color: theme.textTheme.bodyMedium?.color ?? colorScheme.onSurface,
+            ),
+          ),
+          trailing: Icon(
+            Icons.arrow_forward_ios,
+            color: theme.iconTheme.color ?? colorScheme.primary,
+          ),
           onTap: onPress,
           // onTap: () {
           //   context.navigateToNextPage(LanguagePage());

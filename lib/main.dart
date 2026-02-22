@@ -76,6 +76,9 @@ class MyApp extends StatelessWidget {
             selectedIconTheme: IconThemeData(
               color: kAppPrimaryColor,
             ),
+            unselectedIconTheme: IconThemeData(
+              color: Colors.grey,
+            ),
             selectedLabelStyle: TextStyle(
               color: kAppPrimaryColor,
             ),
@@ -140,13 +143,18 @@ class MyApp extends StatelessWidget {
             ),
           ),
           bottomNavigationBarTheme: BottomNavigationBarThemeData(
-            backgroundColor: Color(0xFF121212),
+            backgroundColor: const Color(0xFF121212),
+            // Keep labels in your primary color, but
+            // make the selected icon pure white for stronger contrast.
             selectedItemColor: kAppPrimaryColor,
             unselectedItemColor: Colors.white70,
-            selectedIconTheme: IconThemeData(
-              color: kAppPrimaryColor,
+            selectedIconTheme: const IconThemeData(
+              color: Colors.white,
             ),
-            selectedLabelStyle: TextStyle(
+            unselectedIconTheme: const IconThemeData(
+              color: Colors.white70,
+            ),
+            selectedLabelStyle: const TextStyle(
               color: kAppPrimaryColor,
             ),
           ),

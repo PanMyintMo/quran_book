@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:quran_book/pages/main_page/book_mark_page.dart';
 import 'package:quran_book/pages/main_page/home_page.dart';
 import 'package:quran_book/pages/main_page/profile_page.dart';
-import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/strings.dart';
 
 class IndexPage extends StatefulWidget {
@@ -31,10 +30,15 @@ class _IndexPageState extends State<IndexPage> {
       ),
       bottomNavigationBar: Builder(
         builder: (context) {
+          final theme = Theme.of(context);
+          final bottomNavTheme = theme.bottomNavigationBarTheme;
           return BottomNavigationBar(
-            unselectedItemColor: Colors.grey,
+            backgroundColor: bottomNavTheme.backgroundColor,
+            unselectedItemColor: bottomNavTheme.unselectedItemColor,
             currentIndex: _index,
-            selectedItemColor: kAppPrimaryColor,
+            selectedItemColor: bottomNavTheme.selectedItemColor,
+            selectedIconTheme: bottomNavTheme.selectedIconTheme,
+            unselectedIconTheme: bottomNavTheme.unselectedIconTheme,
             onTap: (index) {
               if (mounted) {
                 setState(() {

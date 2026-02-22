@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quran_book/bloc/main_page/local_and_theme_bloc.dart';
-import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
 import 'package:quran_book/utils/asset_image_utils.dart';
@@ -32,36 +31,61 @@ class _LanguagePageState extends State<LanguagePage> {
         centerTitle: true,
         title: EasyTextWidget(
           text: kDrawerLanguageText.tr(),
+          textColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black,
         ),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(kSP20x),
         child: Column(
           children: [
-            _buildLanguageOption(AssetImageUtils.kEnFlag, "English"),
+            _buildLanguageOption(context, AssetImageUtils.kEnFlag, "English"),
             SizedBox(height: 16),
-            _buildLanguageOption(AssetImageUtils.kMMFlag, "Myanmar"),
+            _buildLanguageOption(context, AssetImageUtils.kMMFlag, "Myanmar"),
             SizedBox(height: 16),
-            _buildLanguageOption(AssetImageUtils.kSAFlag, "بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"),
+            _buildLanguageOption(context, AssetImageUtils.kSAFlag, "بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildLanguageOption(String flagPath, String language) {
+  Widget _buildLanguageOption(BuildContext context, String flagPath, String language) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
     bool isSelected = selectedLanguage == language;
+    
+    // Use theme-aware colors
+    final borderColor = isSelected 
+        ? colorScheme.primary 
+        : (isDarkMode ? Colors.grey[700] : Colors.grey[300]);
+    final backgroundColor = isSelected 
+        ? colorScheme.primary.withOpacity(0.1) 
+        : theme.cardColor;
+    final checkIconColor = isDarkMode ? Colors.white : colorScheme.primary;
+    
     return Container(
       padding: EdgeInsets.symmetric(vertical: kSP10x),
       decoration: BoxDecoration(
-        border: Border.all(color: isSelected ? kAppPrimaryColor : kBlackColor),
+        border: Border.all(color: borderColor ?? Colors.grey),
         borderRadius: BorderRadius.circular(kSP10x),
-        color: isSelected ? kAppPrimaryColor.withOpacity(0.1) : kWhiteColor,
+        color: backgroundColor,
       ),
       child: ListTile(
         leading: Image.asset(flagPath, width: kSP40x, height: kSP40x),
-        title: Text(language, textAlign: TextAlign.center),
-        trailing: isSelected ? Icon(Icons.check, color: kAppPrimaryColor) : null,
+        title: Text(
+          language, 
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: theme.textTheme.bodyMedium?.color ?? colorScheme.onSurface,
+            fontSize: kFontSize16x,
+          ),
+        ),
+        trailing: isSelected 
+            ? Icon(Icons.check, color: checkIconColor) 
+            : null,
         onTap: () {
           if (mounted) {
             setState(() {

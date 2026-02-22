@@ -384,10 +384,16 @@ class HomePageAppbarView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final iconColor = theme.iconTheme.color ?? theme.colorScheme.onSurface;
+    
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        IconButton(icon: const Icon(Icons.menu), onPressed: onTapLeadingIcon),
+        IconButton(
+          icon: Icon(Icons.menu, color: iconColor),
+          onPressed: onTapLeadingIcon,
+        ),
         Image.asset(
           AssetImageUtils.kAppIcon,
           width: kHomePageAppIconWidth,
@@ -395,7 +401,7 @@ class HomePageAppbarView extends StatelessWidget {
         ),
         if (showBookmarkIcon && onTapBookmark != null)
           IconButton(
-            icon: const Icon(Icons.bookmark_border),
+            icon: Icon(Icons.bookmark_border, color: iconColor),
             onPressed: onTapBookmark,
           )
         else
