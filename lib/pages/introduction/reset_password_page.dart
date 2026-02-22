@@ -45,7 +45,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       return;
     }
 
-    // Basic email validation
     if (!email.contains('@') || !email.contains('.')) {
       Logger().e("Please enter a valid email address");
       context.showErrorSnackBar("Please enter a valid email address");
@@ -55,7 +54,19 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     try {
       Logger().d("Sending reset email to $email");
       context.showLoadingDialog();
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+      // ActionCodeSettings ensures the reset link opens correctly
+      // and the continueUrl is set so Firebase generates a proper action URL
+      final actionCodeSettings = ActionCodeSettings(
+        url: 'https://quran-book-30ddf.firebaseapp.com',
+        handleCodeInApp: false,
+      );
+
+      await FirebaseAuth.instance.sendPasswordResetEmail(
+        email: email,
+        actionCodeSettings: actionCodeSettings,
+      );
+
       if (mounted) {
         Logger().d("Password reset email sent! Check your inbox.");
         context.hideLoadingDialog();
