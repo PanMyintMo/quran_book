@@ -1,9 +1,8 @@
-import 'dart:math' as logger;
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:quran_book/pages/introduction/check_email_page.dart';
 import 'package:quran_book/pages/introduction/login_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
@@ -22,17 +21,10 @@ class ResetPasswordPage extends StatefulWidget {
 
 class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  bool _obscureNewPassword = true;
-  bool _obscureConfirmPassword = true;
-  bool _emailVerified = false;
 
   @override
   void dispose() {
     _emailController.dispose();
-    _newPasswordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -40,13 +32,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     final email = _emailController.text.trim();
 
     if (email.isEmpty) {
-      Logger().e("Please enter your email address");
       context.showErrorSnackBar("Please enter your email address");
       return;
     }
 
     if (!email.contains('@') || !email.contains('.')) {
-      Logger().e("Please enter a valid email address");
       context.showErrorSnackBar("Please enter a valid email address");
       return;
     }
@@ -55,11 +45,13 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       Logger().d("Sending reset email to $email");
       context.showLoadingDialog();
 
-      // ActionCodeSettings ensures the reset link opens correctly
-      // and the continueUrl is set so Firebase generates a proper action URL
       final actionCodeSettings = ActionCodeSettings(
         url: 'https://quran-book-30ddf.firebaseapp.com',
-        handleCodeInApp: false,
+        handleCodeInApp: true,
+        androidPackageName: 'com.example.quran_book',
+        androidInstallApp: true,
+        androidMinimumVersion: '21',
+        iOSBundleId: 'com.example.quranBook',
       );
 
       await FirebaseAuth.instance.sendPasswordResetEmail(
@@ -68,70 +60,29 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       );
 
       if (mounted) {
-        Logger().d("Password reset email sent! Check your inbox.");
+        Logger().d("Password reset email sent to $email");
         context.hideLoadingDialog();
-        context.showSuccessSnackBar("Password reset email sent! Check your inbox.");
-        setState(() {
-          _emailVerified = true;
-        });
+        context.navigateToNextPage(const CheckEmailPage());
       }
     } on FirebaseAuthException catch (e) {
       Logger().e("Failed to send password reset email: ${e.message}");
       if (mounted) {
         context.hideLoadingDialog();
-        context.showErrorSnackBar("Failed: ${e.message}");
+        String msg;
+        switch (e.code) {
+          case 'user-not-found':
+            msg = "No account found with this email address.";
+            break;
+          case 'invalid-email':
+            msg = "Invalid email address.";
+            break;
+          default:
+            msg = e.message ?? "Failed to send reset email.";
+        }
+        context.showErrorSnackBar(msg);
       }
     } catch (e) {
       Logger().e("Failed to send password reset email: ${e.toString()}");
-      if (mounted) {
-        context.hideLoadingDialog();
-        context.showErrorSnackBar("Failed: ${e.toString()}");
-      }
-    }
-  }
-
-  Future<void> _handlePasswordReset() async {
-    final newPassword = _newPasswordController.text.trim();
-    final confirmPassword = _confirmPasswordController.text.trim();
-
-    if (newPassword.isEmpty || confirmPassword.isEmpty) {
-      context.showErrorSnackBar("Please fill all fields");
-      return;
-    }
-
-    if (newPassword != confirmPassword) {
-      context.showErrorSnackBar("Passwords do not match");
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      context.showErrorSnackBar("Password must be at least 6 characters");
-      return;
-    }
-
-    try {
-      context.showLoadingDialog();
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await user.updatePassword(newPassword);
-        if (mounted) {
-          context.hideLoadingDialog();
-          context.showSuccessSnackBar("Password updated successfully");
-          context.navigateToNextPageWithRemoveUntil(const LoginPage());
-        }
-      } else {
-        if (mounted) {
-          context.hideLoadingDialog();
-          context.showSuccessSnackBar("Please use the link sent to your email to reset your password");
-          context.navigateToNextPageWithRemoveUntil(const LoginPage());
-        }
-      }
-    } on FirebaseAuthException catch (e) {
-      if (mounted) {
-        context.hideLoadingDialog();
-        context.showErrorSnackBar("Failed: ${e.message}");
-      }
-    } catch (e) {
       if (mounted) {
         context.hideLoadingDialog();
         context.showErrorSnackBar("Failed: ${e.toString()}");
@@ -152,28 +103,24 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: kSP40x),
+            const SizedBox(height: kSP40x),
             Image.asset(
               AssetImageUtils.kAppIcon,
               height: kResetPasswordAppIconHeight,
             ),
-            SizedBox(height: kSP20x),
+            const SizedBox(height: kSP20x),
             EasyTextWidget(
               text: kForgetPasswordTitleText.tr(),
               fontSize: kFontSize22x,
               fontWeight: FontWeight.bold,
             ),
-            SizedBox(height: kSP10x),
+            const SizedBox(height: kSP10x),
             EasyTextWidget(
-              text: _emailVerified
-                  ? "We've sent a password reset link to your email. You can also set a new password below if you're logged in."
-                  : kForgetPasswordSubText.tr(),
+              text: kForgetPasswordSubText.tr(),
               textColor: Colors.grey,
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: kSP20x),
-
-            /// Email Field
+            const SizedBox(height: kSP20x),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -181,7 +128,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   text: kForgetPasswordEmailTitleText.tr(),
                   fontWeight: FontWeight.bold,
                 ),
-                SizedBox(height: kSP10x),
+                const SizedBox(height: kSP10x),
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -190,14 +137,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    suffixIcon: Icon(Icons.email_outlined),
+                    suffixIcon: const Icon(Icons.email_outlined),
                   ),
                 ),
               ],
             ),
-
-            SizedBox(height: kSP20x),
-
+            const SizedBox(height: kSP20x),
             PrimaryButtonWidget(
               width: double.infinity,
               backgroundColor: kAppPrimaryColor,
@@ -206,60 +151,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               buttonText: "Send Reset Link",
               buttonTextColor: kWhiteColor,
             ),
-
-            if (_emailVerified) ...[
-              SizedBox(height: kSP30x),
-              Divider(),
-              SizedBox(height: kSP20x),
-              EasyTextWidget(
-                text: "Or update password directly (if logged in)",
-                textColor: Colors.grey,
-                fontSize: kFontSize12x,
-              ),
-              SizedBox(height: kSP20x),
-
-              /// New Password
-              _buildPasswordField(
-                controller: _newPasswordController,
-                label: kCreateNewPasswordTitleText.tr(),
-                hintText: kCreateNewPasswordTitleHintText.tr(),
-                obscureText: _obscureNewPassword,
-                onToggle: () {
-                  setState(() {
-                    _obscureNewPassword = !_obscureNewPassword;
-                  });
-                },
-              ),
-
-              SizedBox(height: kSP20x),
-
-              /// Confirm Password
-              _buildPasswordField(
-                controller: _confirmPasswordController,
-                label: kCreateNewPasswordRepeatTitleText.tr(),
-                hintText: kCreateNewPasswordRepeatTitleHintText.tr(),
-                obscureText: _obscureConfirmPassword,
-                onToggle: () {
-                  setState(() {
-                    _obscureConfirmPassword = !_obscureConfirmPassword;
-                  });
-                },
-              ),
-
-              SizedBox(height: kSP20x),
-
-              PrimaryButtonWidget(
-                width: double.infinity,
-                backgroundColor: kAppPrimaryColor,
-                height: kResetPasswordSubmitHeight,
-                onPressed: _handlePasswordReset,
-                buttonText: kSubmit.tr(),
-                buttonTextColor: kWhiteColor,
-              ),
-            ],
-
-            SizedBox(height: kSP20x),
-
+            const SizedBox(height: kSP20x),
             TextButton(
               onPressed: () {
                 context.navigateToNextPageWithRemoveUntil(const LoginPage());
@@ -269,45 +161,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 textColor: isDarkMode ? kWhiteColor : kAppPrimaryColor,
               ),
             ),
-
-            SizedBox(height: kSP40x),
+            const SizedBox(height: kSP40x),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildPasswordField({
-    required TextEditingController controller,
-    required String label,
-    required String hintText,
-    required bool obscureText,
-    required VoidCallback onToggle,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        EasyTextWidget(text: label, fontWeight: FontWeight.bold),
-        SizedBox(height: kSP10x),
-        TextField(
-          controller: controller,
-          obscureText: obscureText,
-          enableSuggestions: false,
-          autocorrect: false,
-          decoration: InputDecoration(
-            hintText: hintText,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            suffixIcon: IconButton(
-              icon: Icon(
-                obscureText ? Icons.visibility_off : Icons.visibility,
-              ),
-              onPressed: onToggle,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
