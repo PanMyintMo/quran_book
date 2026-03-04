@@ -37,6 +37,28 @@ class CheckEmailPage extends StatelessWidget {
               textColor: Colors.grey,
               textAlign: TextAlign.center,
             ),
+            SizedBox(height: kSP10x),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: kSP15x, vertical: kSP10x),
+              decoration: BoxDecoration(
+                color: Colors.amber.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.amber.shade300),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.amber.shade700, size: 18),
+                  SizedBox(width: kSP10x),
+                  Expanded(
+                    child: EasyTextWidget(
+                      text: "Can't find the email? Check your spam or junk folder.",
+                      textColor: Colors.amber.shade800,
+                      fontSize: kFontSize12x,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             SizedBox(height: kSP20x),
             PrimaryButtonWidget(
               backgroundColor: kAppPrimaryColor,
