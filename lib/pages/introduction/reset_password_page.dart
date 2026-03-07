@@ -62,7 +62,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       if (mounted) {
         Logger().d("Password reset email sent to $email");
         context.hideLoadingDialog();
-        context.navigateToNextPage(const CheckEmailPage());
+        context.navigateToNextPageWithReplacement(const CheckEmailPage());
       }
     } on FirebaseAuthException catch (e) {
       Logger().e("Failed to send password reset email: ${e.message}");

@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
+import 'package:quran_book/data/vos/user_vo.dart';
 import 'package:quran_book/pages/admin/admin_home_page.dart';
 // import 'package:quran_book/pages/introduction/forget_password_page.dart';
 import 'package:quran_book/pages/introduction/register_page.dart';
@@ -42,16 +43,18 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         context.hideLoadingDialog();
         context.showSuccessSnackBar('Login Successful');
-        final user = await _firebaseModel.getCurrentUserVO();
-        if (user != null && mounted) {
-          if (user.isAdmin) {
+
+        UserVO? user;
+        try {
+          user = await _firebaseModel.getCurrentUserVO();
+        } catch (_) {
+          // Ignore — Firebase Auth login succeeded, proceed to IndexPage
+        }
+
+        if (mounted) {
+          if (user?.isAdmin == true) {
             context.navigateToNextPageWithRemoveUntil(const AdminHomePage());
           } else {
-            context.navigateToNextPageWithRemoveUntil(const IndexPage());
-          }
-        } else {
-          // If user data not found in Firestore, still go to IndexPage since Firebase Auth login succeeded
-          if (mounted) {
             context.navigateToNextPageWithRemoveUntil(const IndexPage());
           }
         }
