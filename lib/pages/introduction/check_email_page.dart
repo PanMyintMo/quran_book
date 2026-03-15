@@ -7,6 +7,7 @@ import 'package:quran_book/resources/strings.dart';
 import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 import 'package:quran_book/widgets/primary_button_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CheckEmailPage extends StatelessWidget {
   const CheckEmailPage({super.key});
@@ -18,7 +19,7 @@ class CheckEmailPage extends StatelessWidget {
         elevation: 0,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: kSP20x),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -64,7 +65,7 @@ class CheckEmailPage extends StatelessWidget {
               backgroundColor: kAppPrimaryColor,
               height: kCheckEmailResetButtonHeight,
               onPressed: () {
-                context.navigateToNextPage(ResetPasswordPage());
+                context.navigateToNextPageWithReplacement(ResetPasswordPage());
               },
               buttonText: kCheckYourEmailResendEmailText.tr(),
               buttonTextColor: kWhiteColor,
@@ -73,8 +74,15 @@ class CheckEmailPage extends StatelessWidget {
             PrimaryButtonWidget(
               backgroundColor: kAppPrimaryColor,
               height: kCheckEmailResetButtonHeight,
-              onPressed: () {
-                context.navigateToNextPage(ResetPasswordPage());
+              onPressed: () async {
+                final uri = Uri(scheme: 'mailto');
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri);
+                } else {
+                  if (context.mounted) {
+                    context.showErrorSnackBar('Could not open email app');
+                  }
+                }
               },
               buttonText: kCheckYourEmailOpenEmailText.tr(),
               buttonTextColor: kWhiteColor,

@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:496161030293:android:ac31567f27830f9c1e1b9c",
+        "mobilesdk_app_id": "1:496161030293:android:48ec16e1b8b60d6f1e1b9c",
         "android_client_info": {
-          "package_name": "com.example.quran_book"
+          "package_name": "com.hidayatul.quran_book"
         }
       },
       "oauth_client": [
@@ -32,10 +32,10 @@
               "client_type": 3
             },
             {
-              "client_id": "496161030293-qi7o1v272mg7m43uveatq6ghng70epbh.apps.googleusercontent.com",
+              "client_id": "496161030293-2l8pa49cjnevkmt329q3sa9its29nj8p.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.quranbook"
+                "bundle_id": "com.example.quranBook"
               }
             }
           ]
