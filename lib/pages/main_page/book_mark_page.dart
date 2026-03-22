@@ -375,18 +375,20 @@ class HomePageAppbarView extends StatelessWidget {
     super.key,
     required this.onTapLeadingIcon,
     this.onTapBookmark,
+    this.onTapSearch,
     this.showBookmarkIcon = false,
   });
 
   final VoidCallback onTapLeadingIcon;
   final VoidCallback? onTapBookmark;
+  final VoidCallback? onTapSearch;
   final bool showBookmarkIcon;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final iconColor = theme.iconTheme.color ?? theme.colorScheme.onSurface;
-    
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -403,6 +405,11 @@ class HomePageAppbarView extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.bookmark_border, color: iconColor),
             onPressed: onTapBookmark,
+          )
+        else if (onTapSearch != null)
+          IconButton(
+            icon: Icon(Icons.search, color: iconColor),
+            onPressed: onTapSearch,
           )
         else
           const SizedBox(width: kSP40x),

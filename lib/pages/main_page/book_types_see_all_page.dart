@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/category_vo.dart';
 import 'package:quran_book/pages/main_page/book_list_from_category_page.dart';
@@ -65,8 +66,8 @@ class _BookTypesSeeAllPageState extends State<BookTypesSeeAllPage> {
                     ),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(kSP10x),
+                        color: kBoxColor,
+                        borderRadius: BorderRadius.circular(15),
                       ),
                       padding: const EdgeInsets.symmetric(
                           horizontal: kSP10x, vertical: kSP5x),
@@ -75,8 +76,8 @@ class _BookTypesSeeAllPageState extends State<BookTypesSeeAllPage> {
                           CacheNetworkImageWidget(
                             radius: kSP5x,
                             imageUrl: category.image,
-                            width: 40,
-                            height: 40,
+                            width: 24,
+                            height: 24,
                             fit: BoxFit.cover,
                           ),
                           const SizedBox(width: kSP10x),
