@@ -284,7 +284,7 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
 }
 
 /// Horizontal slider so users can see at a glance that content scrolls horizontally.
-class _HorizontalInfoSlider extends StatelessWidget {
+class _HorizontalInfoSlider extends StatefulWidget {
   const _HorizontalInfoSlider({
     required this.author,
     required this.audioPlayer,
@@ -296,13 +296,28 @@ class _HorizontalInfoSlider extends StatelessWidget {
   final bool hasAudio;
 
   @override
+  State<_HorizontalInfoSlider> createState() => _HorizontalInfoSliderState();
+}
+
+class _HorizontalInfoSliderState extends State<_HorizontalInfoSlider> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 44,
       child: Scrollbar(
+        controller: _scrollController,
         thumbVisibility: true,
         trackVisibility: true,
         child: ListView(
+          controller: _scrollController,
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(vertical: 6),
           clipBehavior: Clip.none,
@@ -312,9 +327,9 @@ class _HorizontalInfoSlider extends StatelessWidget {
               label: kOverviewText.tr(),
             ),
             const SizedBox(width: kSP10x),
-            if (hasAudio)
+            if (widget.hasAudio)
               StreamBuilder<Duration?>(
-                stream: audioPlayer.durationStream,
+                stream: widget.audioPlayer.durationStream,
                 builder: (context, snapshot) {
                   final duration = snapshot.data;
                   String durationText = 'Audio';
@@ -340,7 +355,7 @@ class _HorizontalInfoSlider extends StatelessWidget {
             const SizedBox(width: kSP10x),
             _InfoChip(
               icon: Icons.person_outline,
-              label: author,
+              label: widget.author,
             ),
           ],
         ),

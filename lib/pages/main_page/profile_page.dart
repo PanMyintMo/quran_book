@@ -83,30 +83,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     fontWeight: FontWeight.w400,
                     fontSize: kFontSize16x,
                   ),
-                  const SizedBox(height: kSP40x),
-                  PrimaryButtonWidget(
-                    height: kProfilePageButtonHeight,
-                    width: double.infinity,
-                    onPressed: () async {
-                      context.showLoadingDialog();
-                      try {
-                        await _firebaseModel.logout();
-                        if (context.mounted) {
-                          context.hideLoadingDialog();
-                          context.showSuccessSnackBar(kLogoutText.tr());
-                          context.navigateToNextPageWithRemoveUntil(LoginPage());
-                        }
-                      } catch (error) {
-                        if (context.mounted) {
-                          context.hideLoadingDialog();
-                          context.showErrorSnackBar(error.toString());
-                        }
-                      }
-                    },
-                    buttonText: kLogoutText.tr(),
-                    backgroundColor: Colors.red,
-                    buttonFontWeight: FontWeight.w600,
-                  ),
                 ],
               ),
             )

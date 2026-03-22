@@ -74,6 +74,8 @@ class _BookReadDetailsPageState extends State<BookReadDetailsPage> {
       body: SfPdfViewer.network(
         widget.pdfUrl,
         key: GlobalKey(),
+        pageLayoutMode: PdfPageLayoutMode.continuous,
+        pageSpacing: 0,
       ),
     );
   }
