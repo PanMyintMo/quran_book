@@ -21,13 +21,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final FirebaseModel _firebaseModel = FirebaseModel();
-  final ScrollController _booksScrollController = ScrollController();
-
-  @override
-  void dispose() {
-    _booksScrollController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,16 +43,17 @@ class _HomePageState extends State<HomePage> {
             final categories = snapshot.data![1] as List<CategoryVO>;
 
             return Padding(
-              padding: const EdgeInsets.all(kSP10x),
+              padding: const EdgeInsets.symmetric(horizontal: kSP10x),
               child: Column(
                 children: [
-                  Builder(
-                    builder: (context) {
-                      return HomePageAppbarView(
+                  Padding(
+                    padding: const EdgeInsets.only(top: kSP10x),
+                    child: Builder(
+                      builder: (context) => HomePageAppbarView(
                         onTapLeadingIcon: () =>
                             Scaffold.of(context).openDrawer(),
-                      );
-                    },
+                      ),
+                    ),
                   ),
                   const SizedBox(height: kSP20x),
                   Expanded(
@@ -77,9 +71,8 @@ class _HomePageState extends State<HomePage> {
                           GridView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            itemCount: categories.length > 4
-                                ? 4
-                                : categories.length,
+                            itemCount:
+                                categories.length > 4 ? 4 : categories.length,
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
@@ -87,10 +80,8 @@ class _HomePageState extends State<HomePage> {
                               mainAxisSpacing: kSP10x,
                               childAspectRatio: 2.6,
                             ),
-                            itemBuilder: (_, index) {
-                              final category = categories[index];
-                              return _BookTypeCard(category: category);
-                            },
+                            itemBuilder: (_, index) =>
+                                _BookTypeCard(category: categories[index]),
                           ),
                           const SizedBox(height: kSP20x),
                         ],
@@ -104,43 +95,49 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           const SizedBox(height: kSP10x),
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.28,
-                            child: Scrollbar(
-                              controller: _booksScrollController,
-                              thumbVisibility: true,
-                              trackVisibility: true,
-                              child: ListView.builder(
-                                controller: _booksScrollController,
-                                scrollDirection: Axis.horizontal,
-                                padding: const EdgeInsets.only(bottom: 8),
-                                itemCount: books.length,
-                                itemBuilder: (_, index) {
-                                  final book = books[index];
-                                  return GestureDetector(
-                                    onTap: () => context.navigateToNextPage(
-                                      BookOverviewPage(
-                                          isPlay: false, book: book),
-                                    ),
-                                    child: Container(
-                                      width: 110,
-                                      margin:
-                                          const EdgeInsets.only(right: kSP10x),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(
-                                            kSP10x),
-                                        child: CacheNetworkImageWidget(
-                                          radius: kSP10x,
-                                          imageUrl: book.image,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
+                          _BooksHorizontalList(
+                            books: books,
+                            onTap: (book) => context.navigateToNextPage(
+                              BookOverviewPage(isPlay: false, book: book),
                             ),
                           ),
+                          const SizedBox(height: kSP20x),
+                        ],
+
+                        // ── Popular Books ──
+                        if (books.isNotEmpty) ...[
+                          _SectionHeader(
+                            title: 'Popular books',
+                            onTap: () => context.navigateToNextPage(
+                              const BookSeeAllPage(title: 'Popular books'),
+                            ),
+                          ),
+                          const SizedBox(height: kSP10x),
+                          _BooksHorizontalList(
+                            books: books,
+                            onTap: (book) => context.navigateToNextPage(
+                              BookOverviewPage(isPlay: false, book: book),
+                            ),
+                          ),
+                          const SizedBox(height: kSP20x),
+                        ],
+
+                        // ── Premium Books ──
+                        if (books.isNotEmpty) ...[
+                          _SectionHeader(
+                            title: 'Premium books',
+                            onTap: () => context.navigateToNextPage(
+                              const BookSeeAllPage(title: 'Premium books'),
+                            ),
+                          ),
+                          const SizedBox(height: kSP10x),
+                          _BooksHorizontalList(
+                            books: books,
+                            onTap: (book) => context.navigateToNextPage(
+                              BookOverviewPage(isPlay: false, book: book),
+                            ),
+                          ),
+                          const SizedBox(height: kSP20x),
                         ],
                       ],
                     ),
@@ -150,6 +147,38 @@ class _HomePageState extends State<HomePage> {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _BooksHorizontalList extends StatelessWidget {
+  const _BooksHorizontalList({required this.books, required this.onTap});
+
+  final List<BookVO> books;
+  final void Function(BookVO) onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 114,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: books.length,
+        separatorBuilder: (_, __) => const SizedBox(width: kSP10x),
+        itemBuilder: (_, index) {
+          final book = books[index];
+          return GestureDetector(
+            onTap: () => onTap(book),
+            child: CacheNetworkImageWidget(
+              radius: kSP5x,
+              imageUrl: book.image,
+              width: 82,
+              height: 114,
+              fit: BoxFit.cover,
+            ),
+          );
+        },
       ),
     );
   }
@@ -192,8 +221,8 @@ class _BookTypeCard extends StatelessWidget {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(kSP10x),
       ),
-      padding: const EdgeInsets.symmetric(
-          horizontal: kSP10x, vertical: kSP5x),
+      padding:
+          const EdgeInsets.symmetric(horizontal: kSP10x, vertical: kSP5x),
       child: Row(
         children: [
           CacheNetworkImageWidget(
