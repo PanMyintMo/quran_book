@@ -11,6 +11,7 @@ import 'package:quran_book/pages/main_page/book_overview_page.dart';
 import 'package:quran_book/pages/main_page/contact_us_page.dart';
 import 'package:quran_book/pages/main_page/language_page.dart';
 import 'package:quran_book/pages/main_page/setting_page.dart';
+import 'package:quran_book/pages/introduction/login_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
@@ -19,6 +20,7 @@ import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/utils/get_package_info_utils.dart';
 import 'package:quran_book/utils/random_color_utils.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
+import 'package:quran_book/widgets/primary_button_widget.dart';
 import 'package:timeago/timeago.dart' as time_ago;
 
 class BookMarkPage extends StatefulWidget {
@@ -131,7 +133,44 @@ class _BookMarkPageState extends State<BookMarkPage>
               const SizedBox(height: kSP20x),
               Expanded(
                 child: _userId == null
-                    ? const Center(child: Text("User not logged in"))
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: kSP10x,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.lock_outline,
+                                size: 72,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(height: kSP20x),
+                              EasyTextWidget(
+                                text: 'Please login to see bookmarks.',
+                                fontWeight: FontWeight.w400,
+                                fontSize: kFontSize14x,
+                                textColor: Colors.grey,
+                              ),
+                              const SizedBox(height: kSP20x),
+                              PrimaryButtonWidget(
+                                width: double.infinity,
+                                height: kProfilePageButtonHeight,
+                                onPressed: () {
+                                  context.navigateToNextPageWithRemoveUntil(
+                                    const LoginPage(),
+                                  );
+                                },
+                                buttonText: kLogin.tr(),
+                                buttonTextColor: kWhiteColor,
+                                backgroundColor: kAppPrimaryColor,
+                                buttonFontWeight: FontWeight.w600,
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
                     : _bookmarkedBooks == null
                         ? const Center(
                             child: CircularProgressIndicator(),
@@ -144,32 +183,16 @@ class _BookMarkPageState extends State<BookMarkPage>
                                 itemCount: _bookmarkedBooks!.length,
                                 itemBuilder: (_, index) {
                                   final book = _bookmarkedBooks![index];
-                                  return GestureDetector(
-                                    onTap: () async {
-                                      final unbookmarkedId = await context
-                                          .navigateToNextPage(
-                                        BookOverviewPage(
-                                            isPlay: false, book: book),
-                                      ) as String?;
-                                      
-                                      if (!mounted) return;
-                                      // Remove unbookmarked book from list immediately
-                                      if (unbookmarkedId != null &&
-                                          _bookmarkedBooks != null) {
-                                        setState(() {
-                                          _bookmarkedBooks = _bookmarkedBooks!
-                                              .where((b) => b.id != unbookmarkedId)
-                                              .toList();
-                                        });
-                                      } else {
-                                        _refreshBookmarks();
-                                      }
+                                  return _BookMarkItemView(
+                                    title: book.name,
+                                    subtitle: book.overview,
+                                    createdAt: book.createAt,
+                                    onTapOpen: () {
+                                      _openBookOverview(book);
                                     },
-                                    child: _BookMarkItemView(
-                                      title: book.name,
-                                      subtitle: book.overview,
-                                      createdAt: book.createAt,
-                                    ),
+                                    onTapUnbookmark: () {
+                                      _unbookmarkBook(book.id);
+                                    },
                                   );
                                 },
                               ),
@@ -179,6 +202,41 @@ class _BookMarkPageState extends State<BookMarkPage>
         ),
       ),
     );
+  }
+
+  Future<void> _unbookmarkBook(String bookId) async {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    if (currentUserId == null) {
+      if (!mounted) return;
+      context.navigateToNextPageWithRemoveUntil(
+        const LoginPage(),
+      );
+      return;
+    }
+
+    try {
+      _userId = currentUserId;
+      await _firebaseModel.toggleBookmark(bookId, currentUserId);
+
+      if (!mounted) return;
+      context.showSuccessSnackBar("Removed from bookmarks.");
+      await _refreshBookmarks();
+    } catch (e) {
+      if (!mounted) return;
+      context.showErrorSnackBar("Unbookmark failed: $e");
+      _refreshBookmarks();
+    }
+  }
+
+  Future<void> _openBookOverview(BookVO book) async {
+    await context.navigateToNextPage(
+      BookOverviewPage(isPlay: false, book: book),
+    );
+
+    if (!mounted) return;
+
+    // Always refresh from Firebase so UI is correct after hot reload too.
+    await _refreshBookmarks();
   }
 }
 
@@ -192,11 +250,15 @@ class _BookMarkItemView extends StatelessWidget {
   final String title;
   final String subtitle;
   final DateTime createdAt;
+  final VoidCallback onTapOpen;
+  final VoidCallback onTapUnbookmark;
 
   const _BookMarkItemView({
     required this.title,
     required this.subtitle,
     required this.createdAt,
+    required this.onTapOpen,
+    required this.onTapUnbookmark,
   });
 
   @override
@@ -214,27 +276,36 @@ class _BookMarkItemView extends StatelessWidget {
           Icon(Icons.bookmark, color: RandomColorUtils.getRandomColor()),
           const SizedBox(width: kSP20x),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                EasyTextWidget(
-                  text: title,
-                  fontWeight: FontWeight.w600,
-                  fontSize: kFontSize16x,
-                ),
-                EasyTextWidget(
-                  text: subtitle,
-                  fontWeight: FontWeight.w600,
-                  fontSize: kFontSize12x,
-                ),
-                const SizedBox(height: kSP20x),
-                EasyTextWidget(
-                  text: time_ago.format(createdAt),
-                  fontWeight: FontWeight.w600,
-                  fontSize: kFontSize12x,
-                ),
-              ],
+            child: InkWell(
+              onTap: onTapOpen,
+              borderRadius: BorderRadius.circular(kSP10x),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  EasyTextWidget(
+                    text: title,
+                    fontWeight: FontWeight.w600,
+                    fontSize: kFontSize16x,
+                  ),
+                  EasyTextWidget(
+                    text: subtitle,
+                    fontWeight: FontWeight.w600,
+                    fontSize: kFontSize12x,
+                  ),
+                  const SizedBox(height: kSP20x),
+                  EasyTextWidget(
+                    text: time_ago.format(createdAt),
+                    fontWeight: FontWeight.w600,
+                    fontSize: kFontSize12x,
+                  ),
+                ],
+              ),
             ),
+          ),
+          IconButton(
+            tooltip: 'Remove bookmark',
+            icon: const Icon(Icons.bookmark_border),
+            onPressed: onTapUnbookmark,
           ),
         ],
       ),

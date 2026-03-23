@@ -60,6 +60,7 @@ class _BookTypesSeeAllPageState extends State<BookTypesSeeAllPage> {
                 ),
                 itemBuilder: (_, index) {
                   final category = _categories[index];
+
                   return GestureDetector(
                     onTap: () => context.navigateToNextPage(
                       const BookListFromCategoryPage(),
@@ -68,6 +69,10 @@ class _BookTypesSeeAllPageState extends State<BookTypesSeeAllPage> {
                       decoration: BoxDecoration(
                         color: kBoxColor,
                         borderRadius: BorderRadius.circular(15),
+                        border: Border.all(
+                          color: Colors.grey.shade300,
+                          width: 1,
+                        ),
                       ),
                       padding: const EdgeInsets.symmetric(
                           horizontal: kSP10x, vertical: kSP5x),

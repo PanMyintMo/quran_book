@@ -5,10 +5,12 @@ import 'package:just_audio/just_audio.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/book_vo.dart';
 import 'package:quran_book/pages/main_page/book_read_details_page.dart';
 import 'package:quran_book/pages/main_page/donate_page.dart';
+import 'package:quran_book/pages/introduction/login_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
@@ -48,10 +50,10 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
   }
 
   Future<void> _loadBookmarkState() async {
-    final user = await _firebaseModel.getCurrentUserVO();
     if (!mounted) return;
     setState(() {
-      _currentUserId = user?.id;
+      // Always use FirebaseAuth UID so it matches all other bookmark filters.
+      _currentUserId = FirebaseAuth.instance.currentUser?.uid;
       _isBookmarked = _currentUserId != null &&
           widget.book.userIDOfBookMark.contains(_currentUserId);
     });
@@ -141,30 +143,74 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
               onPressed: () async {
                 try {
                   final userId = _currentUserId ??
-                      (await _firebaseModel.getCurrentUserVO())?.id;
+                      FirebaseAuth.instance.currentUser?.uid;
 
                   if (userId == null) {
-                    if (mounted)
-                      context.showErrorSnackBar("Please login first.");
+                    if (!mounted) return;
+                    showDialog(
+                      context: context,
+                      builder: (dialogContext) => AlertDialog(
+                        title: EasyTextWidget(
+                          text: 'Login required',
+                          fontWeight: FontWeight.w600,
+                          fontSize: kFontSize16x,
+                        ),
+                        content: EasyTextWidget(
+                          text: 'Please login to bookmark this book.',
+                          fontWeight: FontWeight.w400,
+                          fontSize: kFontSize14x,
+                          textColor: Colors.grey,
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(dialogContext).pop(),
+                            child: const Text('Cancel'),
+                          ),
+                          PrimaryButtonWidget(
+                            height: 40,
+                            radius: 8,
+                            width: 110,
+                            onPressed: () {
+                              Navigator.of(dialogContext).pop();
+                              context.navigateToNextPageWithRemoveUntil(
+                                const LoginPage(),
+                              );
+                            },
+                            buttonText: kLogin.tr(),
+                            buttonTextColor: kWhiteColor,
+                            backgroundColor: kAppPrimaryColor,
+                            buttonFontWeight: FontWeight.w600,
+                          ),
+                        ],
+                      ),
+                    );
                     return;
                   }
+
+                  // Use current book data to decide add/remove direction.
+                  // This avoids UI desync when `_isBookmarked` hasn't finished loading yet.
+                  final alreadyBookmarked =
+                      book.userIDOfBookMark.contains(userId);
 
                   await _firebaseModel.toggleBookmark(book.id, userId);
                   if (!mounted) return;
 
                   setState(() {
-                    _isBookmarked = !_isBookmarked;
-
-                    if (_isBookmarked) {
-                      book.userIDOfBookMark.add(userId); // ✅ ADD locally
-                    } else {
+                    if (alreadyBookmarked) {
                       book.userIDOfBookMark.remove(userId); // ✅ REMOVE locally
+                      _isBookmarked = false;
                       _unbookmarkedBookId = book.id;
+                    } else {
+                      if (!book.userIDOfBookMark.contains(userId)) {
+                        book.userIDOfBookMark.add(userId); // ✅ ADD locally
+                      }
+                      _isBookmarked = true;
+                      _unbookmarkedBookId = null;
                     }
                   });
 
                   context.showSuccessSnackBar(
-                    _isBookmarked
+                    alreadyBookmarked
                         ? "Bookmarked successfully!"
                         : "Removed from bookmarks.",
                   );
