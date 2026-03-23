@@ -48,22 +48,28 @@ class _BookMarkPageState extends State<BookMarkPage>
   void _subscribeToBooks() {
     _booksSubscription?.cancel();
     _booksSubscription = _firebaseModel.watchAllBooks().listen((allBooks) {
-      if (!mounted || _userId == null) return;
+      final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+      if (!mounted || currentUserId == null) return;
       final bookmarked = allBooks
-          .where((book) => book.userIDOfBookMark.contains(_userId))
+          .where((book) => book.userIDOfBookMark.contains(currentUserId))
           .toList();
-      setState(() => _bookmarkedBooks = bookmarked);
+      setState(() {
+        _userId = currentUserId;
+        _bookmarkedBooks = bookmarked;
+      });
     });
   }
 
   Future<void> _refreshBookmarks() async {
-    if (_userId == null) return;
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    if (currentUserId == null) return;
     try {
       final allBooks = await _firebaseModel.getAllBooks();
       if (!mounted) return;
       setState(() {
+        _userId = currentUserId;
         _bookmarkedBooks = allBooks
-            .where((book) => book.userIDOfBookMark.contains(_userId))
+            .where((book) => book.userIDOfBookMark.contains(currentUserId))
             .toList();
       });
     } catch (_) {
@@ -229,13 +235,33 @@ class _BookMarkPageState extends State<BookMarkPage>
   }
 
   Future<void> _openBookOverview(BookVO book) async {
-    await context.navigateToNextPage(
+    final unbookmarkedId = await context.navigateToNextPage(
       BookOverviewPage(isPlay: false, book: book),
-    );
+    ) as String?;
 
     if (!mounted) return;
 
-    // Always refresh from Firebase so UI is correct after hot reload too.
+    // Remove immediately using either returned id (best) or local mutation (fallback).
+    if (unbookmarkedId != null && _bookmarkedBooks != null) {
+      setState(() {
+        _bookmarkedBooks = _bookmarkedBooks!
+            .where((b) => b.id != unbookmarkedId)
+            .toList();
+      });
+    }
+
+    // Fallback: filter based on the current userId to handle cases where
+    // the returned value is null but the local `BookVO` was mutated.
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    if (currentUserId != null && _bookmarkedBooks != null) {
+      setState(() {
+        _bookmarkedBooks = _bookmarkedBooks!
+            .where((b) => b.userIDOfBookMark.contains(currentUserId))
+            .toList();
+      });
+    }
+
+    // Also refresh from Firebase so UI is correct after hot reload too.
     await _refreshBookmarks();
   }
 }

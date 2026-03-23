@@ -51,6 +51,7 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
 
   CategoryVO? _selectedCategory;
   List<CategoryVO> _categoryList = [];
+  String _selectedBookType = 'new'; // new | popular | premium
 
   @override
   void initState() {
@@ -208,6 +209,7 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
         createAt: DateTime.now(),
         updateAt: DateTime.now(),
         userIDOfBookMark: widget.userIDOfBookMark ?? [],
+        bookType: _selectedBookType,
       );
 
       await _firebaseModel.createBook(book);
@@ -320,6 +322,22 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
               onChanged: (value) {
                 setState(() {
                   _selectedCategory = value;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _selectedBookType,
+              decoration: const InputDecoration(labelText: 'Select Book Type'),
+              items: const [
+                DropdownMenuItem(value: 'new', child: Text('New book')),
+                DropdownMenuItem(value: 'popular', child: Text('Popular book')),
+                DropdownMenuItem(value: 'premium', child: Text('Premium book')),
+              ],
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() {
+                  _selectedBookType = value;
                 });
               },
             ),

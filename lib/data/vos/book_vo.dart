@@ -17,6 +17,9 @@ class BookVO {
   final DateTime createAt;
   final DateTime updateAt;
   final List<String> userIDOfBookMark;
+  // Determines which Home section this book appears in.
+  // Values: "new", "popular", "premium" (old data will be treated as "new").
+  final String? bookType;
 
   BookVO({
     required this.id,
@@ -32,6 +35,7 @@ class BookVO {
     required this.createAt,
     required this.updateAt,
     required this.userIDOfBookMark,
+    this.bookType,
   });
 
   factory BookVO.fromJson(Map<String, dynamic> json) {
@@ -58,6 +62,7 @@ class BookVO {
       createAt: DateTime.parse(json['createAt']),
       updateAt: DateTime.parse(json['updateAt']),
       userIDOfBookMark: (json['userIDOfBookMark'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      bookType: json['bookType']?.toString(),
     );
   }
 
@@ -75,5 +80,6 @@ class BookVO {
         'createAt': createAt.toIso8601String(),
         'updateAt': updateAt.toIso8601String(),
         'userIDOfBookMark': userIDOfBookMark,
+        'bookType': bookType,
       };
 }

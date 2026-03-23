@@ -192,6 +192,10 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                   final alreadyBookmarked =
                       book.userIDOfBookMark.contains(userId);
 
+                  // Set return value immediately so the parent can update
+                  // reliably when user goes back (PopScope reads this field).
+                  _unbookmarkedBookId = alreadyBookmarked ? book.id : null;
+
                   await _firebaseModel.toggleBookmark(book.id, userId);
                   if (!mounted) return;
 
@@ -199,20 +203,18 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                     if (alreadyBookmarked) {
                       book.userIDOfBookMark.remove(userId); // ✅ REMOVE locally
                       _isBookmarked = false;
-                      _unbookmarkedBookId = book.id;
                     } else {
                       if (!book.userIDOfBookMark.contains(userId)) {
                         book.userIDOfBookMark.add(userId); // ✅ ADD locally
                       }
                       _isBookmarked = true;
-                      _unbookmarkedBookId = null;
                     }
                   });
 
                   context.showSuccessSnackBar(
                     alreadyBookmarked
-                        ? "Bookmarked successfully!"
-                        : "Removed from bookmarks.",
+                        ? "Removed from bookmarks."
+                        : "Bookmarked successfully!",
                   );
                 } catch (e) {
                   if (mounted) context.showErrorSnackBar("Bookmark failed: $e");

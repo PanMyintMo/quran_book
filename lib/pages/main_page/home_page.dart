@@ -55,6 +55,13 @@ class _HomePageState extends State<HomePage> {
             final books = snapshot.data![0] as List<BookVO>;
             final categories = snapshot.data![1] as List<CategoryVO>;
             final banners = snapshot.data![2] as List<BannerVO>;
+            final newBooks = books
+                .where((b) => (b.bookType ?? 'new') == 'new')
+                .toList();
+            final popularBooks =
+                books.where((b) => b.bookType == 'popular').toList();
+            final premiumBooks =
+                books.where((b) => b.bookType == 'premium').toList();
 
             return Column(
               children: [
@@ -154,7 +161,7 @@ class _HomePageState extends State<HomePage> {
                             ],
 
                             // ── New Books ──
-                            if (books.isNotEmpty) ...[
+                            if (newBooks.isNotEmpty) ...[
                               _SectionHeader(
                                 title: 'New books',
                                 onTap: () => context.navigateToNextPage(
@@ -163,7 +170,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               const SizedBox(height: kSP10x),
                               _BooksHorizontalList(
-                                books: books,
+                                books: newBooks,
                                 onTap: (book) => context.navigateToNextPage(
                                   BookOverviewPage(isPlay: false, book: book),
                                 ),
@@ -172,7 +179,7 @@ class _HomePageState extends State<HomePage> {
                             ],
 
                             // ── Popular Books ──
-                            if (books.isNotEmpty) ...[
+                            if (popularBooks.isNotEmpty) ...[
                               _SectionHeader(
                                 title: 'Popular books',
                                 onTap: () => context.navigateToNextPage(
@@ -182,7 +189,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               const SizedBox(height: kSP10x),
                               _BooksHorizontalList(
-                                books: books,
+                                books: popularBooks,
                                 onTap: (book) => context.navigateToNextPage(
                                   BookOverviewPage(isPlay: false, book: book),
                                 ),
@@ -191,7 +198,7 @@ class _HomePageState extends State<HomePage> {
                             ],
 
                             // ── Premium Books (no arrow per Figma) ──
-                            if (books.isNotEmpty) ...[
+                            if (premiumBooks.isNotEmpty) ...[
                               EasyTextWidget(
                                 text: 'Premium books',
                                 fontWeight: FontWeight.w600,
@@ -199,7 +206,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               const SizedBox(height: kSP10x),
                               _BooksHorizontalList(
-                                books: books,
+                                books: premiumBooks,
                                 onTap: (book) => context.navigateToNextPage(
                                   BookOverviewPage(isPlay: false, book: book),
                                 ),
