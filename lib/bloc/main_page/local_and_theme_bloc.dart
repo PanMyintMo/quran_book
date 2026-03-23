@@ -5,10 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LocalAndThemeBloc extends ChangeNotifier {
   Locale _locale = const Locale('en', '');
   bool _isDarkMode = false; // Default to light mode
-
+  bool _isSystemMode = false;
   Locale get locale => _locale;
   bool get isDarkMode => _isDarkMode;
-
+  bool get isSystemMode => _isSystemMode;
   LocalAndThemeBloc() {
     _loadSavedPreferences();
   }
@@ -51,18 +51,32 @@ class LocalAndThemeBloc extends ChangeNotifier {
   /// Set dark mode and save to SharedPreferences
   Future<void> setDarkMode(bool value) async {
     _isDarkMode = value;
+    // If user selects explicit light/dark, exit "system" mode in UI/state.
+    _isSystemMode = false;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isDarkMode', _isDarkMode);
+    await prefs.setBool('isSystemMode', _isSystemMode);
 
     notifyListeners();
   }
 
+  Future<void> setSystemMode() async {
+    _isSystemMode = true;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isSystemMode', _isSystemMode);
+
+    notifyListeners();
+  }
   /// Toggle theme
   Future<void> toggleTheme() async {
     await setDarkMode(!_isDarkMode);
   }
 
-  ThemeMode get currentThemeMode => _isDarkMode ? ThemeMode.dark : ThemeMode.light;
+  ThemeMode get currentThemeMode {
+    // When "System" is enabled, always follow device theme automatically.
+    if (_isSystemMode) return ThemeMode.system;
+    return _isDarkMode ? ThemeMode.dark : ThemeMode.light;
+  }
 
   // -------------------------
   // Load saved preferences
@@ -80,6 +94,11 @@ class LocalAndThemeBloc extends ChangeNotifier {
     bool? savedTheme = prefs.getBool('isDarkMode');
     if (savedTheme != null) {
       _isDarkMode = savedTheme;
+    }
+
+    bool? savedSystemMode = prefs.getBool('isSystemMode');
+    if (savedSystemMode != null) {
+      _isSystemMode = savedSystemMode;
     }
 
     notifyListeners();

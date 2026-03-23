@@ -34,8 +34,12 @@ class SettingPage extends StatelessWidget {
       body: Column(
         children: [
           /// 🔹 Theme Switch
-          Selector<LocalAndThemeBloc, bool>(
-            selector: (_, bloc) => bloc.isDarkMode,
+          /// bool? means:
+          /// - null => System mode selected
+          /// - false => Light mode selected
+          /// - true => Dark mode selected
+          Selector<LocalAndThemeBloc, bool?>(
+            selector: (_, bloc) => bloc.isSystemMode ? null : bloc.isDarkMode,
             builder: (context, isDarkMode, _) {
               return Padding(
                 padding: const EdgeInsets.all(kSP10x),
@@ -61,6 +65,14 @@ class SettingPage extends StatelessWidget {
                         value: true,
                         groupValue: isDarkMode,
                         onChanged: () => bloc.setDarkMode(true),
+                      ),
+
+                       _buildThemeOption(
+                        context,
+                        label: "System",
+                        value: null,
+                        groupValue: isDarkMode,
+                        onChanged: () => bloc.setSystemMode(),
                       ),
                     ],
                   ),
@@ -91,7 +103,7 @@ class SettingPage extends StatelessWidget {
                   context.navigateToNextPage(AboutUsPage());
                   
                 },),
-                _buildSettingItem(context, Icons.contact_mail, kDrawerContactUsText.tr(),onPress: () {
+                _buildSettingItem(context, Icons.phone, kDrawerContactUsText.tr(),onPress: () {
                   context.navigateToNextPage(const ContactUsPage());
                 },),
                 _buildSettingItem(context, Icons.help, kDrawerHelpAndSupportText.tr(),onPress: () {
@@ -129,8 +141,8 @@ class SettingPage extends StatelessWidget {
   Widget _buildThemeOption(
     BuildContext context, {
     required String label,
-    required bool value,
-    required bool groupValue,
+    required bool? value,
+    required bool? groupValue,
     required VoidCallback onChanged,
   }) {
     final theme = Theme.of(context);
@@ -141,7 +153,7 @@ class SettingPage extends StatelessWidget {
     
     return Column(
       children: [
-        Radio<bool>(
+        Radio<bool?>(
           value: value,
           groupValue: groupValue,
           onChanged: (_) => onChanged(),
