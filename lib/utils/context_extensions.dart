@@ -35,10 +35,13 @@ extension ContextExtensions on BuildContext {
   }
 
   void showErrorSnackBar(String message) {
+    final display = message.startsWith('Exception: ')
+        ? message.substring('Exception: '.length)
+        : message;
     ScaffoldMessenger.of(this).showSnackBar(
       SnackBar(
         content: EasyTextWidget(
-          text: message,
+          text: display,
           textColor: Colors.white,
           maxLines: 10,
         ),
