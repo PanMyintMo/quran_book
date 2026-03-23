@@ -9,9 +9,18 @@ import 'package:quran_book/widgets/easy_text_widget.dart';
 import 'package:uuid/uuid.dart';
 
 class AdminAddBannerPage extends StatefulWidget {
+  final String? id;
   final String? imageUrl;
+  final DateTime? createAt;
+  final DateTime? updateAt;
 
-  const AdminAddBannerPage({super.key, this.imageUrl});
+  const AdminAddBannerPage({
+    super.key,
+    this.id,
+    this.imageUrl,
+    this.createAt,
+    this.updateAt,
+  });
 
   @override
   State<AdminAddBannerPage> createState() => _AdminAddBannerPageState();
@@ -71,18 +80,28 @@ class _AdminAddBannerPageState extends State<AdminAddBannerPage> {
         return;
       }
 
+      final bannerId = widget.id ?? const Uuid().v4();
+      final createAt = widget.createAt ?? DateTime.now();
+      final updateAt = DateTime.now();
+
       final banner = BannerVO(
-        id: const Uuid().v4(),
+        id: bannerId,
         image: imageUrl,
-        createAt: DateTime.now(),
-        updateAt: DateTime.now(),
+        createAt: createAt,
+        updateAt: updateAt,
       );
 
-      await _firebaseModel.createBanner(banner);
+      if (widget.id != null) {
+        await _firebaseModel.updateBanner(banner);
+      } else {
+        await _firebaseModel.createBanner(banner);
+      }
 
       if (mounted) {
         context.hideLoadingDialog();
-        context.showSuccessSnackBar(_selectedImage != null ? "Banner saved successfully" : "Banner updated successfully");
+        context.showSuccessSnackBar(
+          widget.id != null ? "Banner updated successfully" : "Banner saved successfully",
+        );
         Navigator.pop(context);
       }
     } catch (e) {
@@ -102,7 +121,11 @@ class _AdminAddBannerPageState extends State<AdminAddBannerPage> {
             : const Center(child: Text("Tap to select image"));
 
     return Scaffold(
-      appBar: AppBar(title: const EasyTextWidget(text: "Add Banner")),
+      appBar: AppBar(
+        title: EasyTextWidget(
+          text: widget.id != null ? "Update Banner" : "Add Banner",
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

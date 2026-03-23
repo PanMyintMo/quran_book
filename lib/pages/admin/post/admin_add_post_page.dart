@@ -13,25 +13,37 @@ import 'package:quran_book/widgets/cache_network_image_widget.dart';
 import 'package:uuid/uuid.dart';
 
 class AdminAddPostPage extends StatefulWidget {
+  final String? id;
   final String? name;
   final String? overview;
   final String? author;
   final String? imageUrl;
+  final String? pdfUrl;
   final String? pdfName;
+  final String? audioUrl;
   final String? audioName;
   final CategoryVO? category;
   final List<String>? userIDOfBookMark;
+  final DateTime? createAt;
+  final DateTime? updateAt;
+  final String? bookType;
 
   const AdminAddPostPage({
     super.key,
+    this.id,
     this.name,
     this.overview,
     this.author,
     this.imageUrl,
+    this.pdfUrl,
     this.pdfName,
+    this.audioUrl,
     this.audioName,
     this.category,
     this.userIDOfBookMark,
+    this.createAt,
+    this.updateAt,
+    this.bookType,
   });
 
   @override
@@ -51,6 +63,7 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
 
   CategoryVO? _selectedCategory;
   List<CategoryVO> _categoryList = [];
+  String? _selectedCategoryId;
   String _selectedBookType = 'new'; // new | popular | premium
 
   @override
@@ -61,7 +74,8 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
     _authorController.text = widget.author ?? '';
     _pdfController.text = widget.pdfName ?? '';
     _audioController.text = widget.audioName ?? '';
-    _selectedCategory = widget.category;
+    _selectedCategoryId = widget.category?.id;
+    _selectedBookType = widget.bookType ?? 'new';
     _loadCategories();
   }
 
@@ -79,6 +93,12 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
     final categories = await _firebaseModel.getAllCategories();
     setState(() {
       _categoryList = categories;
+      if (_selectedCategoryId == null) {
+        _selectedCategory = null;
+        return;
+      }
+      final matched = _categoryList.where((c) => c.id == _selectedCategoryId).toList();
+      _selectedCategory = matched.isNotEmpty ? matched.first : null;
     });
   }
 
@@ -153,8 +173,9 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
 
     try {
       context.showLoadingDialog();
-
-      final id = const Uuid().v4();
+      final id = widget.id ?? const Uuid().v4();
+      final createAt = widget.createAt ?? DateTime.now();
+      final updateAt = DateTime.now();
 
       // Upload image
       String imageUrl;
@@ -165,13 +186,13 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
       }
 
       // Upload PDF if selected
-      String pdfUrl = '';
+      String pdfUrl = widget.pdfUrl ?? '';
       if (_selectedPdf != null) {
         pdfUrl = await _firebaseModel.uploadFile(_selectedPdf!, 'pdf');
       }
 
       // Upload audio if selected (optional)
-      String audioUrl = '';
+      String audioUrl = widget.audioUrl ?? '';
       if (_selectedAudio != null) {
         audioUrl = await _firebaseModel.uploadFile(_selectedAudio!, 'audio');
       }
@@ -200,23 +221,29 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
           name: _pdfController.text,
           image: imageUrl,
           url: pdfUrl,
-          createAt: DateTime.now(),
-          updateAt: DateTime.now(),
+          createAt: createAt,
+          updateAt: updateAt,
         ),
         audio: audioVO,
         pages: {},
         readBy: [],
-        createAt: DateTime.now(),
-        updateAt: DateTime.now(),
+        createAt: createAt,
+        updateAt: updateAt,
         userIDOfBookMark: widget.userIDOfBookMark ?? [],
         bookType: _selectedBookType,
       );
 
-      await _firebaseModel.createBook(book);
+      if (widget.id != null) {
+        await _firebaseModel.updateBook(book);
+      } else {
+        await _firebaseModel.createBook(book);
+      }
 
       if (mounted) {
         context.hideLoadingDialog();
-        context.showSuccessSnackBar("Post added successfully");
+        context.showSuccessSnackBar(
+          widget.id != null ? "Post updated successfully" : "Post added successfully",
+        );
         Navigator.pop(context);
       }
     } catch (e) {
@@ -236,7 +263,9 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
             : const Center(child: Text("Tap to select image"));
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Add New Post")),
+      appBar: AppBar(
+        title: Text(widget.id != null ? "Update Post" : "Add New Post"),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -322,6 +351,7 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
               onChanged: (value) {
                 setState(() {
                   _selectedCategory = value;
+                  _selectedCategoryId = value?.id;
                 });
               },
             ),

@@ -177,6 +177,17 @@ class FirebaseModel {
     }
   }
 
+  Future<void> updateCategory(CategoryVO category) async {
+    try {
+      await _database
+          .child('categories')
+          .child(category.id)
+          .update(category.toJson());
+    } catch (e) {
+      throw Exception('Failed to update category: ${e.toString()}');
+    }
+  }
+
   // ---------------------------- User ----------------------------
 
   Future<void> createUser(UserVO user) async {
@@ -234,6 +245,17 @@ class FirebaseModel {
     }
   }
 
+  Future<void> updateDonation(DonationVO donation) async {
+    try {
+      await _database
+          .child('donations')
+          .child(donation.id)
+          .update(donation.toJson());
+    } catch (e) {
+      throw Exception('Failed to update donation: ${e.toString()}');
+    }
+  }
+
   Future<List<DonationVO>> getAllDonations() async {
     try {
       final snapshot = await _database.child('donations').get();
@@ -270,6 +292,14 @@ class FirebaseModel {
       await _database.child('banners').child(banner.id).set(banner.toJson());
     } catch (e) {
       throw Exception('Failed to create banner: ${e.toString()}');
+    }
+  }
+
+  Future<void> updateBanner(BannerVO banner) async {
+    try {
+      await _database.child('banners').child(banner.id).update(banner.toJson());
+    } catch (e) {
+      throw Exception('Failed to update banner: ${e.toString()}');
     }
   }
 
