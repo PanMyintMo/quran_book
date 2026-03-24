@@ -155,6 +155,46 @@ class FirebaseModel {
     }
   }
 
+  String _normalizeBookType(String? rawType) {
+    final value = (rawType ?? '').trim().toLowerCase();
+    if (value.isEmpty || value == 'new') return 'new';
+    if (value == 'popular') return 'popular';
+    if (value == 'premium' ||
+        value == 'preminum' ||
+        value == 'preminus' ||
+        value == 'premius') {
+      return 'premium';
+    }
+    return 'new';
+  }
+
+  Future<int> migrateBookTypes() async {
+    try {
+      final snapshot = await _database.child('books').get();
+      final data = snapshot.value as Map<dynamic, dynamic>?;
+      if (data == null || data.isEmpty) return 0;
+
+      int updatedCount = 0;
+      for (final entry in data.entries) {
+        final bookId = entry.key.toString();
+        final raw = Map<String, dynamic>.from(entry.value as Map);
+        final normalizedType = _normalizeBookType(raw['bookType']?.toString());
+        final existingType = raw['bookType']?.toString().trim().toLowerCase();
+
+        if (existingType != normalizedType) {
+          await _database
+              .child('books')
+              .child(bookId)
+              .update({'bookType': normalizedType});
+          updatedCount++;
+        }
+      }
+      return updatedCount;
+    } catch (e) {
+      throw Exception('Failed to migrate book types: ${e.toString()}');
+    }
+  }
+
   // ---------------------------- Category ----------------------------
 
   Future<void> createCategory(CategoryVO category) async {

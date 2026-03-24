@@ -26,6 +26,36 @@ class _HomePageState extends State<HomePage> {
   final FirebaseModel _firebaseModel = FirebaseModel();
   final PageController _bannerController = PageController();
   int _currentBannerIndex = 0;
+  static bool _bookTypeMigrationRan = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _runBookTypeMigrationOnce();
+  }
+
+  Future<void> _runBookTypeMigrationOnce() async {
+    if (_bookTypeMigrationRan) return;
+    _bookTypeMigrationRan = true;
+    try {
+      await _firebaseModel.migrateBookTypes();
+    } catch (_) {
+      // Non-blocking: UI already handles legacy values locally.
+    }
+  }
+
+  String _normalizeBookType(String? rawType) {
+    final value = (rawType ?? '').trim().toLowerCase();
+    if (value.isEmpty || value == 'new') return 'new';
+    if (value == 'popular') return 'popular';
+    if (value == 'premium' ||
+        value == 'preminum' ||
+        value == 'preminus' ||
+        value == 'premius') {
+      return 'premium';
+    }
+    return 'new';
+  }
 
   @override
   void dispose() {
@@ -55,13 +85,14 @@ class _HomePageState extends State<HomePage> {
             final books = snapshot.data![0] as List<BookVO>;
             final categories = snapshot.data![1] as List<CategoryVO>;
             final banners = snapshot.data![2] as List<BannerVO>;
-            final newBooks = books
-                .where((b) => (b.bookType ?? 'new') == 'new')
+            final newBooks =
+                books.where((b) => _normalizeBookType(b.bookType) == 'new').toList();
+            final popularBooks = books
+                .where((b) => _normalizeBookType(b.bookType) == 'popular')
                 .toList();
-            final popularBooks =
-                books.where((b) => b.bookType == 'popular').toList();
-            final premiumBooks =
-                books.where((b) => b.bookType == 'premium').toList();
+            final premiumBooks = books
+                .where((b) => _normalizeBookType(b.bookType) == 'premium')
+                .toList();
 
             return Column(
               children: [
@@ -177,6 +208,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               const SizedBox(height: kSP20x),
                             ],
+
 
                             // ── Popular Books ──
                             if (popularBooks.isNotEmpty) ...[

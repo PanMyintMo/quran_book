@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/audio_vo.dart';
 import 'package:quran_book/data/vos/book_vo.dart';
@@ -65,6 +66,21 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
   List<CategoryVO> _categoryList = [];
   String? _selectedCategoryId;
   String _selectedBookType = 'new'; // new | popular | premium
+  bool _isPickingPdf = false;
+  bool _isPickingAudio = false;
+
+  String _normalizeBookType(String? rawType) {
+    final value = (rawType ?? '').trim().toLowerCase();
+    if (value.isEmpty || value == 'new') return 'new';
+    if (value == 'popular') return 'popular';
+    if (value == 'premium' ||
+        value == 'preminum' ||
+        value == 'preminus' ||
+        value == 'premius') {
+      return 'premium';
+    }
+    return 'new';
+  }
 
   @override
   void initState() {
@@ -75,7 +91,7 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
     _pdfController.text = widget.pdfName ?? '';
     _audioController.text = widget.audioName ?? '';
     _selectedCategoryId = widget.category?.id;
-    _selectedBookType = widget.bookType ?? 'new';
+    _selectedBookType = _normalizeBookType(widget.bookType);
     _loadCategories();
   }
 
@@ -135,22 +151,45 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
   }
 
   Future<void> _pickPdf() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
-    if (result != null && result.files.single.path != null) {
-      setState(() {
-        _selectedPdf = File(result.files.single.path!);
-        _pdfController.text = result.files.single.name;
-      });
+    if (_isPickingPdf) return;
+    _isPickingPdf = true;
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+      );
+      if (result != null && result.files.single.path != null) {
+        setState(() {
+          _selectedPdf = File(result.files.single.path!);
+          _pdfController.text = result.files.single.name;
+        });
+      }
+    } on PlatformException catch (e) {
+      if (e.code != 'multiple_request' && mounted) {
+        context.showErrorSnackBar('Failed to pick PDF: ${e.message ?? e.code}');
+      }
+    } finally {
+      _isPickingPdf = false;
     }
   }
 
   Future<void> _pickAudio() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.audio);
-    if (result != null && result.files.single.path != null) {
-      setState(() {
-        _selectedAudio = File(result.files.single.path!);
-        _audioController.text = result.files.single.name;
-      });
+    if (_isPickingAudio) return;
+    _isPickingAudio = true;
+    try {
+      final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+      if (result != null && result.files.single.path != null) {
+        setState(() {
+          _selectedAudio = File(result.files.single.path!);
+          _audioController.text = result.files.single.name;
+        });
+      }
+    } on PlatformException catch (e) {
+      if (e.code != 'multiple_request' && mounted) {
+        context.showErrorSnackBar('Failed to pick audio: ${e.message ?? e.code}');
+      }
+    } finally {
+      _isPickingAudio = false;
     }
   }
 
