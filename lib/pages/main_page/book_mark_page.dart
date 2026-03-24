@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/book_vo.dart';
 import 'package:quran_book/pages/help_support_page.dart';
@@ -36,6 +37,7 @@ class _BookMarkPageState extends State<BookMarkPage>
   String? _userId;
   List<BookVO>? _bookmarkedBooks;
   StreamSubscription<List<BookVO>>? _booksSubscription;
+  final Set<String> _pendingRemovedBookIds = <String>{};
 
   @override
   void initState() {
@@ -50,9 +52,15 @@ class _BookMarkPageState extends State<BookMarkPage>
     _booksSubscription = _firebaseModel.watchAllBooks().listen((allBooks) {
       final currentUserId = FirebaseAuth.instance.currentUser?.uid;
       if (!mounted || currentUserId == null) return;
-      final bookmarked = allBooks
-          .where((book) => book.userIDOfBookMark.contains(currentUserId))
-          .toList();
+      final bookmarked = allBooks.where((book) {
+        final stillBookmarked = book.userIDOfBookMark.contains(currentUserId);
+        final isPendingRemoval = _pendingRemovedBookIds.contains(book.id);
+        // Once remote state confirms removal, clear pending flag.
+        if (!stillBookmarked && isPendingRemoval) {
+          _pendingRemovedBookIds.remove(book.id);
+        }
+        return stillBookmarked && !isPendingRemoval;
+      }).toList();
       setState(() {
         _userId = currentUserId;
         _bookmarkedBooks = bookmarked;
@@ -68,9 +76,14 @@ class _BookMarkPageState extends State<BookMarkPage>
       if (!mounted) return;
       setState(() {
         _userId = currentUserId;
-        _bookmarkedBooks = allBooks
-            .where((book) => book.userIDOfBookMark.contains(currentUserId))
-            .toList();
+        _bookmarkedBooks = allBooks.where((book) {
+          final stillBookmarked = book.userIDOfBookMark.contains(currentUserId);
+          final isPendingRemoval = _pendingRemovedBookIds.contains(book.id);
+          if (!stillBookmarked && isPendingRemoval) {
+            _pendingRemovedBookIds.remove(book.id);
+          }
+          return stillBookmarked && !isPendingRemoval;
+        }).toList();
       });
     } catch (_) {
       // Keep current list on error
@@ -197,6 +210,7 @@ class _BookMarkPageState extends State<BookMarkPage>
                                       _openBookOverview(book);
                                     },
                                     onTapUnbookmark: () {
+                                      Logger().d("Unbookmarking book: ${book.id}");
                                       _unbookmarkBook(book.id);
                                     },
                                   );
@@ -222,15 +236,23 @@ class _BookMarkPageState extends State<BookMarkPage>
 
     try {
       _userId = currentUserId;
+      _pendingRemovedBookIds.add(bookId);
+      if (_bookmarkedBooks != null) {
+        setState(() {
+          _bookmarkedBooks = _bookmarkedBooks!
+              .where((book) => book.id != bookId)
+              .toList();
+        });
+      }
       await _firebaseModel.toggleBookmark(bookId, currentUserId);
 
       if (!mounted) return;
       context.showSuccessSnackBar("Removed from bookmarks.");
-      await _refreshBookmarks();
     } catch (e) {
       if (!mounted) return;
+      _pendingRemovedBookIds.remove(bookId);
       context.showErrorSnackBar("Unbookmark failed: $e");
-      _refreshBookmarks();
+      await _refreshBookmarks();
     }
   }
 
@@ -243,25 +265,18 @@ class _BookMarkPageState extends State<BookMarkPage>
 
     // Remove immediately using either returned id (best) or local mutation (fallback).
     if (unbookmarkedId != null && _bookmarkedBooks != null) {
+      _pendingRemovedBookIds.add(unbookmarkedId);
       setState(() {
         _bookmarkedBooks = _bookmarkedBooks!
             .where((b) => b.id != unbookmarkedId)
             .toList();
       });
+      // Skip immediate Firebase refetch here; it can return stale data briefly
+      // and re-add the removed book. Stream listener will sync shortly.
+      return;
     }
 
-    // Fallback: filter based on the current userId to handle cases where
-    // the returned value is null but the local `BookVO` was mutated.
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-    if (currentUserId != null && _bookmarkedBooks != null) {
-      setState(() {
-        _bookmarkedBooks = _bookmarkedBooks!
-            .where((b) => b.userIDOfBookMark.contains(currentUserId))
-            .toList();
-      });
-    }
-
-    // Also refresh from Firebase so UI is correct after hot reload too.
+    // If no explicit unbookmark id returned, fallback to refresh.
     await _refreshBookmarks();
   }
 }
@@ -330,7 +345,7 @@ class _BookMarkItemView extends StatelessWidget {
           ),
           IconButton(
             tooltip: 'Remove bookmark',
-            icon: const Icon(Icons.bookmark_border),
+            icon: const Icon(Icons.remove_circle),
             onPressed: onTapUnbookmark,
           ),
         ],

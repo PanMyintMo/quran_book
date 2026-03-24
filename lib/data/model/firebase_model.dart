@@ -120,19 +120,36 @@ class FirebaseModel {
 
   Future<void> toggleBookmark(String bookId, String userId) async {
     try {
-      final bookSnapshot = await _database.child('books').child(bookId).get();
-      if (!bookSnapshot.exists) return;
+      final bookmarkRef =
+          _database.child('books').child(bookId).child('userIDOfBookMark');
 
-      final bookData = Map<String, dynamic>.from(bookSnapshot.value as Map);
-      final List<String> userIDs = (bookData['userIDOfBookMark'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+      await bookmarkRef.runTransaction((currentData) {
+        final List<String> userIDs = [];
 
-      if (userIDs.contains(userId)) {
-        userIDs.remove(userId);
-      } else {
-        userIDs.add(userId);
-      }
+        // Support both Firebase list and map-like shapes safely.
+        if (currentData is List) {
+          for (final value in currentData) {
+            if (value != null) {
+              userIDs.add(value.toString());
+            }
+          }
+        } else if (currentData is Map) {
+          for (final value in currentData.values) {
+            if (value != null) {
+              userIDs.add(value.toString());
+            }
+          }
+        }
 
-      await _database.child('books').child(bookId).update({'userIDOfBookMark': userIDs});
+        if (userIDs.contains(userId)) {
+          userIDs.remove(userId);
+        } else {
+          userIDs.add(userId);
+        }
+
+        // Save as list consistently.
+        return Transaction.success(userIDs);
+      });
     } catch (e) {
       throw Exception('Failed to toggle bookmark: ${e.toString()}');
     }
