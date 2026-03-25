@@ -21,7 +21,8 @@ class FirebaseModel {
     try {
       return await _auth.signInWithEmailAndPassword(email: email, password: password);
     } on FirebaseAuthException catch (e) {
-      throw Exception('Login failed: ${e.message}');
+      // Re-throw the original exception so UI can read `e.code` (wrong-password, user-not-found, etc.)
+      throw e;
     } catch (e) {
       throw Exception('Unexpected error during login: ${e.toString()}');
     }
@@ -31,7 +32,7 @@ class FirebaseModel {
     try {
       return await _auth.createUserWithEmailAndPassword(email: email, password: password);
     } on FirebaseAuthException catch (e) {
-      throw Exception('Registration failed: ${e.message}');
+      throw e;
     } catch (e) {
       throw Exception('Unexpected error during registration: ${e.toString()}');
     }
