@@ -63,7 +63,7 @@ class _BookTypesSeeAllPageState extends State<BookTypesSeeAllPage> {
 
                   return GestureDetector(
                     onTap: () => context.navigateToNextPage(
-                      const BookListFromCategoryPage(),
+                      BookListFromCategoryPage(category: category),
                     ),
                     child: Container(
                       decoration: BoxDecoration(
