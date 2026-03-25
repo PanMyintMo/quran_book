@@ -73,7 +73,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   const Icon(Icons.person_outline, size: 100, color: Colors.grey),
                   const SizedBox(height: kSP20x),
                   Align(
-                    alignment: Alignment.centerRight,
+                    alignment: Alignment.center,
                     child: EasyTextWidget(
                       text: 'Guest User',
                       textAlign: TextAlign.right,
@@ -83,7 +83,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: kSP20x),
                   Align(
-                    alignment: Alignment.centerRight,
+                    alignment: Alignment.center,
                     child: EasyTextWidget(
                       text: 'You are using the app as a guest.',
                       textAlign: TextAlign.right,
