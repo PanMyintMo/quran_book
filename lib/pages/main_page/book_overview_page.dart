@@ -278,6 +278,7 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                     onTap: () => context.navigateToNextPage(BookReadDetailsPage(
                       title: book.name,
                       pdfUrl: book.pdf.url,
+                      audioUrl: book.audio?.url,
                     )),
                   ),
                   const SizedBox(height: kSP10x),
@@ -286,9 +287,18 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                     buttonText: kListenText.tr(),
                     isGhost: false,
                     onTap: () {
+                      final audioUrl = book.audio?.url;
+                      if (audioUrl == null || audioUrl.isEmpty) {
+                        if (mounted) context.showErrorSnackBar("No audio available.");
+                        return;
+                      }
                       requestPermissions().then((_) {
-                        _togglePlayPause();
-                        _showMiniPlayer();
+                        context.navigateToNextPage(BookReadDetailsPage(
+                          title: book.name,
+                          pdfUrl: book.pdf.url,
+                          audioUrl: audioUrl,
+                          autoPlayAudio: true,
+                        ));
                       });
                     },
                   ),
