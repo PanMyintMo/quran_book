@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/book_vo.dart';
+import 'package:quran_book/pages/main_page/book_listen_details_page.dart';
 import 'package:quran_book/pages/main_page/book_read_details_page.dart';
 import 'package:quran_book/pages/main_page/donate_page.dart';
 import 'package:quran_book/pages/introduction/login_page.dart';
@@ -278,7 +279,6 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                     onTap: () => context.navigateToNextPage(BookReadDetailsPage(
                       title: book.name,
                       pdfUrl: book.pdf.url,
-                      audioUrl: book.audio?.url,
                     )),
                   ),
                   const SizedBox(height: kSP10x),
@@ -293,11 +293,12 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                         return;
                       }
                       requestPermissions().then((_) {
-                        context.navigateToNextPage(BookReadDetailsPage(
+                        if (!mounted) return;
+                        context.navigateToNextPage(BookListenDetailsPage(
                           title: book.name,
-                          pdfUrl: book.pdf.url,
                           audioUrl: audioUrl,
-                          autoPlayAudio: true,
+                          coverImageUrl: book.image,
+                          autoPlay: true,
                         ));
                       });
                     },

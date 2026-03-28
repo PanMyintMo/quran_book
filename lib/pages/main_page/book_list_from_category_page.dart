@@ -5,6 +5,7 @@ import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/book_vo.dart';
 import 'package:quran_book/data/vos/category_vo.dart';
 import 'package:quran_book/pages/introduction/login_page.dart';
+import 'package:quran_book/pages/main_page/book_overview_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
@@ -172,10 +173,21 @@ class _BookListFromCategoryPageState extends State<BookListFromCategoryPage> {
                             _onTapSave(book);
                           },
                           onTapPlay: () {
-                            showDialog(
-                              context: context,
-                              builder: (_) => const _NeedToRegisterDialogView(
-                                title: kRegisterAlertTextForPlayText,
+                            final uid = _currentUserId ??
+                                FirebaseAuth.instance.currentUser?.uid;
+                            if (uid == null) {
+                              showDialog(
+                                context: context,
+                                builder: (_) => const _NeedToRegisterDialogView(
+                                  title: kRegisterAlertTextForPlayText,
+                                ),
+                              );
+                              return;
+                            }
+                            context.navigateToNextPage(
+                              BookOverviewPage(
+                                isPlay: true,
+                                book: book,
                               ),
                             );
                           },
