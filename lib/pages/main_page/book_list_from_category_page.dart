@@ -1,10 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/book_vo.dart';
 import 'package:quran_book/data/vos/category_vo.dart';
 import 'package:quran_book/pages/introduction/login_page.dart';
+import 'package:quran_book/pages/main_page/book_listen_details_page.dart';
 import 'package:quran_book/pages/main_page/book_overview_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
@@ -17,9 +19,13 @@ class BookListFromCategoryPage extends StatefulWidget {
   const BookListFromCategoryPage({
     super.key,
     this.category,
+    this.embedInParent = false,
   });
 
   final CategoryVO? category;
+
+  /// When true, only the list/search body is built (no [Scaffold]); used inside [CategoryDetailPage].
+  final bool embedInParent;
 
   @override
   State<BookListFromCategoryPage> createState() =>
@@ -92,6 +98,7 @@ class _BookListFromCategoryPageState extends State<BookListFromCategoryPage> {
         _currentUserId = userId;
       });
 
+      if (!mounted) return;
       context.showSuccessSnackBar(
         alreadyBookmarked ? "Removed from bookmarks." : "Bookmarked successfully!",
       );
@@ -99,6 +106,10 @@ class _BookListFromCategoryPageState extends State<BookListFromCategoryPage> {
       if (!mounted) return;
       context.showErrorSnackBar("Bookmark failed: $e");
     }
+  }
+
+  Future<void> _requestListenPermissions() async {
+    await Permission.notification.request();
   }
 
   @override
@@ -121,90 +132,113 @@ class _BookListFromCategoryPageState extends State<BookListFromCategoryPage> {
                 overview.contains(query);
           }).toList();
 
-    return Scaffold(
-      appBar: AppBar(),
-      body: Padding(
-        // Keep vertical spacing but let the list/dividers use full screen width.
-        padding: const EdgeInsets.symmetric(
-          horizontal: 0,
-          vertical: kSP20x,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-        
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                onChanged: (text) {
-                  setState(() {
-                    _searchQuery = text;
-                  });
-                },
-                style: const TextStyle(color: kWhiteColor),
-                decoration: InputDecoration(
-                  fillColor: kAppPrimaryColor,
-                  filled: true,
-                  hintText: kSearchHintText.tr(),
-                  hintStyle: const TextStyle(color: kWhiteColor),
-                  prefixIcon: const Icon(Icons.search, color: kWhiteColor),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(kSP10x),
-                  ),
+    final body = Padding(
+      // Keep vertical spacing but let the list/dividers use full screen width.
+      padding: EdgeInsets.symmetric(
+        horizontal: 0,
+        vertical: widget.embedInParent ? kSP10x : kSP20x,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              onChanged: (text) {
+                setState(() {
+                  _searchQuery = text;
+                });
+              },
+              style: const TextStyle(color: kWhiteColor),
+              decoration: InputDecoration(
+                fillColor: kAppPrimaryColor,
+                filled: true,
+                hintText: kSearchHintText.tr(),
+                hintStyle: const TextStyle(color: kWhiteColor),
+                prefixIcon: const Icon(Icons.search, color: kWhiteColor),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(kSP10x),
                 ),
               ),
             ),
-            const SizedBox(height: kSP20x),
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : ListView.separated(
-                      padding: EdgeInsets.symmetric(vertical: kSP40x),
-                      itemCount: filteredBooks.length,
-                      itemBuilder: (_, index) {
-                        final book = filteredBooks[index];
-                        return _BookListFromCategoryItemView(
-                          index: index + 1,
-                          title: book.name,
-                          translateBy: book.author,
-                          description: book.overview,
-                          isSave: _isBookmarked(book),
-                          onTapSave: () {
-                            _onTapSave(book);
-                          },
-                          onTapPlay: () {
-                            final uid = _currentUserId ??
-                                FirebaseAuth.instance.currentUser?.uid;
-                            if (uid == null) {
-                              showDialog(
-                                context: context,
-                                builder: (_) => const _NeedToRegisterDialogView(
-                                  title: kRegisterAlertTextForPlayText,
-                                ),
-                              );
-                              return;
-                            }
-                            context.navigateToNextPage(
-                              BookOverviewPage(
-                                isPlay: true,
-                                book: book,
+          ),
+          SizedBox(height: widget.embedInParent ? kSP10x : kSP20x),
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.separated(
+                    padding: EdgeInsets.symmetric(vertical: kSP40x),
+                    itemCount: filteredBooks.length,
+                    itemBuilder: (_, index) {
+                      final book = filteredBooks[index];
+                      return _BookListFromCategoryItemView(
+                        index: index + 1,
+                        title: book.name,
+                        translateBy: book.author,
+                        description: book.overview,
+                        isSave: _isBookmarked(book),
+                        onTapDetail: () {
+                          context.navigateToNextPage(
+                            BookOverviewPage(
+                              isPlay: false,
+                              book: book,
+                            ),
+                          );
+                        },
+                        onTapSave: () {
+                          _onTapSave(book);
+                        },
+                        onTapPlay: () {
+                          final uid = _currentUserId ??
+                              FirebaseAuth.instance.currentUser?.uid;
+                          if (uid == null) {
+                            showDialog(
+                              context: context,
+                              builder: (_) => const _NeedToRegisterDialogView(
+                                title: kRegisterAlertTextForPlayText,
                               ),
                             );
-                          },
-                        );
-                      },
-                      separatorBuilder: (_, __) => const Divider(
-                        height: kSP40x,
-                        color: Colors.grey,
-                        thickness: 0.3,
-                        indent: 0,
-                        endIndent: 0,
-                      ),
+                            return;
+                          }
+                          final audioUrl = book.audio?.url;
+                          if (audioUrl == null || audioUrl.isEmpty) {
+                            context.showErrorSnackBar('No audio available.');
+                            return;
+                          }
+                          _requestListenPermissions().then((_) {
+                            if (!mounted || !context.mounted) return;
+                            context.navigateToNextPage(
+                              BookListenDetailsPage(
+                                title: book.name,
+                                audioUrl: audioUrl,
+                                coverImageUrl: book.image,
+                                autoPlay: true,
+                              ),
+                            );
+                          });
+                        },
+                      );
+                    },
+                    separatorBuilder: (_, __) => const Divider(
+                      height: kSP40x,
+                      color: Colors.grey,
+                      thickness: 0.3,
+                      indent: 0,
+                      endIndent: 0,
                     ),
-            ),
-          ],
-        ),
+                  ),
+          ),
+        ],
       ),
+    );
+
+    if (widget.embedInParent) {
+      return body;
+    }
+
+    return Scaffold(
+      appBar: AppBar(),
+      body: body,
     );
   }
 }
@@ -264,6 +298,7 @@ class _BookListFromCategoryItemView extends StatelessWidget {
     required this.title,
     required this.translateBy,
     required this.isSave,
+    required this.onTapDetail,
     required this.onTapSave,
     required this.onTapPlay,
     required this.description,
@@ -273,72 +308,88 @@ class _BookListFromCategoryItemView extends StatelessWidget {
   final String title;
   final String translateBy;
   final bool isSave;
+  final VoidCallback onTapDetail;
   final VoidCallback onTapSave;
   final VoidCallback onTapPlay;
   final String description;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Add same horizontal padding as the title block.
-        Container(
-          alignment: Alignment.topLeft,
-          padding: const EdgeInsets.symmetric(horizontal: kSP40x),
-          child: EasyTextWidget(
-            text: index.toString(),
-            textAlign: TextAlign.center,
-            fontSize: kFontSize18x,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: kSP10x),
-        Container(
-          alignment: Alignment.topCenter,
-          padding: const EdgeInsets.symmetric(horizontal: kSP40x),
-          child: EasyTextWidget(
-            text: title,
-            textAlign: TextAlign.center,
-            textColor: kAppPrimaryColor,
-            fontSize: kFontSize21x,
-            fontWeight: FontWeight.w600,
-            maxLines: 2,
-          ),
-        ),
-        const SizedBox(height: kSP20x),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-          
-            children: [
-              EasyTextWidget(
-                text: 'Translation by $translateBy',
-                fontSize: kFontSize12x,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTapDetail,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              alignment: Alignment.topLeft,
+              padding: const EdgeInsets.symmetric(horizontal: kSP40x),
+              child: EasyTextWidget(
+                text: index.toString(),
+                textAlign: TextAlign.center,
+                fontSize: kFontSize18x,
+                fontWeight: FontWeight.w600,
               ),
-              const Spacer(),
-              GestureDetector(
-                onTap: onTapSave,
-                child: Icon(
-                  isSave ? Icons.bookmark : Icons.bookmark_border,
-                  color: isSave ? kAppYellowButtonColor : kAppPrimaryColor,
-                ),
+            ),
+            const SizedBox(height: kSP10x),
+            Container(
+              alignment: Alignment.topCenter,
+              padding: const EdgeInsets.symmetric(horizontal: kSP40x),
+              child: EasyTextWidget(
+                text: title,
+                textAlign: TextAlign.center,
+                textColor: kAppPrimaryColor,
+                fontSize: kFontSize21x,
+                fontWeight: FontWeight.w600,
+                maxLines: 2,
               ),
-              const SizedBox(width: kSP10x),
-              GestureDetector(
-                onTap: onTapPlay,
-                child: const Icon(Icons.play_arrow),
+            ),
+            const SizedBox(height: kSP20x),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: EasyTextWidget(
+                      text: 'Translation by $translateBy',
+                      fontSize: kFontSize12x,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: onTapSave,
+                    child: Padding(
+                      padding: const EdgeInsets.all(kSP5x),
+                      child: Icon(
+                        isSave ? Icons.bookmark : Icons.bookmark_border,
+                        color:
+                            isSave ? kAppYellowButtonColor : kAppPrimaryColor,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: kSP5x),
+                  GestureDetector(
+                    onTap: onTapPlay,
+                    child: const Padding(
+                      padding: EdgeInsets.all(kSP5x),
+                      child: Icon(Icons.play_arrow),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: kSP40x),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: kSP40x),
+              child: EasyTextWidget(
+                text: description,
+                maxLines: 6,
+                textColor: Colors.black54,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: kSP40x),
-        EasyTextWidget(
-          text: description,
-          maxLines: 6,
-          textColor: Colors.black54,
-        ),
-      ],
+      ),
     );
   }
 }

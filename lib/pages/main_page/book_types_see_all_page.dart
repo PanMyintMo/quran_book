@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:quran_book/pages/main_page/book_list_from_category_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/category_vo.dart';
-import 'package:quran_book/pages/main_page/book_list_from_category_page.dart';
+import 'package:quran_book/pages/main_page/category_detail_page.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/widgets/cache_network_image_widget.dart';
