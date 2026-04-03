@@ -10,11 +10,22 @@ import 'package:quran_book/widgets/cache_network_image_widget.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 
 class AdminAddDonationPage extends StatefulWidget {
+  final String? id;
   final String? name;
   final String? accountNumber;
   final String? imageUrl;
+  final DateTime? createAt;
+  final DateTime? updateAt;
 
-  const AdminAddDonationPage({super.key, this.name, this.accountNumber, this.imageUrl});
+  const AdminAddDonationPage({
+    super.key,
+    this.id,
+    this.name,
+    this.accountNumber,
+    this.imageUrl,
+    this.createAt,
+    this.updateAt,
+  });
 
   @override
   State<AdminAddDonationPage> createState() => _AdminAddDonationPageState();
@@ -86,20 +97,32 @@ class _AdminAddDonationPageState extends State<AdminAddDonationPage> {
           imageUrl = await _firebaseModel.uploadFile(_selectedImage!, 'donations');
         }
 
+        final id = widget.id ?? const Uuid().v4();
+        final createAt = widget.createAt ?? DateTime.now();
+        final updateAt = DateTime.now();
+
         final donation = DonationVO(
-          id: const Uuid().v4(),
+          id: id,
           name: name,
           accNumber: account,
           image: imageUrl,
-          createAt: DateTime.now(),
-          updateAt: DateTime.now(),
+          createAt: createAt,
+          updateAt: updateAt,
         );
 
-        await _firebaseModel.createDonation(donation);
+        if (widget.id != null) {
+          await _firebaseModel.updateDonation(donation);
+        } else {
+          await _firebaseModel.createDonation(donation);
+        }
 
         if (mounted) {
           context.hideLoadingDialog();
-          context.showSuccessSnackBar("Donation setup saved successfully");
+          context.showSuccessSnackBar(
+            widget.id != null
+                ? "Donation setup updated successfully"
+                : "Donation setup saved successfully",
+          );
           Navigator.pop(context);
         }
       } catch (e) {
@@ -124,7 +147,11 @@ class _AdminAddDonationPageState extends State<AdminAddDonationPage> {
             : const Center(child: Text("Tap to select image"));
 
     return Scaffold(
-      appBar: AppBar(title: const EasyTextWidget(text: "Add Donation Setup")),
+      appBar: AppBar(
+        title: EasyTextWidget(
+          text: widget.id != null ? "Update Donation Setup" : "Add Donation Setup",
+        ),
+      ),
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: SingleChildScrollView(

@@ -40,7 +40,9 @@ class _SplashPageState extends State<SplashPage> {
       if (!mounted) return;
 
       if (currentUser == null) {
-        context.navigateToNextPageWithRemoveUntil(const WelcomePage());
+        // Auth session exists but user profile row may be missing or delayed.
+        // Keep user in app instead of forcing login again.
+        context.navigateToNextPageWithRemoveUntil(const IndexPage());
         return;
       }
 
@@ -51,9 +53,9 @@ class _SplashPageState extends State<SplashPage> {
         context.navigateToNextPageWithRemoveUntil(const IndexPage());
       }
     } catch (e) {
-      // 🔹 Safety fallback
+      // If auth session exists, avoid sending users back to login on transient errors.
       if (mounted) {
-        context.navigateToNextPageWithRemoveUntil(const WelcomePage());
+        context.navigateToNextPageWithRemoveUntil(const IndexPage());
       }
     }
   }

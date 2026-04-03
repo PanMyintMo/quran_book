@@ -18,18 +18,15 @@ class _AdminDonationSetupPageState extends State<AdminDonationSetupPage> {
   final FirebaseModel _firebaseModel = FirebaseModel();
 
   Future<void> _deleteDonation(DonationVO donation) async {
+    if (!mounted) return;
+    context.showLoadingDialog();
     try {
-      context.showLoadingDialog();
       await _firebaseModel.deleteDonation(donation.id, donation.image);
-      if (mounted) {
-        context.hideLoadingDialog();
-        context.showSuccessSnackBar("Donation setup deleted successfully");
-      }
+      if (mounted) context.showSuccessSnackBar("Donation setup deleted successfully");
     } catch (e) {
-      if (mounted) {
-        context.hideLoadingDialog();
-        context.showErrorSnackBar("Failed to delete donation: $e");
-      }
+      if (mounted) context.showErrorSnackBar("Failed to delete donation: $e");
+    } finally {
+      if (mounted) context.hideLoadingDialog();
     }
   }
 
@@ -54,56 +51,57 @@ class _AdminDonationSetupPageState extends State<AdminDonationSetupPage> {
             itemCount: donations.length,
             itemBuilder: (context, index) {
               final donation = donations[index];
-              return Dismissible(
-                key: Key(donation.id),
-                background: Container(
-                  color: Colors.green,
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.only(left: 20),
-                  child: const Icon(Icons.edit, color: Colors.white),
-                ),
-                secondaryBackground: Container(
-                  color: Colors.red,
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 20),
-                  child: const Icon(Icons.delete, color: Colors.white),
-                ),
-                confirmDismiss: (direction) async {
-                  if (direction == DismissDirection.startToEnd) {
-                    await context.navigateToNextPage(
-                      AdminAddDonationPage(
-                        name: donation.name,
-                        accountNumber: donation.accNumber,
-                        imageUrl: donation.image,
-                      ),
-                    );
-                    return false;
-                  } else {
-                    return await showDialog(
-                      context: context,
-                      builder: (context) => PromptDialogWidget.twoBtnDialog(
-                        title: 'Confirm Deletion',
-                        content: 'Are you sure you want to delete this donation setup?',
-                        positiveButtonText: 'Delete',
-                        onPositivePressed: () async {
-                          Navigator.pop(context);
-                          await _deleteDonation(donation);
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ListTile(
+                  leading: CacheNetworkImageWidget(
+                    width: 50,
+                    imageUrl: donation.image,
+                  ),
+                  title: EasyTextWidget(text: donation.name),
+                  subtitle: EasyTextWidget(text: donation.accNumber),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        tooltip: 'Edit donation',
+                        onPressed: () async {
+                          await context.navigateToNextPage(
+                            AdminAddDonationPage(
+                              id: donation.id,
+                              name: donation.name,
+                              accountNumber: donation.accNumber,
+                              imageUrl: donation.image,
+                              createAt: donation.createAt,
+                              updateAt: donation.updateAt,
+                            ),
+                          );
                         },
-                        negativeButtonText: 'Cancel',
-                        onNegativePressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.edit, color: Colors.blue),
                       ),
-                    );
-                  }
-                },
-                child: Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: ListTile(
-                    leading: CacheNetworkImageWidget(
-                      width: 50,
-                      imageUrl: donation.image,
-                    ),
-                    title: EasyTextWidget(text: donation.name),
-                    subtitle: EasyTextWidget(text: donation.accNumber),
+                      IconButton(
+                        tooltip: 'Delete donation',
+                        onPressed: () async {
+                          await showDialog(
+                            context: context,
+                            builder: (context) =>
+                                PromptDialogWidget.twoBtnDialog(
+                              title: 'Confirm Deletion',
+                              content:
+                                  'Are you sure you want to delete this donation setup?',
+                              positiveButtonText: 'Delete',
+                              onPositivePressed: () async {
+                                Navigator.pop(context);
+                                await _deleteDonation(donation);
+                              },
+                              negativeButtonText: 'Cancel',
+                              onNegativePressed: () => Navigator.pop(context),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                      ),
+                    ],
                   ),
                 ),
               );

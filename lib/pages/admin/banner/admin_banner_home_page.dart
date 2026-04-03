@@ -18,18 +18,15 @@ class _AdminBannerManagementPageState extends State<AdminBannerManagementPage> {
   final FirebaseModel _firebaseModel = FirebaseModel();
 
   Future<void> _deleteBanner(BannerVO banner) async {
+    if (!mounted) return;
+    context.showLoadingDialog();
     try {
-      context.showLoadingDialog();
       await _firebaseModel.deleteBanner(banner.id, banner.image);
-      if (mounted) {
-        context.hideLoadingDialog();
-        context.showSuccessSnackBar("Banner deleted successfully");
-      }
+      if (mounted) context.showSuccessSnackBar("Banner deleted successfully");
     } catch (e) {
-      if (mounted) {
-        context.hideLoadingDialog();
-        context.showErrorSnackBar("Failed to delete banner: $e");
-      }
+      if (mounted) context.showErrorSnackBar("Failed to delete banner: $e");
+    } finally {
+      if (mounted) context.hideLoadingDialog();
     }
   }
 
@@ -54,49 +51,58 @@ class _AdminBannerManagementPageState extends State<AdminBannerManagementPage> {
             itemCount: banners.length,
             itemBuilder: (context, index) {
               final banner = banners[index];
-              return Dismissible(
-                key: Key(banner.id),
-                background: Container(
-                  color: Colors.green,
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.only(left: 20),
-                  child: const Icon(Icons.edit, color: Colors.white),
-                ),
-                secondaryBackground: Container(
-                  color: Colors.red,
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 20),
-                  child: const Icon(Icons.delete, color: Colors.white),
-                ),
-                confirmDismiss: (direction) async {
-                  if (direction == DismissDirection.startToEnd) {
-                    await context.navigateToNextPage(AdminAddBannerPage(imageUrl: banner.image));
-                    return false;
-                  } else {
-                    return await showDialog(
-                      context: context,
-                      builder: (context) => PromptDialogWidget.twoBtnDialog(
-                        title: 'Confirm Deletion',
-                        content: 'Are you sure you want to delete this banner?',
-                        positiveButtonText: 'Delete',
-                        onPositivePressed: () async {
-                          Navigator.pop(context);
-                          await _deleteBanner(banner);
-                        },
-                        negativeButtonText: 'Cancel',
-                        onNegativePressed: () => Navigator.pop(context),
-                      ),
-                    );
-                  }
-                },
-                child: Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: CacheNetworkImageWidget(
-                    width: double.infinity,
-                    height: 150,
-                    imageUrl: banner.image,
-                    fit: BoxFit.cover,
-                  ),
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Column(
+                  children: [
+                    CacheNetworkImageWidget(
+                      width: double.infinity,
+                      height: 150,
+                      imageUrl: banner.image,
+                      fit: BoxFit.cover,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          tooltip: 'Edit banner',
+                          onPressed: () async {
+                            await context.navigateToNextPage(
+                              AdminAddBannerPage(
+                                id: banner.id,
+                                imageUrl: banner.image,
+                                createAt: banner.createAt,
+                                updateAt: banner.updateAt,
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                        ),
+                        IconButton(
+                          tooltip: 'Delete banner',
+                          onPressed: () async {
+                            await showDialog(
+                              context: context,
+                              builder: (context) =>
+                                  PromptDialogWidget.twoBtnDialog(
+                                title: 'Confirm Deletion',
+                                content:
+                                    'Are you sure you want to delete this banner?',
+                                positiveButtonText: 'Delete',
+                                onPositivePressed: () async {
+                                  Navigator.pop(context);
+                                  await _deleteBanner(banner);
+                                },
+                                negativeButtonText: 'Cancel',
+                                onNegativePressed: () => Navigator.pop(context),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               );
             },

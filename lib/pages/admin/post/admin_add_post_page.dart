@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/audio_vo.dart';
 import 'package:quran_book/data/vos/book_vo.dart';
@@ -13,25 +14,37 @@ import 'package:quran_book/widgets/cache_network_image_widget.dart';
 import 'package:uuid/uuid.dart';
 
 class AdminAddPostPage extends StatefulWidget {
+  final String? id;
   final String? name;
   final String? overview;
   final String? author;
   final String? imageUrl;
+  final String? pdfUrl;
   final String? pdfName;
+  final String? audioUrl;
   final String? audioName;
   final CategoryVO? category;
   final List<String>? userIDOfBookMark;
+  final DateTime? createAt;
+  final DateTime? updateAt;
+  final String? bookType;
 
   const AdminAddPostPage({
     super.key,
+    this.id,
     this.name,
     this.overview,
     this.author,
     this.imageUrl,
+    this.pdfUrl,
     this.pdfName,
+    this.audioUrl,
     this.audioName,
     this.category,
     this.userIDOfBookMark,
+    this.createAt,
+    this.updateAt,
+    this.bookType,
   });
 
   @override
@@ -51,6 +64,23 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
 
   CategoryVO? _selectedCategory;
   List<CategoryVO> _categoryList = [];
+  String? _selectedCategoryId;
+  String _selectedBookType = 'new'; // new | popular | premium
+  bool _isPickingPdf = false;
+  bool _isPickingAudio = false;
+
+  String _normalizeBookType(String? rawType) {
+    final value = (rawType ?? '').trim().toLowerCase();
+    if (value.isEmpty || value == 'new') return 'new';
+    if (value == 'popular') return 'popular';
+    if (value == 'premium' ||
+        value == 'preminum' ||
+        value == 'preminus' ||
+        value == 'premius') {
+      return 'premium';
+    }
+    return 'new';
+  }
 
   @override
   void initState() {
@@ -60,7 +90,8 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
     _authorController.text = widget.author ?? '';
     _pdfController.text = widget.pdfName ?? '';
     _audioController.text = widget.audioName ?? '';
-    _selectedCategory = widget.category;
+    _selectedCategoryId = widget.category?.id;
+    _selectedBookType = _normalizeBookType(widget.bookType);
     _loadCategories();
   }
 
@@ -78,6 +109,12 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
     final categories = await _firebaseModel.getAllCategories();
     setState(() {
       _categoryList = categories;
+      if (_selectedCategoryId == null) {
+        _selectedCategory = null;
+        return;
+      }
+      final matched = _categoryList.where((c) => c.id == _selectedCategoryId).toList();
+      _selectedCategory = matched.isNotEmpty ? matched.first : null;
     });
   }
 
@@ -114,22 +151,45 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
   }
 
   Future<void> _pickPdf() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
-    if (result != null && result.files.single.path != null) {
-      setState(() {
-        _selectedPdf = File(result.files.single.path!);
-        _pdfController.text = result.files.single.name;
-      });
+    if (_isPickingPdf) return;
+    _isPickingPdf = true;
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+      );
+      if (result != null && result.files.single.path != null) {
+        setState(() {
+          _selectedPdf = File(result.files.single.path!);
+          _pdfController.text = result.files.single.name;
+        });
+      }
+    } on PlatformException catch (e) {
+      if (e.code != 'multiple_request' && mounted) {
+        context.showErrorSnackBar('Failed to pick PDF: ${e.message ?? e.code}');
+      }
+    } finally {
+      _isPickingPdf = false;
     }
   }
 
   Future<void> _pickAudio() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.audio);
-    if (result != null && result.files.single.path != null) {
-      setState(() {
-        _selectedAudio = File(result.files.single.path!);
-        _audioController.text = result.files.single.name;
-      });
+    if (_isPickingAudio) return;
+    _isPickingAudio = true;
+    try {
+      final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+      if (result != null && result.files.single.path != null) {
+        setState(() {
+          _selectedAudio = File(result.files.single.path!);
+          _audioController.text = result.files.single.name;
+        });
+      }
+    } on PlatformException catch (e) {
+      if (e.code != 'multiple_request' && mounted) {
+        context.showErrorSnackBar('Failed to pick audio: ${e.message ?? e.code}');
+      }
+    } finally {
+      _isPickingAudio = false;
     }
   }
 
@@ -152,8 +212,9 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
 
     try {
       context.showLoadingDialog();
-
-      final id = const Uuid().v4();
+      final id = widget.id ?? const Uuid().v4();
+      final createAt = widget.createAt ?? DateTime.now();
+      final updateAt = DateTime.now();
 
       // Upload image
       String imageUrl;
@@ -164,13 +225,13 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
       }
 
       // Upload PDF if selected
-      String pdfUrl = '';
+      String pdfUrl = widget.pdfUrl ?? '';
       if (_selectedPdf != null) {
         pdfUrl = await _firebaseModel.uploadFile(_selectedPdf!, 'pdf');
       }
 
       // Upload audio if selected (optional)
-      String audioUrl = '';
+      String audioUrl = widget.audioUrl ?? '';
       if (_selectedAudio != null) {
         audioUrl = await _firebaseModel.uploadFile(_selectedAudio!, 'audio');
       }
@@ -199,22 +260,29 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
           name: _pdfController.text,
           image: imageUrl,
           url: pdfUrl,
-          createAt: DateTime.now(),
-          updateAt: DateTime.now(),
+          createAt: createAt,
+          updateAt: updateAt,
         ),
         audio: audioVO,
         pages: {},
         readBy: [],
-        createAt: DateTime.now(),
-        updateAt: DateTime.now(),
+        createAt: createAt,
+        updateAt: updateAt,
         userIDOfBookMark: widget.userIDOfBookMark ?? [],
+        bookType: _selectedBookType,
       );
 
-      await _firebaseModel.createBook(book);
+      if (widget.id != null) {
+        await _firebaseModel.updateBook(book);
+      } else {
+        await _firebaseModel.createBook(book);
+      }
 
       if (mounted) {
         context.hideLoadingDialog();
-        context.showSuccessSnackBar("Post added successfully");
+        context.showSuccessSnackBar(
+          widget.id != null ? "Post updated successfully" : "Post added successfully",
+        );
         Navigator.pop(context);
       }
     } catch (e) {
@@ -234,7 +302,9 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
             : const Center(child: Text("Tap to select image"));
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Add New Post")),
+      appBar: AppBar(
+        title: Text(widget.id != null ? "Update Post" : "Add New Post"),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -320,6 +390,23 @@ class _AdminAddPostPageState extends State<AdminAddPostPage> {
               onChanged: (value) {
                 setState(() {
                   _selectedCategory = value;
+                  _selectedCategoryId = value?.id;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _selectedBookType,
+              decoration: const InputDecoration(labelText: 'Select Book Type'),
+              items: const [
+                DropdownMenuItem(value: 'new', child: Text('New book')),
+                DropdownMenuItem(value: 'popular', child: Text('Popular book')),
+                DropdownMenuItem(value: 'premium', child: Text('Premium book')),
+              ],
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() {
+                  _selectedBookType = value;
                 });
               },
             ),

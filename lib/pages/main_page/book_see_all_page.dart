@@ -2,8 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/book_vo.dart';
+import 'package:quran_book/pages/main_page/book_listen_details_page.dart';
 import 'package:quran_book/pages/main_page/book_read_details_page.dart';
 import 'package:quran_book/pages/main_page/donate_page.dart';
 import 'package:quran_book/resources/colors.dart';
@@ -13,6 +15,7 @@ import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/widgets/cache_network_image_widget.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 import 'package:quran_book/widgets/primary_button_widget.dart';
+import 'package:quran_book/pages/introduction/login_page.dart';
 
 class BookOverviewPage extends StatefulWidget {
   const BookOverviewPage({super.key, required this.isPlay, required this.book});
@@ -29,18 +32,28 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
   final FirebaseModel _firebaseModel = FirebaseModel();
   bool isPlaying = false;
   bool showMiniPlayer = false;
+  bool _isBookmarked = false;
+  String? _currentUserId;
 
   @override
   void initState() {
     super.initState();
+    _loadBookmarkState();
     isPlaying = widget.isPlay;
     showMiniPlayer = widget.isPlay;
     if (widget.book.audio?.url.isNotEmpty ?? false) {
-      _audioPlayer.setUrl(widget.book.audio!.url).catchError((e) {
-        if (mounted) context.showErrorSnackBar("Failed to load audio: $e");
-        return e;
-      });
+      _audioPlayer.setUrl(widget.book.audio!.url);
     }
+  }
+
+  Future<void> _loadBookmarkState() async {
+    if (!mounted) return;
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    setState(() {
+      _currentUserId = userId;
+      _isBookmarked =
+          userId != null && widget.book.userIDOfBookMark.contains(userId);
+    });
   }
 
   @override
@@ -85,18 +98,47 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
           IconButton(
             onPressed: () async {
               try {
-                final currentUserID = (await _firebaseModel.getCurrentUserVO())?.id;
-                if (currentUserID == null) {
-                  context.showErrorSnackBar("Please login first.");
-                  return;
-                }
-                await _firebaseModel.toggleBookmark(book.id, currentUserID);
-                if (mounted) context.showSuccessSnackBar("Bookmarked successfully!");
+                  final userId =
+                      _currentUserId ?? FirebaseAuth.instance.currentUser?.uid;
+                  if (userId == null) {
+                    if (!mounted) return;
+                    context.navigateToNextPageWithRemoveUntil(
+                      const LoginPage(),
+                    );
+                    return;
+                  }
+
+                  final alreadyBookmarked =
+                      book.userIDOfBookMark.contains(userId);
+
+                  await _firebaseModel.toggleBookmark(book.id, userId);
+
+                  if (!mounted) return;
+                  setState(() {
+                    if (alreadyBookmarked) {
+                      book.userIDOfBookMark.remove(userId);
+                      _isBookmarked = false;
+                    } else {
+                      if (!book.userIDOfBookMark.contains(userId)) {
+                        book.userIDOfBookMark.add(userId);
+                      }
+                      _isBookmarked = true;
+                    }
+                    _currentUserId = userId;
+                  });
+
+                  if (mounted) {
+                    context.showSuccessSnackBar(
+                      alreadyBookmarked
+                          ? "Removed from bookmarks."
+                          : "Bookmarked successfully!",
+                    );
+                  }
               } catch (e) {
                 if (mounted) context.showErrorSnackBar("Bookmark failed: $e");
               }
             },
-            icon: const Icon(Icons.bookmark),
+              icon: Icon(_isBookmarked ? Icons.bookmark : Icons.bookmark_border),
           ),
           IconButton(
             onPressed: () {},
@@ -156,9 +198,19 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                   buttonText: kListenText.tr(),
                   isGhost: false,
                   onTap: () {
+                    final audioUrl = book.audio?.url;
+                    if (audioUrl == null || audioUrl.isEmpty) {
+                      if (mounted) context.showErrorSnackBar("No audio available.");
+                      return;
+                    }
                     requestPermissions().then((_) {
-                      _togglePlayPause();
-                      _showMiniPlayer();
+                      if (!mounted) return;
+                      context.navigateToNextPage(BookListenDetailsPage(
+                        title: book.name,
+                        audioUrl: audioUrl,
+                        coverImageUrl: book.image,
+                        autoPlay: true,
+                      ));
                     });
                   },
                 ),

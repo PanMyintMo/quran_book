@@ -4,10 +4,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
-import 'package:quran_book/widgets/easy_text_widget.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
+/// Page-by-page text extracted from the book PDF. Use [BookListenDetailsPage] for audio.
 class BookReadDetailsPage extends StatefulWidget {
   const BookReadDetailsPage({
     super.key,
@@ -23,99 +22,106 @@ class BookReadDetailsPage extends StatefulWidget {
 }
 
 class _BookReadDetailsPageState extends State<BookReadDetailsPage> {
+  bool _isLoading = true;
+  int _currentPageIndex = 0;
+  List<String> _pageTexts = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPdfTexts();
+  }
+
+  Future<void> _loadPdfTexts() async {
+    setState(() => _isLoading = true);
+    try {
+      final pages = await extractPdfPageTextsWithDio(widget.pdfUrl);
+      if (!mounted) return;
+      setState(() {
+        _pageTexts = pages;
+        _currentPageIndex = 0;
+        _isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _pageTexts = const [];
+        _currentPageIndex = 0;
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _goToPage(int newIndex) {
+    if (_pageTexts.isEmpty) return;
+    final clamped = newIndex.clamp(0, _pageTexts.length - 1);
+    setState(() => _currentPageIndex = clamped);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: [
-          // FutureBuilder<List<String>>(
-          //   future: extractPdfTitlesWithDio(widget.pdfUrl),
-          //   builder: (context, snapshot) {
-          //     if (snapshot.connectionState == ConnectionState.waiting) {
-          //       return const Center(child: CircularProgressIndicator());
-          //     } else if (snapshot.hasError) {
-          //       return Container(
-          //         margin: const EdgeInsets.all(kSP20x),
-          //         padding: const EdgeInsets.all(kSP20x),
-          //         decoration: BoxDecoration(
-          //           color: Colors.red.shade100,
-          //           borderRadius: BorderRadius.circular(kSP20x),
-          //         ),
-          //         child: const Text("Failed to load titles"),
-          //       );
-          //     } else {
-          //       final titles = snapshot.data ?? [];
-          //       if (titles.isEmpty) {
-          //         return const SizedBox();
-          //       }
-          //       return IconButton(
-          //         icon: const Icon(Icons.menu),
-          //         onPressed: () async {
-          //           showModalBottomSheet(
-          //             backgroundColor: Colors.transparent,
-          //             shape: RoundedRectangleBorder(
-          //               borderRadius: BorderRadius.circular(kSP10x),
-          //             ),
-          //             context: context,
-          //             builder: (_) => _MenuBottomOverView(title: titles),
-          //           );
-          //         },
-          //       );
-          //     }
-          //   },
-          // ),
-        ],
         centerTitle: true,
-        title: EasyTextWidget(
-          text: widget.title,
-          fontWeight: FontWeight.w600,
+        title: Text(
+          widget.title,
+          style: const TextStyle(fontWeight: FontWeight.w600),
         ),
       ),
-      body: SfPdfViewer.network(
-        widget.pdfUrl,
-        key: GlobalKey(),
-        pageLayoutMode: PdfPageLayoutMode.continuous,
-        pageSpacing: 0,
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _pageTexts.isEmpty
+              ? const Center(child: Text('No text available'))
+              : Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(kSP20x),
+                        child: Text(
+                          _pageTexts[_currentPageIndex],
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.black87,
+                            fontSize: 16,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(kSP20x, 0, kSP20x, kSP20x),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back_ios_new),
+                            onPressed: _currentPageIndex > 0
+                                ? () => _goToPage(_currentPageIndex - 1)
+                                : null,
+                          ),
+                          Text(
+                            '${_currentPageIndex + 1} of ${_pageTexts.length}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: kAppPrimaryColor,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.arrow_forward_ios),
+                            onPressed: _currentPageIndex < _pageTexts.length - 1
+                                ? () => _goToPage(_currentPageIndex + 1)
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
     );
   }
 }
 
-class _MenuBottomOverView extends StatelessWidget {
-  const _MenuBottomOverView({
-    required this.title,
-  });
-
-  final List<String> title;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(kSP20x),
-      width: double.infinity,
-      margin: const EdgeInsets.all(kSP20x),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(kSP20x),
-        color: kAppPrimaryColor,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        spacing: kSP20x,
-        children: title
-            .map(
-              (e) => EasyTextWidget(
-                text: e,
-                fontWeight: FontWeight.w600,
-                textColor: kWhiteColor,
-              ),
-            )
-            .toList(),
-      ),
-    );
-  }
-}
-
-Future<List<String>> extractPdfTitlesWithDio(String url) async {
+Future<List<String>> extractPdfPageTextsWithDio(String url) async {
   final dio = Dio();
   final response = await dio.get<Uint8List>(
     url,
@@ -125,26 +131,18 @@ Future<List<String>> extractPdfTitlesWithDio(String url) async {
   final Uint8List bytes = response.data!;
   final PdfDocument document = PdfDocument(inputBytes: bytes);
 
-  String fullText = '';
-  for (int i = 0; i < document.pages.count; i++) {
-    fullText += PdfTextExtractor(document).extractText(
-      startPageIndex: i,
-      endPageIndex: i,
-    );
+  try {
+    final extractor = PdfTextExtractor(document);
+    final pages = <String>[];
+    for (int i = 0; i < document.pages.count; i++) {
+      final text = extractor.extractText(
+        startPageIndex: i,
+        endPageIndex: i,
+      );
+      pages.add(text.trim());
+    }
+    return pages;
+  } finally {
+    document.dispose();
   }
-
-  document.dispose();
-
-  final lines = fullText.split('\n');
-  final titles = lines.where((line) {
-    return line.trim().length > 3 && line.trim().length < 80 && _looksLikeTitle(line);
-  }).toList();
-
-  return titles;
-}
-
-bool _looksLikeTitle(String line) {
-  final trimmed = line.trim();
-  final capitalWords = trimmed.split(' ').where((word) => word.isNotEmpty && word[0].toUpperCase() == word[0]).length;
-  return capitalWords >= 2;
 }

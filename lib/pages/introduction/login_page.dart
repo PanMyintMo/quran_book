@@ -1,4 +1,8 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/user_vo.dart';
@@ -28,12 +32,129 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
 
+  Future<bool> _hasInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com')
+          .timeout(const Duration(seconds: 3));
+      return result.isNotEmpty && result.first.rawAddress.isNotEmpty;
+    } on TimeoutException {
+      return false;
+    } on SocketException {
+      return false;
+    }
+  }
+
+  String _mapLoginErrorToMessage(Object error) {
+    final raw = error.toString().toLowerCase();
+
+    // FirebaseModel wraps FirebaseAuthException into an Exception with message,
+    // so we match by text/code fragments.
+    if (raw.contains('wrong-password') || raw.contains('password is invalid')) {
+      return 'Wrong password. Please try again.';
+    }
+    if (raw.contains('user-not-found') ||
+        raw.contains('no user') ||
+        raw.contains('there is no user')) {
+      return 'Email not found. Please register first.';
+    }
+    if (raw.contains('invalid-email')) {
+      return 'Invalid email address.';
+    }
+    if (raw.contains('network') ||
+        raw.contains('internet') ||
+        raw.contains('failed to fetch') ||
+        raw.contains('connection')) {
+      return 'Network error. Check your internet and try again.';
+    }
+
+    // Fallback
+    return 'Login failed. Please try again.';
+  }
+
+  String _mapFirebaseAuthCodeToMessage(FirebaseAuthException e) {
+    final code = e.code;
+    final msg = (e.message ?? '').toLowerCase();
+
+    // Be careful with message matching: "does not exist" can appear in other cases.
+    final isUserNotFound = code == 'user-not-found' ||
+        msg.contains('user-not-found') ||
+        msg.contains('no user') ||
+        msg.contains('there is no user') ||
+        msg.contains('not found');
+
+    final isWrongPassword = code == 'wrong-password' ||
+        code == 'invalid-credential' ||
+        msg.contains('wrong-password') ||
+        msg.contains('password is invalid') ||
+        (msg.contains('password') && msg.contains('invalid'));
+
+    // Priority: if Firebase says user not found (wrong email), show email error
+    // even if message text also contains the word "password".
+    if (isUserNotFound) {
+      return 'Email not found. Please register first.';
+    }
+
+    if (isWrongPassword) {
+      return 'Wrong password. Please try again.';
+    }
+
+    switch (code) {
+      case 'wrong-password':
+      case 'invalid-credential':
+        return 'Wrong password. Please try again.';
+      case 'user-not-found':
+        return 'Email not found. Please register first.';
+      case 'invalid-email':
+        return 'Invalid email address.';
+      case 'too-many-requests':
+        return 'Too many attempts. Please wait and try again.';
+      default:
+        return 'Login failed. Please try again.';
+    }
+  }
+
+  Future<String> _mapFirebaseAuthExceptionForLogin(
+    FirebaseAuthException e,
+    String email,
+  ) async {
+    // Common message for any wrong-credentials case (email or password).
+    if (e.code == 'wrong-password' ||
+        e.code == 'user-not-found' ||
+        e.code == 'invalid-credential') {
+      return 'Email or password is incorrect. Please try again.';
+    }
+
+    // Specific cases that are NOT just wrong credentials.
+    if (e.code == 'invalid-email') {
+      return 'Invalid email address.';
+    }
+    if (e.code == 'too-many-requests') {
+      return 'Too many attempts. Please wait and try again.';
+    }
+
+    final msg = (e.message ?? '').toLowerCase();
+    if (msg.contains('network') ||
+        msg.contains('internet') ||
+        msg.contains('failed to fetch') ||
+        msg.contains('connection')) {
+      return 'Network error. Check your internet and try again.';
+    }
+
+    return _mapFirebaseAuthCodeToMessage(e);
+  }
+
   Future<void> _handleLogin() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
       context.showErrorSnackBar('Please enter email and password');
+      return;
+    }
+
+    final hasInternet = await _hasInternetConnection();
+    if (!hasInternet) {
+      context.showErrorSnackBar('No internet connection. Please connect and try again.');
       return;
     }
 
@@ -62,7 +183,13 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       if (mounted) {
         context.hideLoadingDialog();
-        context.showErrorSnackBar(e.toString());
+        if (e is FirebaseAuthException) {
+          final message = await _mapFirebaseAuthExceptionForLogin(e, email);
+          context.showErrorSnackBar(message);
+        } else {
+          // Fallback for non-Firebase errors.
+          context.showErrorSnackBar(_mapLoginErrorToMessage(e));
+        }
       }
     }
   }

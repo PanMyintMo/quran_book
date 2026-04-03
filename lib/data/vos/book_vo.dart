@@ -17,6 +17,9 @@ class BookVO {
   final DateTime createAt;
   final DateTime updateAt;
   final List<String> userIDOfBookMark;
+  // Determines which Home section this book appears in.
+  // Values: "new", "popular", "premium" (old data will be treated as "new").
+  final String? bookType;
 
   BookVO({
     required this.id,
@@ -32,17 +35,23 @@ class BookVO {
     required this.createAt,
     required this.updateAt,
     required this.userIDOfBookMark,
+    this.bookType,
   });
 
   factory BookVO.fromJson(Map<String, dynamic> json) {
     final originalPDFMap = json['pdf'];
-    final Map<String, dynamic> convertedPDFMap = Map.from(originalPDFMap as Map);
+    final Map<String, dynamic> convertedPDFMap =
+        originalPDFMap is Map ? Map<String, dynamic>.from(originalPDFMap) : {};
 
     final originalAudioMap = json['audio'];
-    final Map<String, dynamic> convertedAudioMap = Map.from(originalAudioMap as Map);
+    final Map<String, dynamic>? convertedAudioMap = originalAudioMap is Map
+        ? Map<String, dynamic>.from(originalAudioMap)
+        : null;
 
     final originalCategoryMap = json['category'];
-    final Map<String, dynamic> convertedCategoryMap = Map.from(originalCategoryMap as Map);
+    final Map<String, dynamic> convertedCategoryMap = originalCategoryMap is Map
+        ? Map<String, dynamic>.from(originalCategoryMap)
+        : {};
 
     return BookVO(
       id: json['id'],
@@ -51,13 +60,14 @@ class BookVO {
       author: json['author'],
       image: json['image'],
       pdf: PdfVO.fromJson(convertedPDFMap),
-      audio: json['audio'] != null ? AudioVO.fromJson(convertedAudioMap) : null,
+      audio: convertedAudioMap != null ? AudioVO.fromJson(convertedAudioMap) : null,
       category: CategoryVO.fromJson(convertedCategoryMap),
       pages: Map<String, String>.from(json['pages'] ?? {}),
       readBy: (json['readBy'] as List<dynamic>?)?.map((e) => UserVO.fromJson(e)).toList() ?? [],
       createAt: DateTime.parse(json['createAt']),
       updateAt: DateTime.parse(json['updateAt']),
       userIDOfBookMark: (json['userIDOfBookMark'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      bookType: json['bookType']?.toString(),
     );
   }
 
@@ -75,5 +85,6 @@ class BookVO {
         'createAt': createAt.toIso8601String(),
         'updateAt': updateAt.toIso8601String(),
         'userIDOfBookMark': userIDOfBookMark,
+        'bookType': bookType,
       };
 }

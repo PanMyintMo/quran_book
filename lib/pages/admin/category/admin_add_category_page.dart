@@ -10,12 +10,23 @@ import 'package:quran_book/widgets/cache_network_image_widget.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 
 class AdminAddCategoryPage extends StatefulWidget {
+  final String? id;
   final String? name;
   final String? subtitle;
   final String? imageUrl;
+  final int? totalBookCount;
+  final DateTime? createAt;
+  final DateTime? updateAt;
 
   const AdminAddCategoryPage(
-      {super.key, this.name, this.subtitle, this.imageUrl});
+      {super.key,
+      this.id,
+      this.name,
+      this.subtitle,
+      this.imageUrl,
+      this.totalBookCount,
+      this.createAt,
+      this.updateAt});
 
   @override
   State<AdminAddCategoryPage> createState() => _AdminAddCategoryPageState();
@@ -91,21 +102,34 @@ class _AdminAddCategoryPageState extends State<AdminAddCategoryPage> {
               await _firebaseModel.uploadFile(_selectedImage!, 'categories');
         }
 
+        final id = widget.id ?? const Uuid().v4();
+        final createAt = widget.createAt ?? DateTime.now();
+        final updateAt = DateTime.now();
+        final totalBookCount = widget.totalBookCount ?? 0;
+
         final category = CategoryVO(
-          id: const Uuid().v4(),
+          id: id,
           image: imageUrl,
           name: name,
           subtitle: subtitle,
-          totalBookCount: 0,
-          createAt: DateTime.now(),
-          updateAt: DateTime.now(),
+          totalBookCount: totalBookCount,
+          createAt: createAt,
+          updateAt: updateAt,
         );
 
-        await _firebaseModel.createCategory(category);
+        if (widget.id != null) {
+          await _firebaseModel.updateCategory(category);
+        } else {
+          await _firebaseModel.createCategory(category);
+        }
 
         if (mounted) {
           context.hideLoadingDialog();
-          context.showSuccessSnackBar("Category added successfully");
+          context.showSuccessSnackBar(
+            widget.id != null
+                ? "Category updated successfully"
+                : "Category added successfully",
+          );
           Navigator.pop(context);
         }
       } catch (e) {
@@ -134,7 +158,9 @@ class _AdminAddCategoryPageState extends State<AdminAddCategoryPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const EasyTextWidget(text: "Add New Category"),
+        title: EasyTextWidget(
+          text: widget.id != null ? "Update Category" : "Add New Category",
+        ),
       ),
       resizeToAvoidBottomInset: true,
       body: SafeArea(

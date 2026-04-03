@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/banner_vo.dart';
@@ -26,9 +28,65 @@ class _HomePageState extends State<HomePage> {
   final FirebaseModel _firebaseModel = FirebaseModel();
   final PageController _bannerController = PageController();
   int _currentBannerIndex = 0;
+  static bool _bookTypeMigrationRan = false;
+  Timer? _bannerAutoTimer;
+  int _lastBannerCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _runBookTypeMigrationOnce();
+  }
+
+  void _setupBannerAutoPlay(int bannerCount) {
+    if (bannerCount == _lastBannerCount && _bannerAutoTimer != null) return;
+    _lastBannerCount = bannerCount;
+
+    _bannerAutoTimer?.cancel();
+    _bannerAutoTimer = null;
+
+    if (bannerCount <= 1) return;
+
+    _bannerAutoTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!mounted) return;
+      if (!_bannerController.hasClients) return;
+      if (_lastBannerCount <= 1) return;
+
+      final next = (_currentBannerIndex + 1) % _lastBannerCount;
+      _bannerController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  Future<void> _runBookTypeMigrationOnce() async {
+    if (_bookTypeMigrationRan) return;
+    _bookTypeMigrationRan = true;
+    try {
+      await _firebaseModel.migrateBookTypes();
+    } catch (_) {
+      // Non-blocking: UI already handles legacy values locally.
+    }
+  }
+
+  String _normalizeBookType(String? rawType) {
+    final value = (rawType ?? '').trim().toLowerCase();
+    if (value.isEmpty || value == 'new') return 'new';
+    if (value == 'popular') return 'popular';
+    if (value == 'premium' ||
+        value == 'preminum' ||
+        value == 'preminus' ||
+        value == 'premius') {
+      return 'premium';
+    }
+    return 'new';
+  }
 
   @override
   void dispose() {
+    _bannerAutoTimer?.cancel();
     _bannerController.dispose();
     super.dispose();
   }
@@ -55,6 +113,15 @@ class _HomePageState extends State<HomePage> {
             final books = snapshot.data![0] as List<BookVO>;
             final categories = snapshot.data![1] as List<CategoryVO>;
             final banners = snapshot.data![2] as List<BannerVO>;
+            _setupBannerAutoPlay(banners.length);
+            final newBooks =
+                books.where((b) => _normalizeBookType(b.bookType) == 'new').toList();
+            final popularBooks = books
+                .where((b) => _normalizeBookType(b.bookType) == 'popular')
+                .toList();
+            final premiumBooks = books
+                .where((b) => _normalizeBookType(b.bookType) == 'premium')
+                .toList();
 
             return Column(
               children: [
@@ -83,16 +150,41 @@ class _HomePageState extends State<HomePage> {
                             itemCount: banners.length,
                             onPageChanged: (i) =>
                                 setState(() => _currentBannerIndex = i),
-                            itemBuilder: (_, index) => Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: kSP10x),
-                              child: CacheNetworkImageWidget(
-                                radius: kSP10x,
-                                imageUrl: banners[index].image,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                            itemBuilder: (_, index) {
+                              final diff =
+                                  (index - _currentBannerIndex).abs().toDouble();
+                              final isActive = diff == 0;
+
+                              final scale = isActive ? 1.0 : 0.94;
+                              final opacity = isActive ? 1.0 : 0.75;
+
+                              return Center(
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 220),
+                                  curve: Curves.easeOut,
+                                  margin: EdgeInsets.symmetric(
+                                    horizontal: isActive ? 4 : 8,
+                                    vertical: isActive ? 0 : 10,
+                                  ),
+                                  child: Opacity(
+                                    opacity: opacity,
+                                    child: Transform.scale(
+                                      scale: scale,
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(kSP10x),
+                                        child: CacheNetworkImageWidget(
+                                          radius: kSP10x,
+                                          imageUrl: banners[index].image,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ),
                         const SizedBox(height: kSP10x),
@@ -154,7 +246,7 @@ class _HomePageState extends State<HomePage> {
                             ],
 
                             // ── New Books ──
-                            if (books.isNotEmpty) ...[
+                            if (newBooks.isNotEmpty) ...[
                               _SectionHeader(
                                 title: 'New books',
                                 onTap: () => context.navigateToNextPage(
@@ -163,7 +255,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               const SizedBox(height: kSP10x),
                               _BooksHorizontalList(
-                                books: books,
+                                books: newBooks,
                                 onTap: (book) => context.navigateToNextPage(
                                   BookOverviewPage(isPlay: false, book: book),
                                 ),
@@ -171,8 +263,9 @@ class _HomePageState extends State<HomePage> {
                               const SizedBox(height: kSP20x),
                             ],
 
+
                             // ── Popular Books ──
-                            if (books.isNotEmpty) ...[
+                            if (popularBooks.isNotEmpty) ...[
                               _SectionHeader(
                                 title: 'Popular books',
                                 onTap: () => context.navigateToNextPage(
@@ -182,7 +275,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               const SizedBox(height: kSP10x),
                               _BooksHorizontalList(
-                                books: books,
+                                books: popularBooks,
                                 onTap: (book) => context.navigateToNextPage(
                                   BookOverviewPage(isPlay: false, book: book),
                                 ),
@@ -191,7 +284,7 @@ class _HomePageState extends State<HomePage> {
                             ],
 
                             // ── Premium Books (no arrow per Figma) ──
-                            if (books.isNotEmpty) ...[
+                            if (premiumBooks.isNotEmpty) ...[
                               EasyTextWidget(
                                 text: 'Premium books',
                                 fontWeight: FontWeight.w600,
@@ -199,7 +292,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               const SizedBox(height: kSP10x),
                               _BooksHorizontalList(
-                                books: books,
+                                books: premiumBooks,
                                 onTap: (book) => context.navigateToNextPage(
                                   BookOverviewPage(isPlay: false, book: book),
                                 ),

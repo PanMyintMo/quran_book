@@ -34,8 +34,12 @@ class SettingPage extends StatelessWidget {
       body: Column(
         children: [
           /// 🔹 Theme Switch
-          Selector<LocalAndThemeBloc, bool>(
-            selector: (_, bloc) => bloc.isDarkMode,
+          /// bool? means:
+          /// - null => System mode selected
+          /// - false => Light mode selected
+          /// - true => Dark mode selected
+          Selector<LocalAndThemeBloc, bool?>(
+            selector: (_, bloc) => bloc.isSystemMode ? null : bloc.isDarkMode,
             builder: (context, isDarkMode, _) {
               return Padding(
                 padding: const EdgeInsets.all(kSP10x),
@@ -62,6 +66,14 @@ class SettingPage extends StatelessWidget {
                         groupValue: isDarkMode,
                         onChanged: () => bloc.setDarkMode(true),
                       ),
+
+                       _buildThemeOption(
+                        context,
+                        label: "System",
+                        value: null,
+                        groupValue: isDarkMode,
+                        onChanged: () => bloc.setSystemMode(),
+                      ),
                     ],
                   ),
                 ),
@@ -75,7 +87,7 @@ class SettingPage extends StatelessWidget {
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                _buildSettingItem(context, Icons.language, kDrawerLanguageText.tr(),onPress: () {
+                _buildSettingItem(context,  Icons.language, kDrawerLanguageText.tr(),onPress: () {
                   context.navigateToNextPage(LanguagePage());
                   
                 },),
@@ -91,7 +103,7 @@ class SettingPage extends StatelessWidget {
                   context.navigateToNextPage(AboutUsPage());
                   
                 },),
-                _buildSettingItem(context, Icons.contact_mail, kDrawerContactUsText.tr(),onPress: () {
+                _buildSettingItem(context, Icons.phone, kDrawerContactUsText.tr(),onPress: () {
                   context.navigateToNextPage(const ContactUsPage());
                 },),
                 _buildSettingItem(context, Icons.help, kDrawerHelpAndSupportText.tr(),onPress: () {
@@ -129,8 +141,8 @@ class SettingPage extends StatelessWidget {
   Widget _buildThemeOption(
     BuildContext context, {
     required String label,
-    required bool value,
-    required bool groupValue,
+    required bool? value,
+    required bool? groupValue,
     required VoidCallback onChanged,
   }) {
     final theme = Theme.of(context);
@@ -141,7 +153,7 @@ class SettingPage extends StatelessWidget {
     
     return Column(
       children: [
-        Radio<bool>(
+        Radio<bool?>(
           value: value,
           groupValue: groupValue,
           onChanged: (_) => onChanged(),
@@ -155,41 +167,60 @@ class SettingPage extends StatelessWidget {
   // -------------------------
   // Setting Item
   // -------------------------
-  Widget _buildSettingItem(BuildContext context, IconData icon, String title,{required VoidCallback onPress}) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+Widget _buildSettingItem(
+  BuildContext context,
+  IconData icon,
+  String title, {
+  required VoidCallback onPress,
+}) {
+  final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: kSP10x, vertical: kSP10x),
+  return Padding(
+    padding: const EdgeInsets.symmetric(
+      horizontal: kSP10x,
+      vertical: 6,
+    ),
+    child: InkWell(
+      borderRadius: BorderRadius.circular(30),
+      onTap: onPress,
       child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          // Use a proper surface color so it looks good in both
-          // light and dark themes instead of misusing onSecondary.
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(8),
+          color: isDark
+              ? Colors.grey.shade800 // 🌙 Dark mode
+              : const Color(0xFF3A357C), // ☀️ Light mode (purple like UI)
+          borderRadius: BorderRadius.circular(30),
         ),
-        child: ListTile(
-          leading: Icon(
-            icon,
-            color: theme.iconTheme.color ?? colorScheme.primary,
-          ),
-          title: Text(
-            title,
-            style: TextStyle(
-              fontSize: kFontSize16x,
-              color: theme.textTheme.bodyMedium?.color ?? colorScheme.onSurface,
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: Colors.white,
             ),
-          ),
-          trailing: Icon(
-            Icons.arrow_forward_ios,
-            color: theme.iconTheme.color ?? colorScheme.primary,
-          ),
-          onTap: onPress,
-          // onTap: () {
-          //   context.navigateToNextPage(LanguagePage());
-          // },
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: kFontSize16x,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.white,
+              size: 18,
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
 }
+
+}
+
+

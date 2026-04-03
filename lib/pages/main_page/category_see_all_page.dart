@@ -24,6 +24,38 @@ class _BookSeeAllPageState extends State<BookSeeAllPage> {
   List<BookVO> _bookList = [];
   bool _isLoading = true;
 
+  String _normalizeBookType(String? rawType) {
+    final value = (rawType ?? '').trim().toLowerCase();
+    if (value.isEmpty || value == 'new') return 'new';
+    if (value == 'popular') return 'popular';
+    if (value == 'premium' ||
+        value == 'preminum' ||
+        value == 'preminus' ||
+        value == 'premius') {
+      return 'premium';
+    }
+    return 'new';
+  }
+
+  List<BookVO> _filterBooks(List<BookVO> books) {
+    final title = widget.title.toLowerCase();
+    if (title.contains('new')) {
+      // Backward compatible: old books without `bookType` are treated as "new".
+      return books.where((b) => _normalizeBookType(b.bookType) == 'new').toList();
+    }
+    if (title.contains('popular')) {
+      return books
+          .where((b) => _normalizeBookType(b.bookType) == 'popular')
+          .toList();
+    }
+    if (title.contains('premium')) {
+      return books
+          .where((b) => _normalizeBookType(b.bookType) == 'premium')
+          .toList();
+    }
+    return books;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -35,7 +67,7 @@ class _BookSeeAllPageState extends State<BookSeeAllPage> {
       final books = await _firebaseModel.getAllBooks();
       if (mounted) {
         setState(() {
-          _bookList = books;
+          _bookList = _filterBooks(books);
           _isLoading = false;
         });
       }

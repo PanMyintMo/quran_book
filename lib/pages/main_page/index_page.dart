@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:quran_book/pages/main_page/book_mark_page.dart';
 import 'package:quran_book/pages/main_page/home_page.dart';
 import 'package:quran_book/pages/main_page/profile_page.dart';
+import 'package:quran_book/pages/main_page/setting_page.dart';
 import 'package:quran_book/resources/strings.dart';
 
 class IndexPage extends StatefulWidget {
@@ -24,6 +25,7 @@ class _IndexPageState extends State<IndexPage> {
           children: [
             HomePage(),
             BookMarkPage(),
+            SettingPage(),
             ProfilePage(),
           ],
         ),
@@ -56,6 +58,11 @@ class _IndexPageState extends State<IndexPage> {
                 icon: Icon(Icons.bookmark_border),
                 activeIcon: Icon(Icons.bookmark),
                 label: context.tr(kBookmarkText),
+              ),
+                BottomNavigationBarItem(
+                icon: Icon(Icons.settings_outlined),
+                activeIcon: Icon(Icons.settings),
+                label: context.tr(kDrawerSettingText),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.person_2_outlined),

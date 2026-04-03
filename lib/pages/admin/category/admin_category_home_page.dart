@@ -18,18 +18,15 @@ class _AdminCategoryHomePageState extends State<AdminCategoryHomePage> {
   final FirebaseModel _firebaseModel = FirebaseModel();
 
   Future<void> _deleteCategory(CategoryVO category) async {
+    if (!mounted) return;
+    context.showLoadingDialog();
     try {
-      context.showLoadingDialog();
       await _firebaseModel.deleteCategory(category.id, category.image);
-      if (mounted) {
-        context.hideLoadingDialog();
-        context.showSuccessSnackBar("Category deleted successfully");
-      }
+      if (mounted) context.showSuccessSnackBar("Category deleted successfully");
     } catch (e) {
-      if (mounted) {
-        context.hideLoadingDialog();
-        context.showErrorSnackBar("Failed to delete category: $e");
-      }
+      if (mounted) context.showErrorSnackBar("Failed to delete category: $e");
+    } finally {
+      if (mounted) context.hideLoadingDialog();
     }
   }
 
@@ -54,55 +51,58 @@ class _AdminCategoryHomePageState extends State<AdminCategoryHomePage> {
             itemCount: categories.length,
             itemBuilder: (context, index) {
               final category = categories[index];
-              return Dismissible(
-                key: Key(category.id),
-                background: Container(
-                  color: Colors.green,
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.only(left: 20),
-                  child: const Icon(Icons.edit, color: Colors.white),
-                ),
-                secondaryBackground: Container(
-                  color: Colors.red,
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 20),
-                  child: const Icon(Icons.delete, color: Colors.white),
-                ),
-                confirmDismiss: (direction) async {
-                  if (direction == DismissDirection.startToEnd) {
-                    await context.navigateToNextPage(AdminAddCategoryPage(
-                      imageUrl: category.image,
-                      name: category.name,
-                      subtitle: category.subtitle,
-                    ));
-                    return false;
-                  } else {
-                    return await showDialog(
-                      context: context,
-                      builder: (context) => PromptDialogWidget.twoBtnDialog(
-                        title: 'Confirm Deletion',
-                        content: 'Are you sure you want to delete this category?',
-                        positiveButtonText: 'Delete',
-                        onPositivePressed: () async {
-                          Navigator.pop(context);
-                          await _deleteCategory(category);
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ListTile(
+                  leading: CacheNetworkImageWidget(
+                    width: 50,
+                    imageUrl: category.image,
+                  ),
+                  title: EasyTextWidget(text: category.name),
+                  subtitle: EasyTextWidget(text: category.subtitle),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      EasyTextWidget(text: '${category.totalBookCount} Books'),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        tooltip: 'Edit category',
+                        onPressed: () async {
+                          await context.navigateToNextPage(AdminAddCategoryPage(
+                            id: category.id,
+                            imageUrl: category.image,
+                            name: category.name,
+                            subtitle: category.subtitle,
+                            totalBookCount: category.totalBookCount,
+                            createAt: category.createAt,
+                            updateAt: category.updateAt,
+                          ));
                         },
-                        negativeButtonText: 'Cancel',
-                        onNegativePressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.edit, color: Colors.blue),
                       ),
-                    );
-                  }
-                },
-                child: Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: ListTile(
-                    leading: CacheNetworkImageWidget(
-                      width: 50,
-                      imageUrl: category.image,
-                    ),
-                    title: EasyTextWidget(text: category.name),
-                    subtitle: EasyTextWidget(text: category.subtitle),
-                    trailing: EasyTextWidget(text: '${category.totalBookCount} Books'),
+                      IconButton(
+                        tooltip: 'Delete category',
+                        onPressed: () async {
+                          await showDialog(
+                            context: context,
+                            builder: (context) =>
+                                PromptDialogWidget.twoBtnDialog(
+                              title: 'Confirm Deletion',
+                              content:
+                                  'Are you sure you want to delete this category?',
+                              positiveButtonText: 'Delete',
+                              onPositivePressed: () async {
+                                Navigator.pop(context);
+                                await _deleteCategory(category);
+                              },
+                              negativeButtonText: 'Cancel',
+                              onNegativePressed: () => Navigator.pop(context),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                      ),
+                    ],
                   ),
                 ),
               );

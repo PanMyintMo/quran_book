@@ -21,7 +21,8 @@ class FirebaseModel {
     try {
       return await _auth.signInWithEmailAndPassword(email: email, password: password);
     } on FirebaseAuthException catch (e) {
-      throw Exception('Login failed: ${e.message}');
+      // Re-throw the original exception so UI can read `e.code` (wrong-password, user-not-found, etc.)
+      throw e;
     } catch (e) {
       throw Exception('Unexpected error during login: ${e.toString()}');
     }
@@ -31,7 +32,7 @@ class FirebaseModel {
     try {
       return await _auth.createUserWithEmailAndPassword(email: email, password: password);
     } on FirebaseAuthException catch (e) {
-      throw Exception('Registration failed: ${e.message}');
+      throw e;
     } catch (e) {
       throw Exception('Unexpected error during registration: ${e.toString()}');
     }
@@ -120,21 +121,78 @@ class FirebaseModel {
 
   Future<void> toggleBookmark(String bookId, String userId) async {
     try {
-      final bookSnapshot = await _database.child('books').child(bookId).get();
-      if (!bookSnapshot.exists) return;
+      final bookmarkRef =
+          _database.child('books').child(bookId).child('userIDOfBookMark');
 
-      final bookData = Map<String, dynamic>.from(bookSnapshot.value as Map);
-      final List<String> userIDs = (bookData['userIDOfBookMark'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+      await bookmarkRef.runTransaction((currentData) {
+        final List<String> userIDs = [];
 
-      if (userIDs.contains(userId)) {
-        userIDs.remove(userId);
-      } else {
-        userIDs.add(userId);
-      }
+        // Support both Firebase list and map-like shapes safely.
+        if (currentData is List) {
+          for (final value in currentData) {
+            if (value != null) {
+              userIDs.add(value.toString());
+            }
+          }
+        } else if (currentData is Map) {
+          for (final value in currentData.values) {
+            if (value != null) {
+              userIDs.add(value.toString());
+            }
+          }
+        }
 
-      await _database.child('books').child(bookId).update({'userIDOfBookMark': userIDs});
+        if (userIDs.contains(userId)) {
+          userIDs.remove(userId);
+        } else {
+          userIDs.add(userId);
+        }
+
+        // Save as list consistently.
+        return Transaction.success(userIDs);
+      });
     } catch (e) {
       throw Exception('Failed to toggle bookmark: ${e.toString()}');
+    }
+  }
+
+  String _normalizeBookType(String? rawType) {
+    final value = (rawType ?? '').trim().toLowerCase();
+    if (value.isEmpty || value == 'new') return 'new';
+    if (value == 'popular') return 'popular';
+    if (value == 'premium' ||
+        value == 'preminum' ||
+        value == 'preminus' ||
+        value == 'premius') {
+      return 'premium';
+    }
+    return 'new';
+  }
+
+  Future<int> migrateBookTypes() async {
+    try {
+      final snapshot = await _database.child('books').get();
+      final data = snapshot.value as Map<dynamic, dynamic>?;
+      if (data == null || data.isEmpty) return 0;
+
+      int updatedCount = 0;
+      for (final entry in data.entries) {
+        final bookId = entry.key.toString();
+        final raw = Map<String, dynamic>.from(entry.value as Map);
+        final normalizedType = _normalizeBookType(raw['bookType']?.toString());
+        final existingType = raw['bookType']?.toString().trim().toLowerCase();
+
+        if (existingType != normalizedType) {
+          await _database
+              .child('books')
+              .child(bookId)
+              .update({'bookType': normalizedType});
+          updatedCount++;
+        }
+      }
+      return updatedCount;
+    } catch (e) {
+      throw Exception('Failed to migrate book types: ${e.toString()}');
     }
   }
 
@@ -174,6 +232,17 @@ class FirebaseModel {
       await _database.child('categories').child(id).remove();
     } catch (e) {
       throw Exception('Failed to delete category: ${e.toString()}');
+    }
+  }
+
+  Future<void> updateCategory(CategoryVO category) async {
+    try {
+      await _database
+          .child('categories')
+          .child(category.id)
+          .update(category.toJson());
+    } catch (e) {
+      throw Exception('Failed to update category: ${e.toString()}');
     }
   }
 
@@ -234,6 +303,17 @@ class FirebaseModel {
     }
   }
 
+  Future<void> updateDonation(DonationVO donation) async {
+    try {
+      await _database
+          .child('donations')
+          .child(donation.id)
+          .update(donation.toJson());
+    } catch (e) {
+      throw Exception('Failed to update donation: ${e.toString()}');
+    }
+  }
+
   Future<List<DonationVO>> getAllDonations() async {
     try {
       final snapshot = await _database.child('donations').get();
@@ -270,6 +350,14 @@ class FirebaseModel {
       await _database.child('banners').child(banner.id).set(banner.toJson());
     } catch (e) {
       throw Exception('Failed to create banner: ${e.toString()}');
+    }
+  }
+
+  Future<void> updateBanner(BannerVO banner) async {
+    try {
+      await _database.child('banners').child(banner.id).update(banner.toJson());
+    } catch (e) {
+      throw Exception('Failed to update banner: ${e.toString()}');
     }
   }
 
