@@ -77,7 +77,18 @@
   "book_enter_pdf_title": "أدخل عنوان PDF للكتاب",
   "book_select_audio": "يرجى تحديد ملف صوتي للكتاب",
   "book_select_category": "يرجى تحديد فئة للكتاب",
-  "reading": "القراءة"
+  "reading": "القراءة",
+  "profile_privacy": "الخصوصية",
+  "profile_purchase_history": "سجل المشتريات",
+  "profile_invite_friend": "دعوة صديق",
+  "profile_upgrade_pro": "الترقية إلى PRO",
+  "profile_guest_subtitle": "أنت تستخدم التطبيق كضيف.",
+  "profile_coming_soon": "قريبًا",
+  "profile_edit_photo": "تغيير الصورة",
+  "edit_profile": "تعديل الملف الشخصي",
+  "save_changes": "حفظ التغييرات",
+  "profile_email_fixed": "لا يمكن تغيير البريد الإلكتروني من هنا.",
+  "profile_updated": "تم تحديث الملف الشخصي"
 
 }
 

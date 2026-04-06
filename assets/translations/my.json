@@ -85,7 +85,18 @@
   "book_enter_pdf_title": "စာအုပ် PDF ခေါင်းစဉ်ထည့်ပါ",
   "book_select_audio": "စာအုပ်အတွက် အသံဖိုင်ရွေးပါ",
   "book_select_category": "စာအုပ်အတွက် အမျိုးအစားရွေးပါ",
-  "reading": "ဖတ်ရှုခြင်း"
+  "reading": "ဖတ်ရှုခြင်း",
+  "profile_privacy": "ကိုယ်ရေးကိုယ်တာ",
+  "profile_purchase_history": "ဝယ်ယူမှုမှတ်တမ်း",
+  "profile_invite_friend": "သူငယ်ချင်းဖိတ်ခေါ်ရန်",
+  "profile_upgrade_pro": "PRO သို့ အဆင့်မြှင့်ရန်",
+  "profile_guest_subtitle": "သင်သည် ဧည့်သည်အနေဖြင့် အက်ပ်ကို အသုံးပြုနေပါသည်။",
+  "profile_coming_soon": "မကြာမီ ရနိုင်ပါမည်",
+  "profile_edit_photo": "ဓာတ်ပုံပြောင်းရန်",
+  "edit_profile": "ကိုယ်ရေးပြင်ဆင်ရန်",
+  "save_changes": "သိမ်းဆည်းရန်",
+  "profile_email_fixed": "အီးမေးလ်ကို ဤနေရာမှ မပြောင်းလဲနိုင်ပါ။",
+  "profile_updated": "ကိုယ်ရေးအချက်အလက် ပြင်ဆင်ပြီးပါပြီ"
 
 }
 

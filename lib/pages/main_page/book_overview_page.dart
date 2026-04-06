@@ -66,24 +66,9 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
     super.dispose();
   }
 
-  void _togglePlayPause() async {
-    try {
-      if (isPlaying) {
-        await _audioPlayer.pause();
-      } else {
-        await _audioPlayer.play();
-      }
-      if (mounted) setState(() => isPlaying = !isPlaying);
-    } catch (e) {
-      if (mounted) context.showErrorSnackBar("Playback error: $e");
-    }
-  }
-
   Future<void> requestPermissions() async {
     await Permission.notification.request();
   }
-
-  void _showMiniPlayer() => setState(() => showMiniPlayer = true);
 
   Future<void> _downloadPdf() async {
     final book = widget.book;
@@ -138,7 +123,12 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
         }
       },
       child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: AppBar(
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          surfaceTintColor: Colors.transparent,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           actions: [
             IconButton(
               onPressed: () async {
@@ -241,29 +231,61 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
         body: Stack(
           children: [
             SingleChildScrollView(
-              padding: const EdgeInsets.all(kSP20x),
+              padding: EdgeInsets.fromLTRB(
+                kSP20x,
+                kSP5x,
+                kSP20x,
+                kSP20x + MediaQuery.paddingOf(context).bottom,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Center(
-                    child: CacheNetworkImageWidget(
-                      width: kBookDetailsOverViewImageWidth,
-                      height: kBookDetailsOverViewImageHeight,
-                      imageUrl: book.image,
-                    ),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final w = (constraints.maxWidth * 0.45)
+                          .clamp(158.0, 228.0)
+                          .toDouble();
+                      final h = w * 1.38;
+                      return Center(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.10),
+                                blurRadius: 24,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: CacheNetworkImageWidget(
+                            width: w,
+                            height: h,
+                            imageUrl: book.image,
+                            fit: BoxFit.cover,
+                            radius: 18,
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                  const SizedBox(height: kSP10x),
+                  const SizedBox(height: kSP15x),
                   EasyTextWidget(
                     text: book.name,
-                    fontWeight: FontWeight.w600,
-                    fontSize: kFontSize16x,
+                    fontWeight: FontWeight.w700,
+                    fontSize: kFontSize21x,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: kSP5x),
                   EasyTextWidget(
                     text: 'by ${book.author}',
-                    fontSize: kFontSize12x,
-                    textColor: Theme.of(context).textTheme.bodySmall?.color,
+                    fontSize: kFontSize14x,
+                    textAlign: TextAlign.center,
+                    textColor: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.62),
                   ),
                   const SizedBox(height: kSP10x),
                   _HorizontalInfoSlider(
@@ -271,9 +293,9 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                     audioPlayer: _audioPlayer,
                     hasAudio: book.audio?.url.isNotEmpty ?? false,
                   ),
-                  const SizedBox(height: kSP20x),
+                  const SizedBox(height: kSP15x),
                   _ReadAndPlayButtonView(
-                    icon: Icons.laptop_chromebook,
+                    icon: Icons.menu_book_outlined,
                     buttonText: kReadText.tr(),
                     isGhost: true,
                     onTap: () => context.navigateToNextPage(BookReadDetailsPage(
@@ -283,13 +305,15 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                   ),
                   const SizedBox(height: kSP10x),
                   _ReadAndPlayButtonView(
-                    icon: Icons.play_arrow,
+                    icon: Icons.play_circle_outline,
                     buttonText: kListenText.tr(),
                     isGhost: false,
                     onTap: () {
                       final audioUrl = book.audio?.url;
                       if (audioUrl == null || audioUrl.isEmpty) {
-                        if (mounted) context.showErrorSnackBar("No audio available.");
+                        if (mounted) {
+                          context.showErrorSnackBar("No audio available.");
+                        }
                         return;
                       }
                       requestPermissions().then((_) {
@@ -303,23 +327,30 @@ class _BookOverviewPageState extends State<BookOverviewPage> {
                       });
                     },
                   ),
-                  const SizedBox(height: kSP30x),
+                  const SizedBox(height: kSP20x),
                   Align(
-                    alignment: Alignment.topLeft,
-                    child: EasyTextWidget(
-                      text: book.name,
-                      fontWeight: FontWeight.w700,
-                      fontSize: kFontSize16x,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      kOverviewText.tr(),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                     ),
                   ),
-                  const SizedBox(height: kSP10x),
-                  EasyTextWidget(
-                    textAlign: TextAlign.center,
-                    textColor: Theme.of(context).textTheme.bodySmall?.color,
-                    text: book.overview,
-                    maxLines: 7,
+                  const SizedBox(height: kSP5x),
+                  Text(
+                    book.overview,
+                    textAlign: TextAlign.start,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          height: 1.5,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.78),
+                        ),
                   ),
-                  const SizedBox(height: kSP40x),
+                  const SizedBox(height: kSP20x),
                 ],
               ),
             ),
@@ -370,15 +401,15 @@ class _HorizontalInfoSliderState extends State<_HorizontalInfoSlider> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 44,
+      height: 40,
       child: Scrollbar(
         controller: _scrollController,
-        thumbVisibility: true,
-        trackVisibility: true,
+        thumbVisibility: false,
+        trackVisibility: false,
         child: ListView(
           controller: _scrollController,
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(vertical: 6),
+          padding: EdgeInsets.zero,
           clipBehavior: Clip.none,
           children: [
             _InfoChip(
@@ -431,16 +462,24 @@ class _InfoChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: kSP10x, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(kSP20x),
-        color: kBoxColor,
+        borderRadius: BorderRadius.circular(20),
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.65),
+        border: Border.all(
+          color: scheme.outline.withValues(alpha: 0.22),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: kBookDetailsOverViewAndTimeIconSize),
+          Icon(
+            icon,
+            size: kBookDetailsOverViewAndTimeIconSize,
+            color: scheme.onSurface.withValues(alpha: 0.75),
+          ),
           const SizedBox(width: kSP5x),
           Flexible(
             child: EasyTextWidget(
@@ -448,6 +487,7 @@ class _InfoChip extends StatelessWidget {
               fontSize: kFontSize12x,
               fontWeight: FontWeight.w600,
               maxLines: 1,
+              textColor: scheme.onSurface.withValues(alpha: 0.88),
             ),
           ),
         ],
@@ -609,26 +649,50 @@ class _ReadAndPlayButtonView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: kBookOverviewDonateReadPlayButtonHeight,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(kSP10x),
-        color: isGhost ? kWhiteColor : kAppPrimaryColor,
-        border: isGhost ? Border.all(color: kBlackColor) : null,
-      ),
+    final scheme = Theme.of(context).colorScheme;
+    final ghostBorder = scheme.outline.withValues(alpha: 0.45);
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(kSP10x),
+        borderRadius: BorderRadius.circular(14),
         onTap: onTap,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: isGhost ? kBlackColor : kWhiteColor),
-            const SizedBox(width: kSP10x),
-            EasyTextWidget(
+        child: Ink(
+          width: double.infinity,
+          height: kBookOverviewDonateReadPlayButtonHeight,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            color: isGhost ? scheme.surface : kAppPrimaryColor,
+            border: isGhost ? Border.all(color: ghostBorder, width: 1.2) : null,
+            boxShadow: isGhost
+                ? null
+                : [
+                    BoxShadow(
+                      color: kAppPrimaryColor.withValues(alpha: 0.28),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 22,
+                color: isGhost
+                    ? scheme.onSurface.withValues(alpha: 0.9)
+                    : kWhiteColor,
+              ),
+              const SizedBox(width: kSP10x),
+              EasyTextWidget(
                 text: buttonText,
-                textColor: isGhost ? kBlackColor : kWhiteColor),
-          ],
+                fontWeight: FontWeight.w600,
+                textColor: isGhost
+                    ? scheme.onSurface.withValues(alpha: 0.9)
+                    : kWhiteColor,
+              ),
+            ],
+          ),
         ),
       ),
     );

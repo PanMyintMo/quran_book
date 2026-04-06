@@ -90,7 +90,18 @@
   "book_enter_pdf_title": "Enter PDF title for book",
   "book_select_audio": "Please select audio file for book",
   "book_select_category": "Please select category for book",
-  "reading": "Reading"
+  "reading": "Reading",
+  "profile_privacy": "Privacy",
+  "profile_purchase_history": "Purchase History",
+  "profile_invite_friend": "Invite a Friend",
+  "profile_upgrade_pro": "Upgrade to PRO",
+  "profile_guest_subtitle": "You are using the app as a guest.",
+  "profile_coming_soon": "Coming soon",
+  "profile_edit_photo": "Change photo",
+  "edit_profile": "Edit profile",
+  "save_changes": "Save changes",
+  "profile_email_fixed": "Email cannot be changed here.",
+  "profile_updated": "Profile updated"
 
 }
 

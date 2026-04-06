@@ -26,7 +26,7 @@ class SettingPage extends StatelessWidget {
           text:    kDrawerSettingText.tr(),
            textColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black, 
           fontWeight: FontWeight.w600,
-          fontSize: 16,
+          fontSize: kFontSize18x,
         ),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,

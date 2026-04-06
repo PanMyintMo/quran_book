@@ -35,6 +35,17 @@ const kDonationText = 'donation';
 const kHomePageText = 'home_page';
 const kBookmarkText = 'bookmark';
 const kProfileText = 'profile';
+const kProfilePrivacyText = 'profile_privacy';
+const kProfilePurchaseHistoryText = 'profile_purchase_history';
+const kProfileInviteFriendText = 'profile_invite_friend';
+const kProfileUpgradeProText = 'profile_upgrade_pro';
+const kProfileGuestSubtitleText = 'profile_guest_subtitle';
+const kProfileComingSoonText = 'profile_coming_soon';
+const kProfileEditPhotoText = 'profile_edit_photo';
+const kEditProfileText = 'edit_profile';
+const kSaveChangesText = 'save_changes';
+const kProfileEmailFixedText = 'profile_email_fixed';
+const kProfileUpdatedText = 'profile_updated';
 
 const kCheckYourEmailLabelText = 'check_email_label';
 const kCheckYourEmailSentText = 'check_email_sent';

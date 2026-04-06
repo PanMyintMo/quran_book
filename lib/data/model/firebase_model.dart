@@ -293,6 +293,31 @@ class FirebaseModel {
     }
   }
 
+  /// Updates display name in Realtime Database and Firebase Auth profile.
+  Future<void> updateCurrentUserName(String newName) async {
+    final uid = currentUser?.uid;
+    if (uid == null) {
+      throw Exception('Not signed in');
+    }
+    final trimmed = newName.trim();
+    if (trimmed.isEmpty) {
+      throw Exception('Name cannot be empty');
+    }
+    try {
+      await _database.child('users').child(uid).update({
+        'name': trimmed,
+        'updateAt': DateTime.now().toIso8601String(),
+      });
+      final authUser = currentUser;
+      if (authUser != null) {
+        await authUser.updateDisplayName(trimmed);
+        await authUser.reload();
+      }
+    } catch (e) {
+      throw Exception('Failed to update profile: ${e.toString()}');
+    }
+  }
+
   // ---------------------------- Donation ----------------------------
 
   Future<void> createDonation(DonationVO donation) async {
