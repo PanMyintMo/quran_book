@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,18 +30,6 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
-
-  Future<bool> _hasInternetConnection() async {
-    try {
-      final result = await InternetAddress.lookup('google.com')
-          .timeout(const Duration(seconds: 3));
-      return result.isNotEmpty && result.first.rawAddress.isNotEmpty;
-    } on TimeoutException {
-      return false;
-    } on SocketException {
-      return false;
-    }
-  }
 
   String _mapLoginErrorToMessage(Object error) {
     final raw = error.toString().toLowerCase();
@@ -152,44 +139,40 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final hasInternet = await _hasInternetConnection();
-    if (!hasInternet) {
-      context.showErrorSnackBar('No internet connection. Please connect and try again.');
-      return;
-    }
-
     try {
       context.showLoadingDialog();
       await _firebaseModel.login(email, password);
-      if (mounted) {
-        context.hideLoadingDialog();
-        context.showSuccessSnackBar('Login Successful');
+      unawaited(_firebaseModel.refreshHomeContent());
 
-        UserVO? user;
-        try {
-          user = await _firebaseModel.getCurrentUserVO();
-        } catch (_) {
-          // Ignore — Firebase Auth login succeeded, proceed to IndexPage
-        }
+      UserVO? user;
+      try {
+        user = await _firebaseModel.getCurrentUserVO();
+      } catch (_) {
+        // Auth succeeded — proceed to home even if profile fetch fails.
+      }
 
-        if (mounted) {
-          if (user?.isAdmin == true) {
-            context.navigateToNextPageWithRemoveUntil(const AdminHomePage());
-          } else {
-            context.navigateToNextPageWithRemoveUntil(const IndexPage());
-          }
-        }
+      if (!context.mounted) return;
+      context.showSuccessSnackBar('Login Successful');
+
+      if (user?.isAdmin == true) {
+        if (!context.mounted) return;
+        context.navigateToNextPageWithRemoveUntil(const AdminHomePage());
+      } else {
+        if (!context.mounted) return;
+        context.navigateToNextPageWithRemoveUntil(const IndexPage());
       }
     } catch (e) {
       if (mounted) {
-        context.hideLoadingDialog();
         if (e is FirebaseAuthException) {
           final message = await _mapFirebaseAuthExceptionForLogin(e, email);
           context.showErrorSnackBar(message);
         } else {
-          // Fallback for non-Firebase errors.
           context.showErrorSnackBar(_mapLoginErrorToMessage(e));
         }
+      }
+    } finally {
+      if (mounted) {
+        context.hideLoadingDialog();
       }
     }
   }

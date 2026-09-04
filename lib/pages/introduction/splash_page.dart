@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
+import 'package:quran_book/services/auth_token_cache_service.dart';
 import 'package:quran_book/pages/admin/admin_home_page.dart';
 import 'package:quran_book/pages/introduction/welcome_page.dart';
 import 'package:quran_book/pages/main_page/index_page.dart';
@@ -21,7 +24,13 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
+    unawaited(AuthTokenCacheService.restoreSession());
+    _prefetchHomeData();
     Future.delayed(const Duration(seconds: 1), _checkLoginStatus);
+  }
+
+  void _prefetchHomeData() {
+    unawaited(_firebaseModel.refreshHomeContent());
   }
 
   Future<void> _checkLoginStatus() async {

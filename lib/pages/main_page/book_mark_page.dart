@@ -308,7 +308,7 @@ class _BookMarkItemView extends StatelessWidget {
       padding: const EdgeInsets.all(kSP10x),
       margin: const EdgeInsets.only(bottom: kSP20x),
       decoration: BoxDecoration(
-        border: Border.all(color: kBlackColor),
+        border: Border.all(color: adaptiveBorderColor(context)),
         borderRadius: BorderRadius.circular(kSP10x),
       ),
       child: Row(

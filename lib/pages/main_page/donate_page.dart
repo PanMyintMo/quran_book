@@ -51,7 +51,7 @@ class _DonatePageState extends State<DonatePage> {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(kSP10x),
-                  border: Border.all(color: kBlackColor),
+                  border: Border.all(color: adaptiveBorderColor(context)),
                 ),
                 child: ListTile(
                   onTap: () {

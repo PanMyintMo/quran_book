@@ -56,6 +56,7 @@ class DefaultFirebaseOptions {
     appId: '1:496161030293:android:ac31567f27830f9c1e1b9c',
     messagingSenderId: '496161030293',
     projectId: 'quran-book-30ddf',
+    authDomain: 'quran-book-30ddf.firebaseapp.com',
     databaseURL: 'https://quran-book-30ddf-default-rtdb.firebaseio.com',
     storageBucket: 'quran-book-30ddf.firebasestorage.app',
   );
@@ -65,6 +66,7 @@ class DefaultFirebaseOptions {
     appId: '1:496161030293:ios:18ff6eaf2d14573a1e1b9c',
     messagingSenderId: '496161030293',
     projectId: 'quran-book-30ddf',
+    authDomain: 'quran-book-30ddf.firebaseapp.com',
     databaseURL: 'https://quran-book-30ddf-default-rtdb.firebaseio.com',
     storageBucket: 'quran-book-30ddf.firebasestorage.app',
     iosClientId: '496161030293-2l8pa49cjnevkmt329q3sa9its29nj8p.apps.googleusercontent.com',

@@ -1,4 +1,4 @@
-const kDefaultLoadingText = 'Loading';
+const kDefaultLoadingText = 'loading';
 
 const kWelcomeToText = 'welcome_to';
 

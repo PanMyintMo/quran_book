@@ -39,6 +39,7 @@ class PrimaryButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return MaterialButton(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(radius ?? 0),
@@ -52,7 +53,7 @@ class PrimaryButtonWidget extends StatelessWidget {
       color: backgroundColor,
       child: EasyTextWidget(
         text: buttonText,
-        textColor: buttonTextColor ?? kBlackColor,
+        textColor: buttonTextColor ?? onSurface,
         fontWeight: buttonFontWeight,
       ),
     );

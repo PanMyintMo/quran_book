@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/user_vo.dart';
 import 'package:quran_book/pages/introduction/login_page.dart';
+import 'package:quran_book/pages/main_page/index_page.dart';
 import 'package:quran_book/resources/colors.dart';
 import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
@@ -27,6 +31,37 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isPasswordVisible = false;
   bool _isRepeatPasswordVisible = false;
 
+  String _mapRegisterErrorToMessage(Object error) {
+    if (error is FirebaseAuthException) {
+      switch (error.code) {
+        case 'email-already-in-use':
+          return 'This email is already registered. Please login instead.';
+        case 'invalid-email':
+          return 'Invalid email address.';
+        case 'weak-password':
+          return 'Password is too weak. Use at least 6 characters.';
+        case 'network-request-failed':
+        case 'auth-proxy-failed':
+          return error.message ??
+              'Network error. Check your internet and try again.';
+        case 'too-many-requests':
+          return 'Too many attempts. Please wait and try again.';
+        default:
+          return error.message ?? 'Registration failed. Please try again.';
+      }
+    }
+
+    final raw = error.toString().toLowerCase();
+    if (raw.contains('network') ||
+        raw.contains('internet') ||
+        raw.contains('connection') ||
+        raw.contains('timeout')) {
+      return 'Network error. Check your internet and try again.';
+    }
+
+    return 'Registration failed. Please try again.';
+  }
+
   Future<void> _handleRegister() async {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
@@ -34,49 +69,51 @@ class _RegisterPageState extends State<RegisterPage> {
     final repeatPassword = _repeatPasswordController.text.trim();
 
     if (name.isEmpty || email.isEmpty || password.isEmpty || repeatPassword.isEmpty) {
-      _showMessage("Please fill all fields");
+      context.showErrorSnackBar('Please fill all fields');
       return;
     }
 
     if (password != repeatPassword) {
-      _showMessage("Passwords do not match");
+      context.showErrorSnackBar('Passwords do not match');
       return;
     }
 
     try {
       context.showLoadingDialog();
-      final userCredential = await _firebaseModel.register(email, password);
-      final user = userCredential.user;
-      if (user != null) {
-        final userId = user.uid;
-        await _firebaseModel.createUser(
-          UserVO(
-            id: userId,
-            name: name,
-            email: email,
-            password: password,
-            isAdmin: false,
-            isDeleteAccount: false,
-            createAt: DateTime.now(),
-            updateAt: DateTime.now(),
-          ),
+      await _firebaseModel.register(email, password);
+      final uid = await _firebaseModel.resolveAuthUserId();
+
+      final profileSaved = await _firebaseModel.tryCreateUser(
+        UserVO(
+          id: uid,
+          name: name,
+          email: email,
+          password: password,
+          isAdmin: false,
+          isDeleteAccount: false,
+          createAt: DateTime.now(),
+          updateAt: DateTime.now(),
+        ),
+      );
+
+      if (!mounted) return;
+      context.showSuccessSnackBar('Registration successful');
+      if (!profileSaved) {
+        context.showErrorSnackBar(
+          'Account created. Profile will sync when connection is available.',
         );
-        if (mounted) {
-          context.hideLoadingDialog();
-          context.showSuccessSnackBar("Registration successful");
-          context.navigateToNextPageWithRemoveUntil(const LoginPage());
-        }
       }
+      context.navigateToNextPageWithRemoveUntil(const IndexPage());
+      unawaited(_firebaseModel.refreshHomeContent());
     } catch (e) {
       if (mounted) {
+        context.showErrorSnackBar(_mapRegisterErrorToMessage(e));
+      }
+    } finally {
+      if (mounted) {
         context.hideLoadingDialog();
-        _showMessage("Registration failed: ${e.toString()}");
       }
     }
-  }
-
-  void _showMessage(String message) {
-    context.showErrorSnackBar(message);
   }
 
   @override

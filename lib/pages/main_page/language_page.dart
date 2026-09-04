@@ -61,40 +61,57 @@ class _LanguagePageState extends State<LanguagePage> {
     final borderColor = isSelected 
         ? colorScheme.primary 
         : (isDarkMode ? Colors.grey[700] : Colors.grey[300]);
-    final backgroundColor = isSelected 
-        ? colorScheme.primary.withOpacity(0.1) 
+    final backgroundColor = isSelected
+        ? colorScheme.primary.withValues(alpha: 0.1)
         : theme.cardColor;
     final checkIconColor = isDarkMode ? Colors.white : colorScheme.primary;
     
     return Container(
-      padding: EdgeInsets.symmetric(vertical: kSP10x),
       decoration: BoxDecoration(
         border: Border.all(color: borderColor ?? Colors.grey),
         borderRadius: BorderRadius.circular(kSP10x),
-        color: backgroundColor,
       ),
-      child: ListTile(
-        leading: Image.asset(flagPath, width: kSP40x, height: kSP40x),
-        title: Text(
-          language, 
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: theme.textTheme.bodyMedium?.color ?? colorScheme.onSurface,
-            fontSize: kFontSize16x,
+      child: Material(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(kSP10x),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () {
+            if (mounted) {
+              setState(() {
+                selectedLanguage = language;
+                final bloc = context.read<LocalAndThemeBloc>();
+                bloc.setLocaleWithLanguage(selectedLanguage, context);
+              });
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: kSP10x,
+              horizontal: kSP10x,
+            ),
+            child: Row(
+              children: [
+                Image.asset(flagPath, width: kSP40x, height: kSP40x),
+                Expanded(
+                  child: Text(
+                    language,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: theme.textTheme.bodyMedium?.color ??
+                          colorScheme.onSurface,
+                      fontSize: kFontSize16x,
+                    ),
+                  ),
+                ),
+                if (isSelected)
+                  Icon(Icons.check, color: checkIconColor)
+                else
+                  const SizedBox(width: 24),
+              ],
+            ),
           ),
         ),
-        trailing: isSelected 
-            ? Icon(Icons.check, color: checkIconColor) 
-            : null,
-        onTap: () {
-          if (mounted) {
-            setState(() {
-              selectedLanguage = language;
-              final bloc = context.read<LocalAndThemeBloc>();
-              bloc.setLocaleWithLanguage(selectedLanguage, context);
-            });
-          }
-        },
       ),
     );
   }

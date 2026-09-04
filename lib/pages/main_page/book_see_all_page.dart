@@ -393,13 +393,14 @@ class _ReadAndPlayButtonView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       height: kBookOverviewDonateReadPlayButtonHeight,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(kSP10x),
-        color: isGhost ? kWhiteColor : kAppPrimaryColor,
-        border: isGhost ? Border.all(color: kBlackColor) : null,
+        color: isGhost ? scheme.surface : kAppPrimaryColor,
+        border: isGhost ? Border.all(color: scheme.outline) : null,
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(kSP10x),
@@ -407,9 +408,15 @@ class _ReadAndPlayButtonView extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: isGhost ? kBlackColor : kWhiteColor),
+            Icon(
+              icon,
+              color: isGhost ? scheme.onSurface : kWhiteColor,
+            ),
             const SizedBox(width: kSP10x),
-            EasyTextWidget(text: buttonText, textColor: isGhost ? kBlackColor : kWhiteColor),
+            EasyTextWidget(
+              text: buttonText,
+              textColor: isGhost ? scheme.onSurface : kWhiteColor,
+            ),
           ],
         ),
       ),
@@ -429,7 +436,7 @@ class _OverViewAndTimeView extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: kSP10x),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(kSP20x),
-            color: kBoxColor,
+            color: adaptiveSurfaceTileColor(context),
           ),
           child: Row(
             children: [
@@ -448,7 +455,7 @@ class _OverViewAndTimeView extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: kSP10x),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(kSP20x),
-            color: kBoxColor,
+            color: adaptiveSurfaceTileColor(context),
           ),
           child: Row(
             children: [

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quran_book/resources/strings.dart';
 import 'package:quran_book/widgets/dialog/loading_dialog_widget.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
 
@@ -69,11 +70,12 @@ extension ContextExtensions on BuildContext {
 
   void showLoadingDialog({String? message}) {
     showDialog(
-        context: this,
-        barrierDismissible: false,
-        builder: (_) => LoadingDialogWidget(
-              message: message ?? '',
-            ));
+      context: this,
+      barrierDismissible: false,
+      builder: (_) => LoadingDialogWidget(
+        message: message ?? kDefaultLoadingText,
+      ),
+    );
   }
 
   void hideLoadingDialog() {

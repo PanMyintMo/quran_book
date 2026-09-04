@@ -36,6 +36,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _loadUser() async {
     final user = await _firebaseModel.getCurrentUserVO();
+    if (!mounted) return;
     setState(() {
       _user = user;
     });

@@ -161,7 +161,7 @@ class _BookListenDetailsPageState extends State<BookListenDetailsPage> {
                             width: 220,
                             height: 220,
                             decoration: BoxDecoration(
-                              color: kBoxColor,
+                              color: adaptiveSurfaceTileColor(context),
                               borderRadius: BorderRadius.circular(kSP10x),
                             ),
                             child: const Icon(
@@ -174,9 +174,10 @@ class _BookListenDetailsPageState extends State<BookListenDetailsPage> {
                         Text(
                           widget.title,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: kFontSize18x,
                             fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         const Spacer(),

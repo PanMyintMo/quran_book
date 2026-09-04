@@ -68,10 +68,10 @@ class _BookTypesSeeAllPageState extends State<BookTypesSeeAllPage> {
                     ),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: kBoxColor,
+                        color: adaptiveSurfaceTileColor(context),
                         borderRadius: BorderRadius.circular(15),
                         border: Border.all(
-                          color: Colors.grey.shade300,
+                          color: adaptiveBorderColor(context),
                           width: 1,
                         ),
                       ),

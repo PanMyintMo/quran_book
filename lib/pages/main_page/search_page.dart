@@ -131,7 +131,7 @@ class _SearchResultItemView extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: kSP40x),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(kSP10x),
-        border: Border.all(color: kBlackColor),
+        border: Border.all(color: adaptiveBorderColor(context)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

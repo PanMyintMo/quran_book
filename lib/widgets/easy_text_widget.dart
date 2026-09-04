@@ -24,7 +24,7 @@ class EasyTextWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Use provided color if not null, otherwise use theme
-    final color = textColor ?? Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black;
+    final color = textColor ?? Theme.of(context).textTheme.bodyMedium?.color ?? Theme.of(context).colorScheme.onSurface;
 
     return Text(
       text,
