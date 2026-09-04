@@ -1,5 +1,8 @@
 {
-  "syncedAt": null,
-  "counts": { "books": 0, "categories": 0, "banners": 0 },
-  "note": "Populated automatically by GitHub Actions — no VPN needed on phones."
+  "syncedAt": "2026-09-04T15:46:36.998Z",
+  "counts": {
+    "books": 2,
+    "categories": 1,
+    "banners": 2
+  }
 }
