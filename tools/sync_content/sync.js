@@ -62,7 +62,7 @@ async function rewriteImages(items, owner, repo, branch) {
 async function main() {
   const owner = process.env.CONTENT_MIRROR_OWNER || 'PanMyintMo';
   const repo = process.env.CONTENT_MIRROR_REPO || 'quran_book';
-  const branch = process.env.CONTENT_MIRROR_BRANCH || 'main';
+  const branch = process.env.CONTENT_MIRROR_BRANCH || 'master';
 
   fs.mkdirSync(IMAGES_DIR, { recursive: true });
 

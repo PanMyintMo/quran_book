@@ -15,7 +15,7 @@ class ContentMirrorConfig {
 
   static const String githubBranch = String.fromEnvironment(
     'CONTENT_MIRROR_BRANCH',
-    defaultValue: 'main',
+    defaultValue: 'master',
   );
 
   static const String publicDataPath = 'public_data';
