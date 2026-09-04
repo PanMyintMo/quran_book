@@ -50,21 +50,27 @@ class ContentMirrorService {
     if (data == null) return <T>[];
 
     if (data is List) {
-      return data
-          .whereType<Map>()
-          .map((item) => fromJson(Map<String, dynamic>.from(item)))
-          .toList();
+      final items = <T>[];
+      for (final item in data) {
+        if (item is! Map) continue;
+        try {
+          items.add(fromJson(Map<String, dynamic>.from(item)));
+        } catch (_) {}
+      }
+      return items;
     }
 
     if (data is Map) {
-      return data.entries
-          .where((entry) => entry.value is Map)
-          .map(
-            (entry) => fromJson(
-              Map<String, dynamic>.from(entry.value as Map),
-            ),
-          )
-          .toList();
+      final items = <T>[];
+      for (final entry in data.entries) {
+        if (entry.value is! Map) continue;
+        try {
+          items.add(
+            fromJson(Map<String, dynamic>.from(entry.value as Map)),
+          );
+        } catch (_) {}
+      }
+      return items;
     }
 
     return <T>[];

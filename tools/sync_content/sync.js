@@ -35,11 +35,27 @@ function imageKey(url) {
   return crypto.createHash('md5').update(url).digest('hex');
 }
 
+function fileExt(url) {
+  if (url.includes('.pdf')) return 'pdf';
+  if (url.includes('.mp3')) return 'mp3';
+  if (url.includes('.png')) return 'png';
+  if (url.includes('.webp')) return 'webp';
+  return 'jpg';
+}
+
+function isFirebaseStorageUrl(url) {
+  return (
+    url.includes('firebasestorage.googleapis.com') ||
+    url.includes('storage.googleapis.com')
+  );
+}
+
 async function mirrorImage(url, owner, repo, branch) {
   if (!url || typeof url !== 'string' || !url.startsWith('http')) return url;
+  if (!isFirebaseStorageUrl(url)) return url;
 
   const key = imageKey(url);
-  const ext = url.includes('.png') ? 'png' : url.includes('.webp') ? 'webp' : 'jpg';
+  const ext = fileExt(url);
   const filename = `${key}.${ext}`;
   const filePath = path.join(IMAGES_DIR, filename);
 
@@ -51,6 +67,28 @@ async function mirrorImage(url, owner, repo, branch) {
   }
 
   return `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${branch}/public_data/images/${filename}`;
+}
+
+async function deepRewriteFirebaseUrls(value, owner, repo, branch) {
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i++) {
+      value[i] = await deepRewriteFirebaseUrls(value[i], owner, repo, branch);
+    }
+    return value;
+  }
+
+  if (value && typeof value === 'object') {
+    for (const key of Object.keys(value)) {
+      value[key] = await deepRewriteFirebaseUrls(value[key], owner, repo, branch);
+    }
+    return value;
+  }
+
+  if (typeof value === 'string' && value.startsWith('http')) {
+    return mirrorImage(value, owner, repo, branch);
+  }
+
+  return value;
 }
 
 async function rewriteImages(items, owner, repo, branch) {
@@ -79,10 +117,13 @@ async function main() {
   const categories = mapToArray(categoriesRaw);
   const banners = mapToArray(bannersRaw);
 
-  console.log(`Mirroring images (${books.length + categories.length + banners.length} items)...`);
+  console.log(`Mirroring Firebase URLs in books/categories/banners...`);
   await rewriteImages(books, owner, repo, branch);
   await rewriteImages(categories, owner, repo, branch);
   await rewriteImages(banners, owner, repo, branch);
+  for (const book of books) {
+    await deepRewriteFirebaseUrls(book, owner, repo, branch);
+  }
 
   fs.writeFileSync(path.join(ROOT, 'books.json'), JSON.stringify(books, null, 2));
   fs.writeFileSync(
