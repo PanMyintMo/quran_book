@@ -206,24 +206,27 @@ class FirebaseModel {
     T Function(Map<String, dynamic>) fromJson,
     Map<String, dynamic> Function(T) toJson,
   ) async {
-    Future<List<T>> tryMirror() async {
+    Future<List<T>?> tryMirror() async {
       try {
-        final list =
-            await _contentMirrorService.fetchList(path, fromJson);
-        if (list.isNotEmpty) {
-          await AppCacheService.saveList(
-            path,
-            list.map((item) => toJson(item)).toList(),
-          );
-        }
-        return list;
+        return await _contentMirrorService.fetchList(path, fromJson);
       } catch (_) {
-        return <T>[];
+        return null;
       }
     }
 
     final mirrored = await tryMirror();
-    if (mirrored.isNotEmpty) return mirrored;
+    if (mirrored != null) {
+      if (mirrored.isNotEmpty) {
+        await AppCacheService.saveList(
+          path,
+          mirrored.map((item) => toJson(item)).toList(),
+        );
+        return mirrored;
+      }
+      final cached = await AppCacheService.loadList(path, fromJson);
+      if (cached.isNotEmpty) return cached;
+      return mirrored;
+    }
 
     Future<List<T>> tryRest() async {
       try {

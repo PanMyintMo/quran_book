@@ -19,6 +19,8 @@ jobs:
           node-version: '20'
 
       - name: Sync Firebase → public_data
+        env:
+          FIREBASE_DATABASE_AUTH: ${{ secrets.FIREBASE_DATABASE_AUTH }}
         run: node tools/sync_content/sync.js
 
       - name: Commit and push if changed

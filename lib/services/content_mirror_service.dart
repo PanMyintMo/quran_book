@@ -8,7 +8,9 @@ class ContentMirrorService {
 
   final Dio _dio;
 
-  Future<List<T>> fetchList<T>(
+  /// Returns [null] when no mirror URL responded (404/network).
+  /// Returns an empty list when the mirror file exists but has no items yet.
+  Future<List<T>?> fetchList<T>(
     String path,
     T Function(Map<String, dynamic>) fromJson,
   ) async {
@@ -26,12 +28,11 @@ class ContentMirrorService {
         if (response.statusCode != null &&
             response.statusCode! >= 200 &&
             response.statusCode! < 300) {
-          final list = _parseListMap(response.data, fromJson);
-          if (list.isNotEmpty) return list;
+          return _parseListMap(response.data, fromJson);
         }
       } catch (_) {}
     }
-    return <T>[];
+    return null;
   }
 
   List<String> _listUrls(String path) {

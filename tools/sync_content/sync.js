@@ -15,7 +15,9 @@ const ROOT = path.join(__dirname, '..', '..', 'public_data');
 const IMAGES_DIR = path.join(ROOT, 'images');
 
 async function fetchJson(path) {
-  const url = `${DATABASE_URL}/${path}.json`;
+  const auth = process.env.FIREBASE_DATABASE_AUTH;
+  const query = auth ? `?auth=${encodeURIComponent(auth)}` : '';
+  const url = `${DATABASE_URL}/${path}.json${query}`;
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`Failed to fetch ${url}: ${res.status}`);
