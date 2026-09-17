@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -21,25 +24,57 @@ class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<ProfilePage> createState() => ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class ProfilePageState extends State<ProfilePage> {
   final FirebaseModel _firebaseModel = FirebaseModel();
   UserVO? _user;
+  bool _loading = true;
+  StreamSubscription<User?>? _authSub;
 
   @override
   void initState() {
     super.initState();
     _loadUser();
+    _authSub = FirebaseAuth.instance.authStateChanges().listen((_) {
+      reloadUser();
+    });
   }
 
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
+  }
+
+  Future<void> reloadUser() => _loadUser();
+
   Future<void> _loadUser() async {
-    final user = await _firebaseModel.getCurrentUserVO();
-    if (!mounted) return;
-    setState(() {
-      _user = user;
-    });
+    if (!_firebaseModel.isLoggedIn()) {
+      if (!mounted) return;
+      setState(() {
+        _user = null;
+        _loading = false;
+      });
+      return;
+    }
+
+    if (mounted) {
+      setState(() => _loading = true);
+    }
+
+    try {
+      final user = await _firebaseModel.getCurrentUserVO();
+      if (!mounted) return;
+      setState(() {
+        _user = user;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+    }
   }
 
   Future<void> _deleteAccount() async {
@@ -127,7 +162,9 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ],
       ),
-      body: _user == null
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _user == null && !_firebaseModel.isLoggedIn()
           ? _GuestProfileBody(
               onLogin: () => context.navigateToNextPageWithRemoveUntil(
                 const LoginPage(),
@@ -152,7 +189,19 @@ class _ProfilePageState extends State<ProfilePage> {
               },
             )
           : _SignedInProfileBody(
-              user: _user!,
+              user: _user ??
+                  UserVO(
+                    id: _firebaseModel.currentUser?.uid ?? '',
+                    name: _firebaseModel.currentUser?.displayName ??
+                        _firebaseModel.currentUser?.email?.split('@').first ??
+                        'User',
+                    email: _firebaseModel.currentUser?.email ?? '',
+                    password: '',
+                    isAdmin: false,
+                    isDeleteAccount: false,
+                    createAt: DateTime.now(),
+                    updateAt: DateTime.now(),
+                  ),
               onUpgrade: () => _comingSoon(context),
               onEditProfile: _openEditProfile,
               onHelp: () => context.navigateToNextPage(const HelpSupportPage()),

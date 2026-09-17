@@ -7,6 +7,7 @@ import 'package:quran_book/data/model/firebase_model.dart';
 import 'package:quran_book/data/vos/user_vo.dart';
 import 'package:quran_book/pages/admin/admin_home_page.dart';
 // import 'package:quran_book/pages/introduction/forget_password_page.dart';
+import 'package:quran_book/pages/introduction/phone_login_page.dart';
 import 'package:quran_book/pages/introduction/register_page.dart';
 import 'package:quran_book/pages/introduction/reset_password_page.dart';
 import 'package:quran_book/pages/main_page/index_page.dart';
@@ -280,6 +281,19 @@ class _LoginPageState extends State<LoginPage> {
                 backgroundColor: kAppPrimaryColor,
               ),
               SizedBox(height: kSP10x),
+              // OutlinedButton.icon(
+              //   onPressed: () {
+              //     context.navigateToNextPage(const PhoneLoginPage());
+              //   },
+              //   icon: const Icon(Icons.phone),
+              //   label: Text(kPhoneLoginWithPhone.tr()),
+              //   style: OutlinedButton.styleFrom(
+              //     minimumSize: const Size(double.infinity, kLoginPageButtonHeight),
+              //   ),
+              // ),
+              // SizedBox(height: kSP10x),
+             
+             
               // Google/Apple login not implemented yet - hidden
               // Row(
               //   children: [

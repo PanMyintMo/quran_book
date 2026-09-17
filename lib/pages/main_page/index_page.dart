@@ -15,6 +15,7 @@ class IndexPage extends StatefulWidget {
 
 class _IndexPageState extends State<IndexPage> {
   int _index = 0;
+  final GlobalKey<ProfilePageState> _profileKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +27,7 @@ class _IndexPageState extends State<IndexPage> {
             HomePage(),
             BookMarkPage(),
             SettingPage(),
-            ProfilePage(),
+            ProfilePage(key: _profileKey),
           ],
         ),
       ),
@@ -46,6 +47,9 @@ class _IndexPageState extends State<IndexPage> {
                 setState(() {
                   _index = index;
                 });
+                if (index == 3) {
+                  _profileKey.currentState?.reloadUser();
+                }
               }
             },
             items: [

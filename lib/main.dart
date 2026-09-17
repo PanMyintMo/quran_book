@@ -13,8 +13,6 @@ import 'package:quran_book/pages/introduction/new_password_page.dart';
 import 'package:quran_book/pages/main_page/book_mark_page.dart';
 import 'package:quran_book/pages/introduction/splash_page.dart';
 import 'package:quran_book/resources/app_theme.dart';
-import 'package:quran_book/resources/colors.dart';
-import 'package:quran_book/resources/strings.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -22,11 +20,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
-
- // await Firebase.initializeApp();
- await Firebase.initializeApp(
-  options: DefaultFirebaseOptions.currentPlatform,
-);
+  // await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   try {
     await FirebaseAppCheck.instance.activate(
@@ -39,7 +36,6 @@ void main() async {
     // App Check can fail on some networks/devices; continue without blocking app startup.
   }
 
-
   runApp(
     EasyLocalization(
       supportedLocales: [
@@ -51,7 +47,8 @@ void main() async {
       fallbackLocale: Locale('en', ''),
       child: MultiProvider(
         providers: [
-          ChangeNotifierProvider<LocalAndThemeBloc>(create: (context) => LocalAndThemeBloc()),
+          ChangeNotifierProvider<LocalAndThemeBloc>(
+              create: (context) => LocalAndThemeBloc()),
         ],
         child: MyApp(),
       ),

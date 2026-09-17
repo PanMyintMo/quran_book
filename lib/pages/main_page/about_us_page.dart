@@ -1,7 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:quran_book/pages/introduction/phone_login_page.dart';
+import 'package:quran_book/resources/colors.dart';
+import 'package:quran_book/resources/dimens.dart';
 import 'package:quran_book/resources/strings.dart';
+import 'package:quran_book/utils/context_extensions.dart';
 import 'package:quran_book/widgets/easy_text_widget.dart';
+import 'package:quran_book/widgets/primary_button_widget.dart';
 
 class AboutUsPage extends StatelessWidget {
   const AboutUsPage({super.key});
@@ -9,17 +14,15 @@ class AboutUsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textColor = theme.textTheme.bodyMedium?.color ?? Colors.black;
-    final cardColor = theme.cardColor; // automatically adapts to light/dark
-    final titleColor = theme.colorScheme.primary; // primary color for title
-    final bodyColor = theme.textTheme.bodyMedium?.color ?? Colors.black87;
+    final cardColor = theme.cardColor;
+    final titleColor = theme.colorScheme.onSurface;
+    final bodyColor = theme.textTheme.bodyMedium?.color ?? theme.colorScheme.onSurface;
     final isDark = theme.brightness == Brightness.dark;
     
     return Scaffold(
       appBar: AppBar(
         title: EasyTextWidget(
           text: kDrawerAboutUsText.tr(),
-          textColor: textColor,
           fontWeight: FontWeight.w600,
           fontSize: 16,
         ),
@@ -78,7 +81,18 @@ class AboutUsPage extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16, color: bodyColor),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: kSP20x),
+                  PrimaryButtonWidget(
+                    width: double.infinity,
+                    height: kLoginPageButtonHeight,
+                    onPressed: () {
+                      context.navigateToNextPage(const PhoneLoginPage());
+                    },
+                    buttonText: kPhoneLoginWithPhone.tr(),
+                    buttonTextColor: kWhiteColor,
+                    backgroundColor: kAppPrimaryColor,
+                  ),
+                  const SizedBox(height: kSP20x),
 
                   // Social / Contact Buttons
                   Row(

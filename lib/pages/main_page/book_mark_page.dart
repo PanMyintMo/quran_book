@@ -378,8 +378,6 @@ class HomePageDrawerView extends StatelessWidget {
                     text: kDrawerWelcomeText.tr(),
                     fontSize: kFontSize18x,
                     fontWeight: FontWeight.bold,
-                    textColor: Theme.of(context).textTheme.bodyMedium?.color ??
-                        Colors.black,
                   ),
                   FutureBuilder<String>(
                       future: GetPackageInfoUtils.getAppVersion(),
@@ -471,9 +469,16 @@ class HomePageDrawerView extends StatelessWidget {
     required String label,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
     return ListTile(
-      leading: Icon(icon),
-      title: EasyTextWidget(text: label),
+      leading: Icon(icon, color: theme.listTileTheme.iconColor),
+      title: Text(
+        label,
+        style: theme.textTheme.bodyLarge?.copyWith(
+          color: theme.listTileTheme.textColor,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
       onTap: () {
         Scaffold.of(context).closeDrawer();
         onTap();

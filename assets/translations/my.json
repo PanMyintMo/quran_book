@@ -96,8 +96,22 @@
   "edit_profile": "ကိုယ်ရေးပြင်ဆင်ရန်",
   "save_changes": "သိမ်းဆည်းရန်",
   "profile_email_fixed": "အီးမေးလ်ကို ဤနေရာမှ မပြောင်းလဲနိုင်ပါ။",
-  "profile_updated": "ကိုယ်ရေးအချက်အလက် ပြင်ဆင်ပြီးပါပြီ"
-
+  "profile_updated": "ကိုယ်ရေးအချက်အလက် ပြင်ဆင်ပြီးပါပြီ",
+  "phone_login_title": "ဖုန်းနံပါတ်ဖြင့် ဝင်ရောက်ရန်",
+  "phone_login_subtext": "OTP ကုဒ်ဖြင့် ဖုန်းနံပါတ်မှ အမြန်ဆုံး မှတ်ပုံတင်နိုင်ပါသည်။",
+  "phone_login_name": "အမည်",
+  "phone_login_name_hint": "သင့်အမည် ထည့်ပါ",
+  "phone_login_phone": "ဖုန်းနံပါတ်",
+  "phone_login_phone_hint": "9XXXXXXXXX",
+  "phone_login_send_otp": "OTP ပို့ရန်",
+  "phone_login_sending": "ပို့နေသည်...",
+  "phone_login_otp_sent_to": "OTP ပို့ထားသော နံပါတ်",
+  "phone_login_otp_hint": "ဂဏန်း ၆ လုံး ထည့်ပါ",
+  "phone_login_verify": "အတည်ပြုပြီး ဆက်လက်သုံးရန်",
+  "phone_login_change_number": "ဖုန်းနံပါတ် ပြောင်းရန်",
+  "phone_login_resend_otp": "OTP ထပ်မံပို့ရန်",
+  "phone_login_use_email": "Email ဖြင့် ဝင်မလား?",
+  "phone_login_with_phone": "ဖုန်းနံပါတ်ဖြင့် ဝင်ရောက် / မှတ်ပုံတင်ရန်"
 }
 
 

@@ -113,6 +113,16 @@ class AuthTokenCacheService {
   }
 
   static String? _uidFromIdToken(String idToken) {
+    return _claimsFromIdToken(idToken)?['uid'];
+  }
+
+  static Future<Map<String, String>?> getCachedTokenClaims() async {
+    final token = await getIdToken();
+    if (token == null || token.isEmpty) return null;
+    return _claimsFromIdToken(token);
+  }
+
+  static Map<String, String>? _claimsFromIdToken(String idToken) {
     try {
       final parts = idToken.split('.');
       if (parts.length < 2) return null;
@@ -127,7 +137,16 @@ class AuthTokenCacheService {
       final map = jsonDecode(decoded);
       if (map is! Map) return null;
 
-      return (map['user_id'] ?? map['sub'])?.toString();
+      final uid = (map['user_id'] ?? map['sub'])?.toString();
+      if (uid == null || uid.isEmpty) return null;
+
+      return {
+        'uid': uid,
+        if (map['email'] != null) 'email': map['email'].toString(),
+        if (map['name'] != null) 'name': map['name'].toString(),
+        if (map['phone_number'] != null)
+          'phone': map['phone_number'].toString(),
+      };
     } catch (_) {
       return null;
     }

@@ -101,7 +101,21 @@
   "edit_profile": "Edit profile",
   "save_changes": "Save changes",
   "profile_email_fixed": "Email cannot be changed here.",
-  "profile_updated": "Profile updated"
-
+  "profile_updated": "Profile updated",
+  "phone_login_title": "Phone Login",
+  "phone_login_subtext": "Register or login quickly with your phone number and OTP.",
+  "phone_login_name": "Your name",
+  "phone_login_name_hint": "Enter your name",
+  "phone_login_phone": "Phone number",
+  "phone_login_phone_hint": "9XXXXXXXXX",
+  "phone_login_send_otp": "Send OTP",
+  "phone_login_sending": "Sending...",
+  "phone_login_otp_sent_to": "OTP sent to",
+  "phone_login_otp_hint": "Enter 6-digit code",
+  "phone_login_verify": "Verify & Continue",
+  "phone_login_change_number": "Change phone number",
+  "phone_login_resend_otp": "Resend OTP",
+  "phone_login_use_email": "Prefer email?",
+  "phone_login_with_phone": "Login / Register with Phone"
 }
 

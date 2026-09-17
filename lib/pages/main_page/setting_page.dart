@@ -23,8 +23,7 @@ class SettingPage extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         title: EasyTextWidget(
-          text:    kDrawerSettingText.tr(),
-           textColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black, 
+          text: kDrawerSettingText.tr(),
           fontWeight: FontWeight.w600,
           fontSize: kFontSize18x,
         ),

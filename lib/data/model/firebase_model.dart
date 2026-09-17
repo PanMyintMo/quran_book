@@ -18,6 +18,18 @@ import 'package:quran_book/data/vos/donation_vo.dart';
 import 'package:quran_book/data/vos/user_vo.dart';
 import 'package:uuid/uuid.dart';
 
+class PhoneVerificationSession {
+  const PhoneVerificationSession({
+    this.verificationId,
+    this.resendToken,
+    this.autoCredential,
+  });
+
+  final String? verificationId;
+  final int? resendToken;
+  final PhoneAuthCredential? autoCredential;
+}
+
 class FirebaseModel {
   final _auth = FirebaseAuth.instance;
   final _database = FirebaseDatabase.instance.ref();
@@ -132,6 +144,55 @@ class FirebaseModel {
       code: 'not-authenticated',
       message: 'Not signed in',
     );
+  }
+
+  Future<PhoneVerificationSession> startPhoneVerification(String phoneNumber) async {
+    final completer = Completer<PhoneVerificationSession>();
+
+    await _auth.verifyPhoneNumber(
+      phoneNumber: phoneNumber,
+      timeout: const Duration(seconds: 60),
+      verificationCompleted: (credential) {
+        if (!completer.isCompleted) {
+          completer.complete(
+            PhoneVerificationSession(autoCredential: credential),
+          );
+        }
+      },
+      verificationFailed: (error) {
+        if (!completer.isCompleted) {
+          completer.completeError(error);
+        }
+      },
+      codeSent: (verificationId, resendToken) {
+        if (!completer.isCompleted) {
+          completer.complete(
+            PhoneVerificationSession(
+              verificationId: verificationId,
+              resendToken: resendToken,
+            ),
+          );
+        }
+      },
+      codeAutoRetrievalTimeout: (_) {},
+    );
+
+    return completer.future;
+  }
+
+  Future<void> signInWithPhoneCredential(PhoneAuthCredential credential) async {
+    await _auth.signInWithCredential(credential);
+  }
+
+  Future<void> completePhoneSignIn({
+    required String verificationId,
+    required String smsCode,
+  }) async {
+    final credential = PhoneAuthProvider.credential(
+      verificationId: verificationId,
+      smsCode: smsCode,
+    );
+    await signInWithPhoneCredential(credential);
   }
 
   Future<void> logout() async {
@@ -524,11 +585,17 @@ class FirebaseModel {
   }
 
   UserVO _userVoFromAuthUser(User authUser) {
-    final email = authUser.email ?? '';
+    final phone = authUser.phoneNumber ?? '';
+    final email = authUser.email ??
+        (phone.isNotEmpty
+            ? '${phone.replaceAll('+', '')}@phone.quranbook.app'
+            : '');
     final displayName = authUser.displayName?.trim();
     final name = (displayName != null && displayName.isNotEmpty)
         ? displayName
-        : (email.isNotEmpty ? email.split('@').first : 'User');
+        : (phone.isNotEmpty
+            ? phone
+            : (email.isNotEmpty ? email.split('@').first : 'User'));
 
     return UserVO(
       id: authUser.uid,
@@ -571,7 +638,47 @@ class FirebaseModel {
     if (authUser != null) {
       return _userVoFromAuthUser(authUser);
     }
-    return null;
+
+    return _userVoFromCachedSession(uid);
+  }
+
+  Future<UserVO?> _userVoFromCachedSession(String uid) async {
+    final claims = await AuthTokenCacheService.getCachedTokenClaims();
+    if (claims == null || claims['uid'] != uid) {
+      return UserVO(
+        id: uid,
+        name: 'User',
+        email: '',
+        password: '',
+        isAdmin: false,
+        isDeleteAccount: false,
+        createAt: DateTime.now(),
+        updateAt: DateTime.now(),
+      );
+    }
+
+    final email = claims['email'] ?? '';
+    final phone = claims['phone'] ?? '';
+    final name = (claims['name']?.trim().isNotEmpty ?? false)
+        ? claims['name']!.trim()
+        : (email.isNotEmpty
+            ? email.split('@').first
+            : (phone.isNotEmpty ? phone : 'User'));
+
+    return UserVO(
+      id: uid,
+      name: name,
+      email: email.isNotEmpty
+          ? email
+          : (phone.isNotEmpty
+              ? '${phone.replaceAll('+', '')}@phone.quranbook.app'
+              : ''),
+      password: '',
+      isAdmin: false,
+      isDeleteAccount: false,
+      createAt: DateTime.now(),
+      updateAt: DateTime.now(),
+    );
   }
 
   /// Updates display name in Realtime Database and Firebase Auth profile.
